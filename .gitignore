@@ -1,0 +1,6 @@
+# Coverage reports.
+coverage.out
+cover.cov
+
+# Built binaries.
+gofutz

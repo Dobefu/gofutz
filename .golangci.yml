@@ -1,0 +1,22 @@
+version: "2"
+linters:
+  enable:
+    - errcheck
+    - exhaustive
+    - exhaustruct
+    - forbidigo
+    - gocognit
+    - godot
+    - gosec
+    - govet
+    - ineffassign
+    - misspell
+    - nlreturn
+    - paralleltest
+    - revive
+    - sloglint
+    - staticcheck
+    - unused
+  settings:
+    gocognit:
+      min-complexity: 15
