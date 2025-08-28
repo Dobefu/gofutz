@@ -2,25 +2,25 @@ name: CI
 
 on:
   push:
-    branches: ['*']
-    tags: ['v*']
+    branches: ["*"]
+    tags: ["v*"]
   pull_request:
-    branches: ['*']
+    branches: ["*"]
 
 permissions:
   contents: write
 
 jobs:
   build-test:
-    name: 'Build and Lint'
+    name: "Build and Lint"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5
         with:
-          go-version: '1.25'
+          go-version: "1.25"
           cache: true
           cache-dependency-path: |
             **/go.sum
@@ -33,7 +33,7 @@ jobs:
         run: go build
 
       - name: Lint the code
-        uses: golangci/golangci-lint-action@v8
+        uses: golangci/golangci-lint-action@3c28b2cb75e1933038fca129074454e12a0f45d8
         with:
           version: v2.1
 
@@ -46,7 +46,7 @@ jobs:
           go test "./..." -coverprofile="coverage.out" -covermode=count -json > test-report.out
 
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v5
+        uses: SonarSource/sonarqube-scan-action@8c71dc039c2dd71d3821e89a2b58ecc7fee6ced9
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
