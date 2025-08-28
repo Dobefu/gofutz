@@ -1,6 +1,6 @@
 module github.com/Dobefu/gofutz
 
-go 1.25.0
+go 1.24.6
 
 require github.com/spf13/cobra v1.9.1
 
