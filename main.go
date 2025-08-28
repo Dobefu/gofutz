@@ -2,10 +2,9 @@
 package main
 
 import (
-	"fmt"
-	"os"
+	"github.com/Dobefu/gofutz/cmd"
 )
 
 func main() {
-	fmt.Fprintln(os.Stdout, "TODO")
+	cmd.Execute()
 }
