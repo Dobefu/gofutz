@@ -11,14 +11,8 @@ import (
 )
 
 // Handle handles the route.
-func Handle(w http.ResponseWriter, r *http.Request) {
+func Handle(w http.ResponseWriter, _ *http.Request) {
 	const tmplName = "index"
-
-	if r.URL.Path != "/" {
-		http.NotFound(w, r)
-
-		return
-	}
 
 	tmpl, err := templates.GetPageTemplate(tmplName)
 
@@ -39,6 +33,4 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-
-	slog.Info("Page load")
 }
