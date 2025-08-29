@@ -30,7 +30,7 @@ func init() {
 }
 
 func runRootCmd(_ *cobra.Command, _ []string) {
-	err := server.Start("127.0.0.1", port)
+	err := server.NewServer("127.0.0.1", port).Start()
 
 	if err != nil {
 		slog.Error("Could not start server", "error", err.Error())
