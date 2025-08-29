@@ -8,12 +8,6 @@
   margin: 0;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  html {
-    interpolate-size: allow-keywords;
-  }
-}
-
 body {
   font-family: sans-serif;
   line-height: 1.5;
