@@ -5,12 +5,14 @@ import (
 
 	"github.com/Dobefu/gofutz/assets"
 	"github.com/Dobefu/gofutz/internal/server/routes/index"
+	"github.com/Dobefu/gofutz/internal/server/routes/ws"
 )
 
 func handleRoutes(mux *http.ServeMux) {
-	// Pages.
-	mux.HandleFunc("GET /{$}", index.Handle)
-
 	// Assets.
 	mux.Handle("GET /", assets.GetFS())
+
+	// Pages.
+	mux.HandleFunc("GET /{$}", index.Handle)
+	mux.HandleFunc("GET /ws", ws.Handle)
 }
