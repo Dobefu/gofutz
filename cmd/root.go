@@ -1,9 +1,10 @@
 package cmd
 
 import (
-	"fmt"
+	"log/slog"
 	"os"
 
+	"github.com/Dobefu/gofutz/internal/server"
 	"github.com/spf13/cobra"
 )
 
@@ -29,5 +30,10 @@ func init() {
 }
 
 func runRootCmd(_ *cobra.Command, _ []string) {
-	_, _ = fmt.Fprintf(os.Stdout, "Port: %d\n", port)
+	err := server.Start("127.0.0.1", port)
+
+	if err != nil {
+		slog.Error("Could not start server", "error", err.Error())
+		os.Exit(1)
+	}
 }
