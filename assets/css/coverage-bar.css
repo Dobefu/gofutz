@@ -1,0 +1,14 @@
+.coverage-bar {
+  display: flex;
+  grid-area: coverage-bar;
+}
+
+.coverage-bar > .covered {
+  background-color: #016630;
+  transition: width 0.5s;
+}
+
+.coverage-bar > .uncovered {
+  background-color: #9f0712;
+  flex: 1;
+}

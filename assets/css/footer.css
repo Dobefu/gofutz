@@ -1,0 +1,6 @@
+footer {
+  background-color: #18181b;
+  border-top: 0.5rem solid #09090b;
+  grid-area: footer;
+  padding: 1rem;
+}

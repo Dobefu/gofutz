@@ -10,9 +10,19 @@
 
       <link href="/css/main.css" rel="stylesheet" />
     </head>
-    <body>
+    <body class="layout--default">
       {{- template "components/layout/header" . -}}
+{{- end -}}
 
+{{- define "layouts/default/coverage-bar" -}}
+  {{- template "components/layout/coverage-bar" . -}}
+{{- end -}}
+
+{{- define "layouts/default/sidebar" -}}
+  {{- template "components/layout/sidebar" . -}}
+{{- end -}}
+
+{{- define "layouts/default/content" -}}
       <main id="main-content">
 {{- end -}}
 

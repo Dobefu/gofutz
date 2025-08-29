@@ -4,7 +4,7 @@ tmp_dir = "tmp"
 
 [build]
   args_bin = []
-  bin = "./tmp/main"
+  bin = "./tmp/main --port=7358"
   cmd = "go build -o ./tmp/main ."
   delay = 1000
   exclude_dir = ["tmp", "vendor", "testdata"]
@@ -43,9 +43,9 @@ tmp_dir = "tmp"
   clean_on_exit = false
 
 [proxy]
-  app_port = 0
-  enabled = false
-  proxy_port = 0
+  app_port = 7358
+  enabled = true
+  proxy_port = 7357
 
 [screen]
   clear_on_rebuild = false

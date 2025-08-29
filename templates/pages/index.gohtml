@@ -1,7 +1,10 @@
 {{- define "pages/index" -}}
   {{- template "layouts/default/head" . -}}
+  {{- template "layouts/default/coverage-bar" . -}}
+  {{- template "layouts/default/sidebar" . -}}
+  {{- template "layouts/default/content" . -}}
 
-  <h1>{{- .Title -}}</h1>
+  INDEX
 
   {{- template "layouts/default/foot" . -}}
 {{- end -}}
