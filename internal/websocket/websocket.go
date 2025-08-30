@@ -2,6 +2,9 @@
 package websocket
 
 import (
+	"encoding/json"
+	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -33,6 +36,39 @@ func NewWebsocket(ws *websocket.Conn) error {
 
 	if err != nil {
 		return err
+	}
+
+	handler := NewHandler()
+
+	for {
+		messageType, message, err := ws.ReadMessage()
+
+		if err != nil {
+			if websocket.IsUnexpectedCloseError(
+				err,
+				websocket.CloseGoingAway,
+				websocket.CloseAbnormalClosure,
+			) {
+				slog.Error(fmt.Sprintf("Could not read message: %s", err.Error()))
+			}
+
+			break
+		}
+
+		msg := &Message{} // nolint:exhaustruct
+		err = json.Unmarshal(message, &msg)
+
+		if err != nil {
+			slog.Error(fmt.Sprintf("Could not unmarshal message: %s", err.Error()))
+
+			break
+		}
+
+		err = handler.HandleMessage(ws, messageType, *msg)
+
+		if err != nil {
+			slog.Error(fmt.Sprintf("Could not handle message: %s", err.Error()))
+		}
 	}
 
 	return nil

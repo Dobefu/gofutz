@@ -41,9 +41,12 @@ const WS_URL = `ws://${window.location.host}/ws`;
     wss.onopen = (_e) => {};
 
     /**
-     * @param {MessageEvent} _e
+     * @param {MessageEvent} e
      */
-    wss.onmessage = (_e) => {};
+    wss.onmessage = (e) => {
+      const msg = JSON.parse(e.data);
+      console.log(msg);
+    };
 
     /**
      * @param {CloseEvent} e
