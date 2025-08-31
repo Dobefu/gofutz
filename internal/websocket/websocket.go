@@ -74,10 +74,16 @@ func (w *Websocket) FinishGoroutine() {
 func (w *Websocket) HandlePing(ws WsInterface) {
 	defer w.FinishGoroutine()
 
-	ticker := time.NewTicker(time.Second * 5)
+	isInitialPing := true
+	ticker := time.NewTicker(time.Millisecond * 50)
 	defer ticker.Stop()
 
 	for range ticker.C {
+		if isInitialPing {
+			ticker.Reset(time.Second * 5)
+			isInitialPing = false
+		}
+
 		select {
 		case _, ok := <-w.close:
 			if !ok {

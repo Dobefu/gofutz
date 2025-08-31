@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -14,6 +15,7 @@ const (
 type mockWebsocket struct {
 	numMsgsRead   int
 	isCloseCalled bool
+	shouldError   bool
 }
 
 func (m *mockWebsocket) SetReadLimit(_ int64) {
@@ -21,6 +23,10 @@ func (m *mockWebsocket) SetReadLimit(_ int64) {
 }
 
 func (m *mockWebsocket) SetReadDeadline(_ time.Time) error {
+	if m.shouldError {
+		return fmt.Errorf("read deadline exceeded")
+	}
+
 	return nil
 }
 
@@ -67,6 +73,7 @@ func TestNewWebsocket(t *testing.T) {
 			ws: &mockWebsocket{
 				numMsgsRead:   0,
 				isCloseCalled: false,
+				shouldError:   false,
 			},
 		},
 	}
@@ -94,11 +101,50 @@ func TestNewWebsocket(t *testing.T) {
 				t.Fatalf("expected no error, got: %s", err.Error())
 			}
 
-			websocket.FinishGoroutine()
 			websocket.Close()
 
 			if !test.ws.isCloseCalled {
 				t.Error("expected Close() to have been called on the websocket")
+			}
+		})
+	}
+}
+
+func TestNewWebsocketErr(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		ws       *mockWebsocket
+		expected string
+	}{
+		{
+			name: "read deadline error",
+			ws: &mockWebsocket{
+				numMsgsRead:   0,
+				isCloseCalled: false,
+				shouldError:   true,
+			},
+			expected: "read deadline exceeded",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			websocket, err := NewWebsocket(test.ws)
+
+			if err == nil {
+				t.Fatal("expected error, got nil")
+			}
+
+			if err.Error() != test.expected {
+				t.Fatalf("expected error to be %s, got: %s", test.expected, err.Error())
+			}
+
+			if websocket != nil {
+				t.Fatal("expected websocket to be nil when error occurs")
 			}
 		})
 	}
