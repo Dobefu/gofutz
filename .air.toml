@@ -4,7 +4,7 @@ tmp_dir = "tmp"
 
 [build]
   args_bin = []
-  bin = "./tmp/main --port=7358"
+  bin = "./tmp/main"
   cmd = "go build -o ./tmp/main ."
   delay = 1000
   exclude_dir = ["tmp", "vendor", "testdata"]
@@ -42,10 +42,11 @@ tmp_dir = "tmp"
 [misc]
   clean_on_exit = false
 
+# The proxy server should be disabled, since it doesn't play nice with websockets.
 [proxy]
-  app_port = 7358
-  enabled = true
-  proxy_port = 7357
+  app_port = 0
+  enabled = false
+  proxy_port = 0
 
 [screen]
   clear_on_rebuild = false
