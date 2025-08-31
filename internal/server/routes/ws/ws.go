@@ -36,11 +36,27 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = websocket.NewWebsocket(ws)
+	websocketInstance, err := websocket.NewWebsocket(ws)
 
 	if err != nil {
 		slog.Error(fmt.Sprintf("Could not create websocket: %s", err.Error()))
 
 		return
 	}
+
+	websocketInstance.AddGoroutine()
+	go websocketInstance.HandlePing(ws)
+
+	websocketInstance.AddGoroutine()
+
+	err = websocketInstance.HandleMessages(ws)
+	websocketInstance.FinishGoroutine()
+
+	if err != nil {
+		slog.Error(fmt.Sprintf("Could not handle websocket messages: %s", err.Error()))
+
+		return
+	}
+
+	websocketInstance.Close()
 }

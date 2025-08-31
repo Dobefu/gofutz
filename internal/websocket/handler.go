@@ -3,9 +3,26 @@ package websocket
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
+	"os"
 
+	"github.com/Dobefu/gofutz/internal/filewatcher"
 	"github.com/gorilla/websocket"
 )
+
+var testFiles []string
+
+func init() {
+	files, err := filewatcher.CollectAllTestFiles()
+
+	if err != nil {
+		slog.Error(err.Error())
+
+		os.Exit(1)
+	}
+
+	testFiles = files
+}
 
 // Handler defines a websocket handler.
 type Handler struct{}
@@ -26,6 +43,14 @@ func (h *Handler) HandleMessage(
 	}
 
 	switch msg.Method {
+	case "init":
+		return h.SendResponse(ws, Message{
+			Method: "init",
+			Params: []any{
+				testFiles,
+			},
+		})
+
 	default:
 		return h.SendResponse(ws, Message{
 			Method: "error",

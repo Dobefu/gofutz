@@ -5,25 +5,39 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
 )
 
+// Websocket defines a websocket.
+type Websocket struct {
+	handler *Handler
+	ws      *websocket.Conn
+	close   chan struct{}
+	wg      *sync.WaitGroup
+}
+
 // NewWebsocket creates a new websocket.
-func NewWebsocket(ws *websocket.Conn) error {
-	defer func() { _ = ws.Close() }()
+func NewWebsocket(ws *websocket.Conn) (*Websocket, error) {
+	w := &Websocket{
+		handler: NewHandler(),
+		ws:      ws,
+		close:   make(chan struct{}),
+		wg:      &sync.WaitGroup{},
+	}
 
 	ws.SetReadLimit(512)
 
-	err := ws.SetReadDeadline(time.Now().Add(time.Second * 5))
+	err := ws.SetReadDeadline(time.Now().Add(time.Second * 15))
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	ws.SetPongHandler(func(string) error {
-		err = ws.SetReadDeadline(time.Now().Add(time.Second * 5))
+		err = ws.SetReadDeadline(time.Now().Add(time.Second * 15))
 
 		if err != nil {
 			return err
@@ -32,15 +46,60 @@ func NewWebsocket(ws *websocket.Conn) error {
 		return nil
 	})
 
-	err = ws.WriteMessage(websocket.PongMessage, nil)
+	return w, nil
+}
 
-	if err != nil {
-		return err
+// AddGoroutine adds a goroutine to the wait group.
+func (w *Websocket) AddGoroutine() {
+	w.wg.Add(1)
+}
+
+// FinishGoroutine finishes a goroutine after the wait group is done.
+func (w *Websocket) FinishGoroutine() {
+	w.wg.Done()
+}
+
+// HandlePing handles sending pings to the client.
+func (w *Websocket) HandlePing(ws *websocket.Conn) {
+	defer w.FinishGoroutine()
+
+	ticker := time.NewTicker(time.Second * 5)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		select {
+		case _, ok := <-w.close:
+			if !ok {
+				return
+			}
+
+		default:
+		}
+
+		err := ws.WriteControl(
+			websocket.PingMessage,
+			[]byte{},
+			time.Now().Add(time.Second*10),
+		)
+
+		if err != nil {
+			slog.Error(fmt.Sprintf("Could not send ping: %s", err.Error()))
+		}
 	}
+}
 
-	handler := NewHandler()
-
+// HandleMessages handles websocket messages.
+func (w *Websocket) HandleMessages(ws *websocket.Conn) error {
 	for {
+		select {
+		case _, ok := <-w.close:
+			if !ok {
+				return nil
+			}
+
+		default:
+		}
+
 		messageType, message, err := ws.ReadMessage()
 
 		if err != nil {
@@ -64,12 +123,22 @@ func NewWebsocket(ws *websocket.Conn) error {
 			break
 		}
 
-		err = handler.HandleMessage(ws, messageType, *msg)
+		err = w.handler.HandleMessage(ws, messageType, *msg)
 
 		if err != nil {
 			slog.Error(fmt.Sprintf("Could not handle message: %s", err.Error()))
+
+			break
 		}
 	}
 
 	return nil
+}
+
+// Close sends a signal to close the websocket.
+func (w *Websocket) Close() {
+	close(w.close)
+	w.wg.Wait()
+
+	_ = w.ws.Close()
 }

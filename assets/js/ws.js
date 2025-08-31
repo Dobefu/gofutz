@@ -38,7 +38,9 @@ const WS_URL = `ws://${window.location.host}/ws`;
     /**
      * @param {Event} _e
      */
-    wss.onopen = (_e) => {};
+    wss.onopen = (_e) => {
+      wss.send(JSON.stringify({ method: "init" }));
+    };
 
     /**
      * @param {MessageEvent} e
