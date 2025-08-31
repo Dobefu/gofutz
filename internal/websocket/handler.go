@@ -7,10 +7,11 @@ import (
 	"os"
 
 	"github.com/Dobefu/gofutz/internal/filewatcher"
+	"github.com/Dobefu/gofutz/internal/testrunner"
 	"github.com/gorilla/websocket"
 )
 
-var testFiles []string
+var runner *testrunner.TestRunner
 
 func init() {
 	files, err := filewatcher.CollectAllTestFiles()
@@ -21,7 +22,13 @@ func init() {
 		os.Exit(1)
 	}
 
-	testFiles = files
+	runner, err = testrunner.NewTestRunner(files)
+
+	if err != nil {
+		slog.Error(err.Error())
+
+		os.Exit(1)
+	}
 }
 
 // Handler defines a websocket handler.
@@ -47,7 +54,7 @@ func (h *Handler) HandleMessage(
 		return h.SendResponse(ws, Message{
 			Method: "init",
 			Params: []any{
-				testFiles,
+				runner.GetTests(),
 			},
 		})
 
