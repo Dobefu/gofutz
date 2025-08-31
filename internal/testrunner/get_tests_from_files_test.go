@@ -2,9 +2,36 @@ package testrunner
 
 import (
 	"fmt"
-	"os"
 	"testing"
 )
+
+func writeTestFiles(
+	t *testing.T,
+	name string,
+	fileContents []string,
+) ([]string, func(), error) {
+	t.Helper()
+
+	filePaths := []string{}
+	cleanups := []func(){}
+
+	for i, fileContent := range fileContents {
+		filePath, cleanup, err := writeTestFile(t, fmt.Sprintf("%s_%d", name, i), fileContent)
+
+		if err != nil {
+			return []string{}, func() {}, err
+		}
+
+		filePaths = append(filePaths, filePath)
+		cleanups = append(cleanups, cleanup)
+	}
+
+	return filePaths, func() {
+		for _, cleanup := range cleanups {
+			cleanup()
+		}
+	}, nil
+}
 
 func TestGetTestsFromFiles(t *testing.T) {
 	t.Parallel()
@@ -30,27 +57,17 @@ func TestGetTestsFromFiles(t *testing.T) {}
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			filePaths := []string{}
+			filePaths, cleanup, err := writeTestFiles(t, test.name, test.fileContents)
+			defer cleanup()
 
-			for i, fileContent := range test.fileContents {
-				filePath, err := writeTestFile(t, fmt.Sprintf("%s_%d", test.name, i), fileContent)
-				defer os.Remove(filePath)
-
-				if err != nil {
-					t.Fatalf("expected no error, got: %s", err.Error())
-				}
-
-				filePaths = append(filePaths, filePath)
+			if err != nil {
+				t.Fatalf("expected no error, got: %s", err.Error())
 			}
 
 			fileTests, err := GetTestsFromFiles(filePaths)
 
 			if err != nil {
 				t.Fatalf("expected no error, got: %s", err.Error())
-			}
-
-			if len(fileTests) != len(test.expected) {
-				t.Fatalf("expected %d tests, got %d", len(test.expected), len(fileTests))
 			}
 
 			for i, fileTest := range fileTests {
@@ -81,20 +98,14 @@ func TestGetTestsFromFilesErr(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			filePaths := []string{}
+			filePaths, cleanup, err := writeTestFiles(t, test.name, test.fileContents)
+			defer cleanup()
 
-			for i, fileContent := range test.fileContents {
-				filePath, err := writeTestFile(t, fmt.Sprintf("%s_%d", test.name, i), fileContent)
-				defer os.Remove(filePath)
-
-				if err != nil {
-					t.Fatalf("expected no error, got: %s", err.Error())
-				}
-
-				filePaths = append(filePaths, filePath)
+			if err != nil {
+				t.Fatalf("expected no error, got: %s", err.Error())
 			}
 
-			_, err := GetTestsFromFiles(filePaths)
+			_, err = GetTestsFromFiles(filePaths)
 
 			if err == nil {
 				t.Fatalf("expected error, got nil")

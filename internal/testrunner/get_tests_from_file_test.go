@@ -12,7 +12,7 @@ func writeTestFile(
 	t *testing.T,
 	name string,
 	fileContent string,
-) (string, error) {
+) (string, func(), error) {
 	t.Helper()
 
 	filePath := ""
@@ -27,12 +27,12 @@ func writeTestFile(
 			err := os.WriteFile(filePath, []byte(fileContent), 0600)
 
 			if err != nil {
-				return "", err
+				return "", func() {}, err
 			}
 		}
 	}
 
-	return filePath, nil
+	return filePath, func() { _ = os.Remove(filePath) }, nil
 }
 
 func TestGetTestsFromFile(t *testing.T) {
@@ -73,8 +73,8 @@ func TestGetTestsFromFile
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			filePath, err := writeTestFile(t, test.name, test.fileContent)
-			defer os.Remove(filePath)
+			filePath, cleanup, err := writeTestFile(t, test.name, test.fileContent)
+			defer cleanup()
 
 			if err != nil {
 				t.Fatalf("expected no error, got: %s", err.Error())
@@ -119,8 +119,8 @@ func TestGetTestsFromFileErr(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			filePath, err := writeTestFile(t, test.name, test.fileContent)
-			defer os.Remove(filePath)
+			filePath, cleanup, err := writeTestFile(t, test.name, test.fileContent)
+			defer cleanup()
 
 			if err != nil {
 				t.Fatalf("expected no error, got: %s", err.Error())
