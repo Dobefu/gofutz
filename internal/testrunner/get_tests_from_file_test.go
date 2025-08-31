@@ -74,6 +74,7 @@ func TestGetTestsFromFile
 			t.Parallel()
 
 			filePath, err := writeTestFile(t, test.name, test.fileContent)
+			defer os.Remove(filePath)
 
 			if err != nil {
 				t.Fatalf("expected no error, got: %s", err.Error())
@@ -119,6 +120,7 @@ func TestGetTestsFromFileErr(t *testing.T) {
 			t.Parallel()
 
 			filePath, err := writeTestFile(t, test.name, test.fileContent)
+			defer os.Remove(filePath)
 
 			if err != nil {
 				t.Fatalf("expected no error, got: %s", err.Error())
