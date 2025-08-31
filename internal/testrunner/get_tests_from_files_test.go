@@ -45,7 +45,7 @@ func TestGetTestsFromFiles(t *testing.T) {
 	tests := []struct {
 		name         string
 		fileContents []string
-		expected     []string
+		expected     []Test
 	}{
 		{
 			name: "regular test files",
@@ -55,7 +55,7 @@ func TestGetTestsFromFiles(t *testing.T) {}
 				`,
 				"package testrunner",
 			},
-			expected: []string{"TestGetTestsFromFiles"},
+			expected: []Test{{Name: "TestGetTestsFromFiles"}},
 		},
 	}
 
@@ -82,9 +82,13 @@ func TestGetTestsFromFiles(t *testing.T) {}
 				t.Fatalf("expected no error, got: %s", err.Error())
 			}
 
-			for i, fileTest := range fileTests {
-				if fileTest != test.expected[i] {
-					t.Fatalf("expected %s, got %s", test.expected[i], fileTest)
+			for i, expected := range test.expected {
+				if fileTests[filePaths[i]].Tests[i].Name != expected.Name {
+					t.Fatalf(
+						"expected %s, got %s",
+						expected.Name,
+						fileTests[filePaths[i]].Tests[i].Name,
+					)
 				}
 			}
 		})

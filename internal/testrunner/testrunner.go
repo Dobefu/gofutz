@@ -2,8 +2,8 @@
 package testrunner
 
 import (
-	"fmt"
 	"log/slog"
+	"slices"
 
 	"github.com/Dobefu/gofutz/internal/filewatcher"
 )
@@ -11,7 +11,7 @@ import (
 // TestRunner defines a test runner.
 type TestRunner struct {
 	files []string
-	tests []string
+	tests map[string]File
 }
 
 // NewTestRunner creates a new test runner.
@@ -27,18 +27,51 @@ func NewTestRunner(files []string) (*TestRunner, error) {
 		tests: tests,
 	}
 
-	filewatcher.AddListener(runner.handleFileEvent)
+	filewatcher.AddListener(func(path, operation string) {
+		go runner.handleFileEvent(path, operation)
+	})
 
 	return runner, nil
 }
 
 // GetTests gets the tests.
-func (t *TestRunner) GetTests() []string {
+func (t *TestRunner) GetTests() map[string]File {
 	return t.tests
 }
 
 func (t *TestRunner) handleFileEvent(path, operation string) {
-	slog.Info(
-		fmt.Sprintf("file event received: %s %s", operation, path),
-	)
+	switch operation {
+	case "CREATE":
+		t.files = slices.DeleteFunc(t.files, func(file string) bool {
+			return file == path
+		})
+
+		delete(t.tests, path)
+
+		t.files = append(t.files, path)
+		slices.Sort(t.files)
+
+		fallthrough
+
+	case "WRITE", "MODIFY":
+		tests, err := GetTestsFromFile(path)
+
+		if err != nil {
+			slog.Error(err.Error())
+
+			return
+		}
+
+		t.tests[path] = File{
+			Name:  path,
+			Tests: tests,
+		}
+
+	case "REMOVE":
+		t.files = slices.DeleteFunc(t.files, func(file string) bool {
+			return file == path
+		})
+
+		delete(t.tests, path)
+	}
 }

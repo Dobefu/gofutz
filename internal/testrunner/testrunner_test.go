@@ -8,7 +8,7 @@ func TestNewTestRunner(t *testing.T) {
 	tests := []struct {
 		name         string
 		fileContents []string
-		expected     []string
+		expected     []Test
 	}{
 		{
 			name: "regular test files",
@@ -16,7 +16,7 @@ func TestNewTestRunner(t *testing.T) {
 				package testrunner
 				func TestGetTestsFromFile(t *testing.T) {}
 			`},
-			expected: []string{"TestGetTestsFromFile"},
+			expected: []Test{{Name: "TestGetTestsFromFile"}},
 		},
 	}
 
@@ -43,13 +43,17 @@ func TestNewTestRunner(t *testing.T) {
 				t.Fatalf("expected no error, got: %s", err.Error())
 			}
 
-			for i, fileTest := range runner.GetTests() {
-				if fileTest == test.expected[i] {
-					continue
+			for _, fileTest := range runner.GetTests() {
+				if fileTest.Tests[0].Name == test.expected[0].Name {
+					return
 				}
-
-				t.Fatalf("expected %s, got %s", test.expected[i], fileTest)
 			}
+
+			t.Fatalf(
+				"expected \"%s\", got \"%s\"",
+				test.expected[0].Name,
+				runner.GetTests()[filePaths[0]].Tests[0].Name,
+			)
 		})
 	}
 }

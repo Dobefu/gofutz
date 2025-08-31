@@ -1,17 +1,20 @@
 package testrunner
 
 // GetTestsFromFiles gets all test functions from the supplied files.
-func GetTestsFromFiles(files []string) ([]string, error) {
-	allTests := []string{}
+func GetTestsFromFiles(files []string) (map[string]File, error) {
+	allTests := map[string]File{}
 
 	for _, file := range files {
 		tests, err := GetTestsFromFile(file)
 
 		if err != nil {
-			return []string{}, err
+			return map[string]File{}, err
 		}
 
-		allTests = append(allTests, tests...)
+		allTests[file] = File{
+			Name:  file,
+			Tests: tests,
+		}
 	}
 
 	return allTests, nil
