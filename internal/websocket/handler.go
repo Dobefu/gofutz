@@ -41,7 +41,7 @@ func NewHandler() *Handler {
 
 // HandleMessage handles a websocket message.
 func (h *Handler) HandleMessage(
-	ws *websocket.Conn,
+	ws WsInterface,
 	messageType int,
 	msg Message,
 ) error {
@@ -69,7 +69,7 @@ func (h *Handler) HandleMessage(
 }
 
 // SendResponse sends a websocket response.
-func (h *Handler) SendResponse(ws *websocket.Conn, msg Message) error {
+func (h *Handler) SendResponse(ws WsInterface, msg Message) error {
 	json, err := json.Marshal(msg)
 
 	if err != nil {

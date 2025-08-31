@@ -11,16 +11,27 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// WsInterface defines a websocket interface.
+type WsInterface interface {
+	SetReadLimit(limit int64)
+	SetReadDeadline(deadline time.Time) error
+	SetPongHandler(handler func(string) error)
+	WriteControl(messageType int, data []byte, deadline time.Time) error
+	WriteMessage(messageType int, data []byte) error
+	ReadMessage() (messageType int, p []byte, err error)
+	Close() error
+}
+
 // Websocket defines a websocket.
 type Websocket struct {
 	handler *Handler
-	ws      *websocket.Conn
+	ws      WsInterface
 	close   chan struct{}
 	wg      *sync.WaitGroup
 }
 
 // NewWebsocket creates a new websocket.
-func NewWebsocket(ws *websocket.Conn) (*Websocket, error) {
+func NewWebsocket(ws WsInterface) (*Websocket, error) {
 	w := &Websocket{
 		handler: NewHandler(),
 		ws:      ws,
@@ -60,7 +71,7 @@ func (w *Websocket) FinishGoroutine() {
 }
 
 // HandlePing handles sending pings to the client.
-func (w *Websocket) HandlePing(ws *websocket.Conn) {
+func (w *Websocket) HandlePing(ws WsInterface) {
 	defer w.FinishGoroutine()
 
 	ticker := time.NewTicker(time.Second * 5)
@@ -89,7 +100,7 @@ func (w *Websocket) HandlePing(ws *websocket.Conn) {
 }
 
 // HandleMessages handles websocket messages.
-func (w *Websocket) HandleMessages(ws *websocket.Conn) error {
+func (w *Websocket) HandleMessages(ws WsInterface) error {
 	for {
 		select {
 		case _, ok := <-w.close:
@@ -105,6 +116,7 @@ func (w *Websocket) HandleMessages(ws *websocket.Conn) error {
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(
 				err,
+				websocket.CloseNormalClosure,
 				websocket.CloseGoingAway,
 				websocket.CloseAbnormalClosure,
 			) {
