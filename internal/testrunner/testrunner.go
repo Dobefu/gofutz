@@ -1,6 +1,13 @@
 // Package testrunner provides test runner functionality.
 package testrunner
 
+import (
+	"fmt"
+	"log/slog"
+
+	"github.com/Dobefu/gofutz/internal/filewatcher"
+)
+
 // TestRunner defines a test runner.
 type TestRunner struct {
 	files []string
@@ -15,13 +22,23 @@ func NewTestRunner(files []string) (*TestRunner, error) {
 		return nil, err
 	}
 
-	return &TestRunner{
+	runner := &TestRunner{
 		files: files,
 		tests: tests,
-	}, nil
+	}
+
+	filewatcher.AddListener(runner.handleFileEvent)
+
+	return runner, nil
 }
 
 // GetTests gets the tests.
 func (t *TestRunner) GetTests() []string {
 	return t.tests
+}
+
+func (t *TestRunner) handleFileEvent(path, operation string) {
+	slog.Info(
+		fmt.Sprintf("file event received: %s %s", operation, path),
+	)
 }

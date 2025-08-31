@@ -2,55 +2,75 @@
 package filewatcher
 
 import (
-	"fmt"
-	"io/fs"
+	"log/slog"
 	"os"
-	"path/filepath"
+
+	"github.com/fsnotify/fsnotify"
 )
 
-// CollectAllTestFiles collects all test files.
-func CollectAllTestFiles() ([]string, error) {
+var (
+	watcher   *fsnotify.Watcher
+	listeners []func(string, string)
+)
+
+func init() {
+	var err error
+	watcher, err = fsnotify.NewWatcher()
+
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
+
+	go handleFileEvents()
+
 	cwd, err := os.Getwd()
 
 	if err != nil {
-		return []string{}, fmt.Errorf(
-			"could not get current working directory: %s",
-			err.Error(),
-		)
+		slog.Error(err.Error())
+		os.Exit(1)
 	}
 
-	testFiles := []string{}
-
-	err = filepath.Walk(cwd, func(path string, info fs.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if info.IsDir() {
-			return nil
-		}
-
-		isTestFile, err := filepath.Match(
-			filepath.Join(path, "..", "*_test.go"),
-			path,
-		)
-
-		if err != nil {
-			return err
-		}
-
-		if !isTestFile {
-			return nil
-		}
-
-		testFiles = append(testFiles, path)
-
-		return nil
-	})
+	err = watcher.Add(cwd)
 
 	if err != nil {
-		return []string{}, fmt.Errorf("could not find any test files: %s", err.Error())
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
+}
+
+func handleFileEvents() {
+	for {
+		select {
+		case event, ok := <-watcher.Events:
+			if !ok {
+				return
+			}
+
+			for _, listener := range listeners {
+				listener(event.Name, event.Op.String())
+			}
+
+		case err, ok := <-watcher.Errors:
+			if !ok {
+				return
+			}
+
+			slog.Error(err.Error())
+		}
+	}
+}
+
+// AddListener adds an event listener.
+func AddListener(listener func(string, string)) {
+	listeners = append(listeners, listener)
+}
+
+// Close shuts down the file watcher.
+func Close() error {
+	if watcher != nil {
+		return watcher.Close()
 	}
 
-	return testFiles, nil
+	return nil
 }
