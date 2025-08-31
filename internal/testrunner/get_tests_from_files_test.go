@@ -7,6 +7,7 @@ import (
 
 func writeTestFiles(
 	t *testing.T,
+	prefix string,
 	name string,
 	fileContents []string,
 ) ([]string, func(), error) {
@@ -16,7 +17,12 @@ func writeTestFiles(
 	cleanups := []func(){}
 
 	for i, fileContent := range fileContents {
-		filePath, cleanup, err := writeTestFile(t, fmt.Sprintf("%s_%d", name, i), fileContent)
+		filePath, cleanup, err := writeTestFile(
+			t,
+			prefix,
+			fmt.Sprintf("%s_%d", name, i),
+			fileContent,
+		)
 
 		if err != nil {
 			return []string{}, func() {}, err
@@ -57,7 +63,13 @@ func TestGetTestsFromFiles(t *testing.T) {}
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			filePaths, cleanup, err := writeTestFiles(t, test.name, test.fileContents)
+			filePaths, cleanup, err := writeTestFiles(
+				t,
+				"TestGetTestsFromFiles",
+				test.name,
+				test.fileContents,
+			)
+
 			defer cleanup()
 
 			if err != nil {
@@ -98,7 +110,13 @@ func TestGetTestsFromFilesErr(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			filePaths, cleanup, err := writeTestFiles(t, test.name, test.fileContents)
+			filePaths, cleanup, err := writeTestFiles(
+				t,
+				"TestGetTestsFromFiles",
+				test.name,
+				test.fileContents,
+			)
+
 			defer cleanup()
 
 			if err != nil {
@@ -112,7 +130,11 @@ func TestGetTestsFromFilesErr(t *testing.T) {
 			}
 
 			if err.Error() != test.expected {
-				t.Fatalf("expected error to be \"%s\", got \"%s\"", test.expected, err.Error())
+				t.Fatalf(
+					"expected error to be \"%s\", got \"%s\"",
+					test.expected,
+					err.Error(),
+				)
 			}
 		})
 	}

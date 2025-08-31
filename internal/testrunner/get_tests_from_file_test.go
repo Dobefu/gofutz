@@ -10,6 +10,7 @@ import (
 
 func writeTestFile(
 	t *testing.T,
+	prefix string,
 	name string,
 	fileContent string,
 ) (string, func(), error) {
@@ -20,7 +21,7 @@ func writeTestFile(
 	if fileContent != "" {
 		filePath = filepath.Join(
 			os.TempDir(),
-			fmt.Sprintf("test_%s.go", name),
+			fmt.Sprintf("%s_%s.go", prefix, name),
 		)
 
 		if fileContent != "-" {
@@ -73,7 +74,13 @@ func TestGetTestsFromFile
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			filePath, cleanup, err := writeTestFile(t, test.name, test.fileContent)
+			filePath, cleanup, err := writeTestFile(
+				t,
+				"TestGetTestsFromFile",
+				test.name,
+				test.fileContent,
+			)
+
 			defer cleanup()
 
 			if err != nil {
@@ -119,7 +126,13 @@ func TestGetTestsFromFileErr(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			filePath, cleanup, err := writeTestFile(t, test.name, test.fileContent)
+			filePath, cleanup, err := writeTestFile(
+				t,
+				"TestGetTestsFromFile",
+				test.name,
+				test.fileContent,
+			)
+
 			defer cleanup()
 
 			if err != nil {
