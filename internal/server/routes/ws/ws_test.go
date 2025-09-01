@@ -42,7 +42,10 @@ func TestHandle(t *testing.T) {
 
 			initMessage := websocket.Message{
 				Method: "gofutz:init",
-				Params: websocket.Params{},
+				Error:  "",
+				Params: websocket.Params{
+					Files: nil,
+				},
 			}
 
 			messageBytes, err := json.Marshal(initMessage)
