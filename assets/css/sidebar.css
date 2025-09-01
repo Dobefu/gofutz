@@ -11,5 +11,43 @@
 }
 
 .sidebar__tests--file {
-  padding-block-end: 0.5rem;
+  padding-block-end: 0.25rem;
+  padding-inline-start: 1.25rem;
+  position: relative;
+}
+
+.sidebar__tests--file::before {
+  content: "▶";
+  font-size: 0.75rem;
+  position: absolute;
+  inset-inline-start: 0.25rem;
+  inset-block-start: 0.25rem;
+  transition: transform 0.1s ease-in-out;
+}
+
+.sidebar__tests--file[open]::before {
+  transform: rotate(90deg);
+}
+
+.sidebar__tests--file-summary {
+  cursor: pointer;
+  direction: rtl;
+  list-style: none;
+  max-width: 100%;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  user-select: none;
+  white-space: nowrap;
+}
+
+[dir="rtl"] .sidebar__tests--file-summary {
+  direction: ltr;
+  text-align: right;
+}
+
+.sidebar__tests--tests {
+  list-style-position: outside;
+  padding-block: 0.25rem;
+  padding-inline-start: 1.25rem;
 }

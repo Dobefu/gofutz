@@ -22,14 +22,18 @@ function handleGofutzInit(e) {
     const fileItemSummary = document.createElement("summary");
     fileItemSummary.classList.add("sidebar__tests--file-summary");
     fileItemSummary.textContent = file.name;
+    fileItemSummary.title = file.name;
     fileItem.appendChild(fileItemSummary);
 
     const testsContainer = document.createElement("ul");
+    testsContainer.classList.add("sidebar__tests--tests");
 
     for (const test of file.tests) {
       const testItem = document.createElement("li");
-
+      testItem.classList.add("sidebar__tests--test");
       testItem.textContent = test.name;
+      testItem.title = test.name;
+
       testsContainer.appendChild(testItem);
     }
 

@@ -74,5 +74,7 @@ h6 {
 #main-content {
   box-shadow: 0 0 0.5rem 0 rgb(0, 0, 0, 0.5) inset;
   grid-area: content;
+  overflow: auto;
   padding: 1rem;
+  scrollbar-gutter: stable;
 }
