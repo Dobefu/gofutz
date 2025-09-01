@@ -48,7 +48,7 @@ func TestGetTestsFromFile(t *testing.T) {
 			name: "regular test file",
 			fileContent: `
 package testrunner
-func TestGetTestsFromFile(t *testing.T) {
+func TestGetTestsFromFile(t *testing.T) {}
 				`,
 			expected: []Test{{Name: "TestGetTestsFromFile"}},
 		},
@@ -61,10 +61,10 @@ func TestGetTestsFromFile[T any](t *testing.T) {}
 			expected: []Test{{Name: "TestGetTestsFromFile"}},
 		},
 		{
-			name: "invalid test function syntax",
+			name: "non-test function",
 			fileContent: `
 package testrunner
-func TestGetTestsFromFile
+func HelperFunction(t *testing.T) {}
 				`,
 			expected: []Test{},
 		},

@@ -2,6 +2,9 @@ package testrunner
 
 import (
 	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
 	"os"
 	"path/filepath"
 	"strings"
@@ -21,31 +24,30 @@ func GetTestsFromFile(file string) ([]Test, string, error) {
 		return []Test{}, "", err
 	}
 
-	lines := strings.SplitSeq(string(fileContent), "\n")
+	fileset := token.NewFileSet()
+	node, err := parser.ParseFile(
+		fileset,
+		file,
+		fileContent,
+		parser.ParseComments,
+	)
 
-	for line := range lines {
-		line = strings.TrimSpace(line)
+	if err != nil {
+		return []Test{}, "", err
+	}
 
-		if !strings.HasPrefix(line, "func Test") {
+	for _, declaration := range node.Decls {
+		functionDeclaration, isFunctionDeclaration := declaration.(*ast.FuncDecl)
+
+		if !isFunctionDeclaration {
 			continue
 		}
 
-		funcDefinition := strings.TrimPrefix(line, "func ")
-		argsIdx := strings.Index(funcDefinition, "(")
-
-		if argsIdx == -1 {
+		if !strings.HasPrefix(functionDeclaration.Name.Name, "Test") {
 			continue
 		}
 
-		funcName := funcDefinition[:argsIdx]
-
-		genericIdx := strings.Index(funcName, "[")
-
-		if genericIdx != -1 {
-			funcName = funcName[:genericIdx]
-		}
-
-		tests = append(tests, Test{Name: funcName})
+		tests = append(tests, Test{Name: functionDeclaration.Name.Name})
 	}
 
 	return tests, string(fileContent), nil
