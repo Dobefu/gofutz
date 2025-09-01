@@ -48,9 +48,7 @@ function initWebSocket(url) {
 
     switch (msg.method) {
       case "gofutz:init":
-        window.dispatchEvent(
-          new CustomEvent("gofutz:init", { detail: msg }),
-        );
+        window.dispatchEvent(new CustomEvent("gofutz:init", { detail: msg }));
         break;
 
       default:

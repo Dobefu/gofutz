@@ -13,25 +13,27 @@ function handleGofutzToggleFile(e) {
   }
 
   /** @type {HTMLPreElement | null} */
-  const currentCodeContainer = mainContentContainer.querySelector(".main-content__code");
+  const currentCodeContainer = mainContentContainer.querySelector(
+    ".main-content__code",
+  );
 
-  if (
-    currentCodeContainer &&
-    currentCodeContainer.dataset.file === file.name
-  ) {
+  if (currentCodeContainer && currentCodeContainer.dataset.file === file.name) {
     currentCodeContainer.remove();
 
     return;
   }
 
-  const code = file.code.split("\n").map((line, idx) => {
-    const processedLine = line.replace(/^\s*$/g, "&nbsp;");
+  const code = file.highlightedCode
+    .split("\n")
+    .map((line, idx) => {
+      const processedLine = line.replace(/^<\/span>/g, "");
 
-    return `<div class="main-content__code--line">
-      <span class="main-content__code--line-number">${idx + 1}</span>
-      <span class="main-content__code--line-content">${processedLine}</span>
-    </div>`;
-  }).join("");
+      return `<div class="main-content__code--line">
+        <span class="main-content__code--line-number">${idx + 1}</span>
+        <span class="main-content__code--line-content">${processedLine}</span></span>
+      </div>`;
+    })
+    .join("");
 
   mainContentContainer.innerHTML = "";
 

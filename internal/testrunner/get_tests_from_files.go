@@ -12,9 +12,10 @@ func GetTestsFromFiles(files []string) (map[string]File, error) {
 		}
 
 		allTests[file] = File{
-			Name:  file,
-			Tests: tests,
-			Code:  string(code),
+			Name:            file,
+			Tests:           tests,
+			Code:            string(code),
+			HighlightedCode: HighlightCode("go", string(code)),
 		}
 	}
 

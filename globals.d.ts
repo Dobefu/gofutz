@@ -2,6 +2,7 @@ interface File {
   name: string;
   tests: Test[];
   code: string;
+  highlightedCode: string;
 }
 
 interface Test {

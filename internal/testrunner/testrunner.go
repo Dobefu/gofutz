@@ -63,9 +63,10 @@ func (t *TestRunner) handleFileEvent(path, operation string) {
 		}
 
 		t.tests[path] = File{
-			Name:  path,
-			Tests: tests,
-			Code:  code,
+			Name:            path,
+			Tests:           tests,
+			Code:            code,
+			HighlightedCode: HighlightCode("go", string(code)),
 		}
 
 	case "REMOVE":
