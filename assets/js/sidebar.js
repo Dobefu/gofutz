@@ -16,7 +16,11 @@ function handleGofutzInit(e) {
 
   for (const file of Object.values(details.params.files)) {
     const fileItem = document.createElement("details");
+    fileItem.classList.add("sidebar__tests--file");
+    fileItem.open = true;
+
     const fileItemSummary = document.createElement("summary");
+    fileItemSummary.classList.add("sidebar__tests--file-summary");
     fileItemSummary.textContent = file.name;
     fileItem.appendChild(fileItemSummary);
 

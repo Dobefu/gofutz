@@ -1,5 +1,15 @@
 .sidebar {
   background-color: #030712;
   grid-area: sidebar;
+  overflow: auto;
   padding: 1rem;
+  scrollbar-gutter: stable;
+}
+
+.sidebar__header {
+  padding-block-end: 1rem;
+}
+
+.sidebar__tests--file {
+  padding-block-end: 0.5rem;
 }

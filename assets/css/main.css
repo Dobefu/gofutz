@@ -13,13 +13,13 @@ html {
 }
 
 body {
+  -webkit-font-smoothing: antialiased;
   background-color: #1e2939;
   color: white;
   display: grid;
   font-family: sans-serif;
-  min-height: 100%;
+  height: 100%;
   line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
 }
 
 img,
@@ -67,7 +67,7 @@ h6 {
     "coverage-bar coverage-bar coverage-bar"
     "sidebar content content"
     "sidebar footer footer";
-  grid-template-columns: min(16rem, 50%) 1fr 1fr;
+  grid-template-columns: min(24rem, 50%) 1fr 1fr;
   grid-template-rows: 4rem 0.5rem 1fr min(16rem, calc(50vh - 4.5rem));
 }
 
