@@ -1,81 +1,122 @@
-// @ts-check
+"use strict";
 
 /** @type {string} */
 const WS_URL = `ws://${window.location.host}/ws`;
 
-(() => {
-  "use strict";
+/** @type {WebSocket | null} */
+let wss;
+/** @type {AbortController | null} */
+let abortController;
 
-  /** @type {WebSocket | null} */
-  let wss;
+/**
+ * @param {string} url
+ */
+function initWebSocket(url) {
+  // If a websocket still exists, clear all event listeners and close it.
+  if (wss) {
+    wss.onopen = null;
+    wss.onmessage = null;
+    wss.onclose = null;
+    wss.onerror = null;
+    wss.close();
 
-  window.addEventListener("beforeunload", () => {
-    if (!wss || wss.readyState !== WebSocket.OPEN) {
+    wss = null;
+  }
+
+  if (abortController) {
+    abortController.abort();
+    abortController = null;
+  }
+
+  abortController = new AbortController();
+  wss = new WebSocket(url);
+
+  wss.onopen = () => {
+    if (!wss) {
       return;
     }
 
-    wss.close();
-    wss = null;
-  });
+    wss.send(JSON.stringify({ method: "gofutz:init" }));
+  };
 
   /**
-   * @param {string} url
+   * @param {MessageEvent} e
    */
-  const initWebSocket = (url) => {
-    // If a prior websocket still exists, clear all event listeners and close it.
-    if (wss) {
-      wss.onopen = null;
-      wss.onmessage = null;
-      wss.onclose = null;
-      wss.onerror = null;
-      wss.close();
+  wss.onmessage = (e) => {
+    /** @type {Message} */
+    const msg = JSON.parse(e.data);
 
-      wss = null;
+    switch (msg.method) {
+      case "gofutz:init":
+        window.dispatchEvent(
+          new CustomEvent("gofutz:init", { detail: msg }),
+        );
+        break;
+
+      default:
+        console.log({ "Unknown event": msg });
+        break;
+    }
+  };
+
+  /**
+   * @param {CloseEvent} e
+   */
+  wss.onclose = (e) => {
+    if (e.wasClean) {
+      return;
     }
 
-    wss = new WebSocket(url);
+    if (abortController?.signal.aborted) {
+      return;
+    }
 
-    /**
-     * @param {Event} _e
-     */
-    wss.onopen = (_e) => {
-      wss.send(JSON.stringify({ method: "init" }));
-    };
-
-    /**
-     * @param {MessageEvent} e
-     */
-    wss.onmessage = (e) => {
-      const msg = JSON.parse(e.data);
-      console.log(msg);
-    };
-
-    /**
-     * @param {CloseEvent} e
-     */
-    wss.onclose = (e) => {
-      if (e.wasClean) {
+    setTimeout(() => {
+      if (abortController?.signal.aborted) {
         return;
       }
 
-      setTimeout(() => {
-        console.error("Websocket closed unexpectedly, reconnecting...");
-        initWebSocket(url);
-      }, 1000);
-    };
-
-    /**
-     * @param {ErrorEvent} e
-     */
-    wss.onerror = (e) => {
-      console.error("Websocket error", e);
-
-      setTimeout(() => {
-        console.error("Websocket closed unexpectedly, reconnecting...");
-        initWebSocket(url);
-      }, 1000);
-    };
+      console.error("Websocket closed unexpectedly, reconnecting...");
+      initWebSocket(url);
+    }, 1000);
   };
 
+  /**
+   * @param {ErrorEvent} e
+   */
+  wss.onerror = (e) => {
+    console.error("Websocket error", e);
+
+    if (abortController?.signal.aborted) {
+      return;
+    }
+
+    setTimeout(() => {
+      if (abortController?.signal.aborted) {
+        return;
+      }
+
+      console.error("Websocket closed unexpectedly, reconnecting...");
+      initWebSocket(url);
+    }, 1000);
+  };
+}
+
+function closeWebSocket() {
+  if (!wss || wss.readyState !== WebSocket.OPEN) {
+    return;
+  }
+
+  if (abortController) {
+    abortController.abort();
+    abortController = null;
+  }
+
+  wss.close();
+  wss = null;
+}
+
+(() => {
+  window.addEventListener("beforeunload", closeWebSocket);
   initWebSocket(WS_URL);
 })();

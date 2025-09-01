@@ -2,7 +2,7 @@ package testrunner
 
 // File defines a test file.
 type File struct {
-	Name  string
-	Tests []Test
-	Code  string
+	Name  string `json:"name"`
+	Tests []Test `json:"tests"`
+	Code  string `json:"code"`
 }

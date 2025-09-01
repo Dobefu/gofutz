@@ -54,6 +54,7 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		slog.Error(fmt.Sprintf("Could not handle websocket messages: %s", err.Error()))
+		websocketInstance.Close()
 
 		return
 	}

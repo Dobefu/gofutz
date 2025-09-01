@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // CollectAllTestFiles collects all test files.
@@ -42,6 +43,7 @@ func CollectAllTestFiles() ([]string, error) {
 			return nil
 		}
 
+		path = strings.TrimPrefix(path, fmt.Sprintf("%s/", cwd))
 		testFiles = append(testFiles, path)
 
 		return nil

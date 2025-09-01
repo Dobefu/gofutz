@@ -41,8 +41,8 @@ func TestHandle(t *testing.T) {
 			defer func() { _ = ws.Close() }()
 
 			initMessage := websocket.Message{
-				Method: "init",
-				Params: []any{},
+				Method: "gofutz:init",
+				Params: websocket.Params{},
 			}
 
 			messageBytes, err := json.Marshal(initMessage)

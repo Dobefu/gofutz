@@ -50,19 +50,21 @@ func (h *Handler) HandleMessage(
 	}
 
 	switch msg.Method {
-	case "init":
+	case "gofutz:init":
 		return h.SendResponse(ws, Message{
-			Method: "init",
-			Params: []any{
-				runner.GetTests(),
+			Method: "gofutz:init",
+			Error:  "",
+			Params: Params{
+				Files: runner.GetTests(),
 			},
 		})
 
 	default:
 		return h.SendResponse(ws, Message{
 			Method: "error",
-			Params: []any{
-				fmt.Sprintf("Unknown method: %s", msg.Method),
+			Error:  fmt.Sprintf("Unknown method: %s", msg.Method),
+			Params: Params{
+				Files: nil,
 			},
 		})
 	}

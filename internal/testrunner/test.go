@@ -2,5 +2,5 @@ package testrunner
 
 // Test defines a single test.
 type Test struct {
-	Name string
+	Name string `json:"name"`
 }

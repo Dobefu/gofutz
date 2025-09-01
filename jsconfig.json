@@ -1,6 +1,9 @@
 {
   "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
     "module": "CommonJS",
+    "strictNullChecks": true,
     "target": "ES6"
   }
 }
