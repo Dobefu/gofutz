@@ -8,17 +8,17 @@ import (
 )
 
 // GetTestsFromFile gets all test functions from a file.
-func GetTestsFromFile(file string) ([]Test, error) {
+func GetTestsFromFile(file string) ([]Test, string, error) {
 	tests := []Test{}
 
 	if file == "" {
-		return []Test{}, fmt.Errorf("file is empty")
+		return []Test{}, "", fmt.Errorf("file is empty")
 	}
 
 	fileContent, err := os.ReadFile(filepath.Clean(file))
 
 	if err != nil {
-		return []Test{}, err
+		return []Test{}, "", err
 	}
 
 	lines := strings.SplitSeq(string(fileContent), "\n")
@@ -48,5 +48,5 @@ func GetTestsFromFile(file string) ([]Test, error) {
 		tests = append(tests, Test{Name: funcName})
 	}
 
-	return tests, nil
+	return tests, string(fileContent), nil
 }

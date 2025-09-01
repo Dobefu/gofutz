@@ -54,7 +54,7 @@ func (t *TestRunner) handleFileEvent(path, operation string) {
 		fallthrough
 
 	case "WRITE", "MODIFY":
-		tests, err := GetTestsFromFile(path)
+		tests, code, err := GetTestsFromFile(path)
 
 		if err != nil {
 			slog.Error(err.Error())
@@ -65,6 +65,7 @@ func (t *TestRunner) handleFileEvent(path, operation string) {
 		t.tests[path] = File{
 			Name:  path,
 			Tests: tests,
+			Code:  code,
 		}
 
 	case "REMOVE":

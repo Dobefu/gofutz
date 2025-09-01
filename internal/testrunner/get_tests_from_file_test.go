@@ -87,7 +87,7 @@ func TestGetTestsFromFile
 				t.Fatalf("expected no error, got: %s", err.Error())
 			}
 
-			fileTests, err := GetTestsFromFile(filePath)
+			fileTests, _, err := GetTestsFromFile(filePath)
 
 			if err != nil {
 				t.Fatalf("expected no error, got: %s", err.Error())
@@ -143,7 +143,7 @@ func TestGetTestsFromFileErr(t *testing.T) {
 				t.Fatalf("expected no error, got: %s", err.Error())
 			}
 
-			_, err = GetTestsFromFile(filePath)
+			_, _, err = GetTestsFromFile(filePath)
 
 			if err == nil {
 				t.Fatalf("expected error, got nil")

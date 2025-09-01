@@ -4,4 +4,5 @@ package testrunner
 type File struct {
 	Name  string
 	Tests []Test
+	Code  string
 }

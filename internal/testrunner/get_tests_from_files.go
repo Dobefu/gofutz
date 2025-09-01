@@ -5,7 +5,7 @@ func GetTestsFromFiles(files []string) (map[string]File, error) {
 	allTests := map[string]File{}
 
 	for _, file := range files {
-		tests, err := GetTestsFromFile(file)
+		tests, code, err := GetTestsFromFile(file)
 
 		if err != nil {
 			return map[string]File{}, err
@@ -14,6 +14,7 @@ func GetTestsFromFiles(files []string) (map[string]File, error) {
 		allTests[file] = File{
 			Name:  file,
 			Tests: tests,
+			Code:  string(code),
 		}
 	}
 
