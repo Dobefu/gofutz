@@ -76,5 +76,41 @@ h6 {
   grid-area: content;
   overflow: auto;
   padding: 1rem;
+  position: relative;
   scrollbar-gutter: stable;
+}
+
+#main-content:empty::after {
+  color: #5c6e87;
+  content: "Please select a file to check its coverage";
+  inset-inline: 0;
+  padding: 1rem;
+  position: absolute;
+  text-align: center;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.main-content__code {
+  display: grid;
+}
+
+.main-content__code--line {
+  align-items: start;
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+}
+
+.main-content__code--line-number {
+  border-inline-end: 1px solid #5c6e87;
+  color: #5c6e87;
+  padding-inline-end: 1rem;
+  text-align: end;
+  user-select: none;
+}
+
+.main-content__code--line-content {
+  padding-inline-start: 0.5rem;
+  tab-size: 4;
+  white-space: pre;
 }

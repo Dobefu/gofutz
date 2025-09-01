@@ -23,6 +23,13 @@ function handleGofutzInit(e) {
     fileItemSummary.classList.add("sidebar__tests--file-summary");
     fileItemSummary.textContent = file.name;
     fileItemSummary.title = file.name;
+    fileItemSummary.onclick = (e) => {
+      e.preventDefault();
+
+      window.dispatchEvent(
+        new CustomEvent("gofutz:toggle-file", { detail: file }),
+      );
+    };
     fileItem.appendChild(fileItemSummary);
 
     const testsContainer = document.createElement("ul");
