@@ -12,8 +12,16 @@ import (
 // RunAllTests runs all tests.
 func (t *TestRunner) RunAllTests(testCompleteCallback func(test Test) error) {
 	go func() {
-		coverageFile := filepath.Join(os.TempDir(), "coverage.out")
-		defer func() { _ = os.Remove(coverageFile) }()
+		coverageFile, err := os.CreateTemp("", "coverage.out")
+
+		if err != nil {
+			slog.Error(fmt.Sprintf("could not create coverage file: %s", err.Error()))
+
+			return
+		}
+
+		defer func() { _ = coverageFile.Close() }()
+		defer func() { _ = os.Remove(coverageFile.Name()) }()
 
 		startTime := time.Now()
 		slog.Info("Running all tests")
@@ -31,7 +39,7 @@ func (t *TestRunner) RunAllTests(testCompleteCallback func(test Test) error) {
 			"test",
 			"-v",
 			"-coverprofile",
-			filepath.Clean(coverageFile),
+			filepath.Clean(coverageFile.Name()),
 			"./...",
 		)
 
@@ -47,7 +55,7 @@ func (t *TestRunner) RunAllTests(testCompleteCallback func(test Test) error) {
 
 		slog.Info(fmt.Sprintf("tests completed in %s", time.Since(startTime)))
 
-		coverageLines, err := t.ParseCoverage(coverageFile)
+		coverageLines, err := t.ParseCoverage(coverageFile.Name())
 
 		if err != nil {
 			slog.Error(fmt.Sprintf("could not parse coverage: %s", err.Error()))
