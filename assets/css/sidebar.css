@@ -49,21 +49,6 @@
 
 .sidebar__tests--file {
   padding-block-end: 0.25rem;
-  padding-inline-start: 1.25rem;
-  position: relative;
-}
-
-.sidebar__tests--file::before {
-  content: "▶";
-  font-size: 0.75rem;
-  position: absolute;
-  inset-inline-start: 0.25rem;
-  inset-block-start: 0.25rem;
-  transition: transform 0.1s ease-in-out;
-}
-
-.sidebar__tests--file[open]::before {
-  transform: rotate(90deg);
 }
 
 .sidebar__tests--file-summary {
@@ -84,7 +69,16 @@
 }
 
 .sidebar__tests--tests {
-  list-style-position: outside;
   padding-block: 0.25rem;
   padding-inline-start: 1.25rem;
+}
+
+.sidebar__tests--tests:empty::after {
+  color: #5c6e87;
+  content: "No tests found";
+  font-style: italic;
+}
+
+.sidebar__tests--test {
+  list-style: none;
 }

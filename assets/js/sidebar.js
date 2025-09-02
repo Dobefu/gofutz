@@ -17,21 +17,18 @@ function handleGofutzInit(e) {
   testFilesContainer.innerHTML = "";
 
   for (const file of Object.values(details.params.files)) {
-    const fileItem = document.createElement("details");
+    const fileItem = document.createElement("div");
     fileItem.classList.add("sidebar__tests--file");
-    fileItem.open = true;
 
-    const fileItemSummary = document.createElement("summary");
+    const fileItemSummary = document.createElement("div");
     fileItemSummary.classList.add("sidebar__tests--file-summary");
     fileItemSummary.textContent = file.name;
     fileItemSummary.title = file.name;
-    fileItemSummary.onclick = (e) => {
-      e.preventDefault();
-
+    fileItemSummary.addEventListener("click", (e) => {
       window.dispatchEvent(
         new CustomEvent("gofutz:toggle-file", { detail: file }),
       );
-    };
+    });
     fileItem.appendChild(fileItemSummary);
 
     const testsContainer = document.createElement("ul");
