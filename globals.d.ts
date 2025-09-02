@@ -7,10 +7,30 @@ interface File {
 
 interface Test {
   name: string;
+  result: TestResult;
+}
+
+interface TestStatus {
+  Pending: 0;
+  Running: 1;
+  Passed: 2;
+  Failed: 3;
+}
+
+interface Line {
+  number: number;
+  executionCount: number;
+}
+
+interface TestResult {
+  status: TestStatus;
+  output: string[];
+  coverage: number;
+  coveredLines: Line[];
 }
 
 interface Params {
-  files: File[];
+  files: Record<string, File>;
 }
 
 interface Message {
