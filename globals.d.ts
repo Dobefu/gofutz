@@ -3,6 +3,7 @@ interface File {
   tests: Test[];
   code: string;
   highlightedCode: string;
+  coverage: number;
 }
 
 interface Test {

@@ -52,6 +52,7 @@ func (t *TestRunner) handleFileEvent(path, operation string) {
 			Tests:           []Test{},
 			Code:            "",
 			HighlightedCode: "",
+			Coverage:        0,
 		}
 
 		fallthrough
@@ -70,6 +71,7 @@ func (t *TestRunner) handleFileEvent(path, operation string) {
 			Tests:           tests,
 			Code:            code,
 			HighlightedCode: HighlightCode("go", string(code)),
+			Coverage:        0,
 		}
 
 	case "REMOVE":

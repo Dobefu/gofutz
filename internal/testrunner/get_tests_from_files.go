@@ -35,6 +35,7 @@ func GetTestsFromFiles(files []string) (map[string]File, error) {
 			Tests:           tests,
 			Code:            string(code),
 			HighlightedCode: HighlightCode("go", string(code)),
+			Coverage:        0,
 		}
 	}
 

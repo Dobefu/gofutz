@@ -55,6 +55,10 @@ function initWebSocket(url) {
         window.dispatchEvent(new CustomEvent("gofutz:init", { detail: msg }));
         break;
 
+      case "gofutz:update":
+        window.dispatchEvent(new CustomEvent("gofutz:update", { detail: msg }));
+        break;
+
       default:
         console.log({ "Unknown event": msg });
         break;
