@@ -32,8 +32,14 @@ type Websocket struct {
 
 // NewWebsocket creates a new websocket.
 func NewWebsocket(ws WsInterface) (*Websocket, error) {
+	handler, err := NewHandler()
+
+	if err != nil {
+		return nil, err
+	}
+
 	w := &Websocket{
-		handler: NewHandler(),
+		handler: handler,
 		ws:      ws,
 		close:   make(chan struct{}),
 		wg:      &sync.WaitGroup{},
@@ -41,7 +47,7 @@ func NewWebsocket(ws WsInterface) (*Websocket, error) {
 
 	ws.SetReadLimit(512)
 
-	err := ws.SetReadDeadline(time.Now().Add(time.Second * 15))
+	err = ws.SetReadDeadline(time.Now().Add(time.Second * 15))
 
 	if err != nil {
 		return nil, err

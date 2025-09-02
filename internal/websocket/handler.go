@@ -3,40 +3,37 @@ package websocket
 import (
 	"encoding/json"
 	"fmt"
-	"log/slog"
-	"os"
+	"sync"
 
 	"github.com/Dobefu/gofutz/internal/filewatcher"
 	"github.com/Dobefu/gofutz/internal/testrunner"
 	"github.com/gorilla/websocket"
 )
 
-var runner *testrunner.TestRunner
+// Handler defines a websocket handler.
+type Handler struct {
+	runner *testrunner.TestRunner
+	mu     sync.Mutex
+}
 
-func init() {
+// NewHandler creates a new handler.
+func NewHandler() (*Handler, error) {
 	files, err := filewatcher.CollectAllTestFiles()
 
 	if err != nil {
-		slog.Error(err.Error())
-
-		os.Exit(1)
+		return nil, err
 	}
 
-	runner, err = testrunner.NewTestRunner(files)
+	runner, err := testrunner.NewTestRunner(files)
 
 	if err != nil {
-		slog.Error(err.Error())
-
-		os.Exit(1)
+		return nil, err
 	}
-}
 
-// Handler defines a websocket handler.
-type Handler struct{}
-
-// NewHandler creates a new handler.
-func NewHandler() *Handler {
-	return &Handler{}
+	return &Handler{
+		runner: runner,
+		mu:     sync.Mutex{},
+	}, nil
 }
 
 // HandleMessage handles a websocket message.
@@ -45,6 +42,9 @@ func (h *Handler) HandleMessage(
 	messageType int,
 	msg Message,
 ) error {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
 	if messageType != websocket.TextMessage {
 		return nil
 	}
@@ -55,9 +55,32 @@ func (h *Handler) HandleMessage(
 			Method: "gofutz:init",
 			Error:  "",
 			Params: Params{
-				Files: runner.GetTests(),
+				Files: h.runner.GetTests(),
 			},
 		})
+
+	case "gofutz:run-all-tests":
+		h.runner.RunAllTests(func(test testrunner.Test) error {
+			h.mu.Lock()
+			defer h.mu.Unlock()
+
+			return h.SendResponse(ws, Message{
+				Method: "gofutz:update",
+				Error:  "",
+				Params: Params{
+					Files: map[string]testrunner.File{
+						test.Name: {
+							Name:            test.Name,
+							Tests:           []testrunner.Test{test},
+							Code:            "",
+							HighlightedCode: "",
+						},
+					},
+				},
+			})
+		})
+
+		return nil
 
 	default:
 		return h.SendResponse(ws, Message{

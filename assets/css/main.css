@@ -91,10 +91,6 @@ h6 {
   transform: translateY(-50%);
 }
 
-.main-content__code {
-  display: grid;
-}
-
 .main-content__code--line {
   align-items: start;
   display: grid;

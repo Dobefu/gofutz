@@ -7,7 +7,44 @@
 }
 
 .sidebar__header {
+  border-block-end: 1px solid #364153;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-block-end: 1rem;
   padding-block-end: 1rem;
+}
+
+.btn__run-tests {
+  background-color: transparent;
+  border: 2px solid #99a1af;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 1.25rem;
+  position: relative;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
+}
+
+.btn__run-tests::after {
+  color: #99a1af;
+  content: "▶";
+  font-size: 1.5rem;
+  inset: 50% 0 0 50%;
+  line-height: 1;
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.btn__run-tests:hover,
+.btn__run-tests:focus-visible {
+  border-color: #d1d5dc;
+}
+
+.btn__run-tests:hover::after,
+.btn__run-tests:focus-visible::after {
+  color: #d1d5dc;
 }
 
 .sidebar__tests--file {

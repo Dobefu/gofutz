@@ -9,6 +9,8 @@ function handleGofutzToggleFile(e) {
   const mainContentContainer = document.querySelector("#main-content");
 
   if (!mainContentContainer) {
+    console.error("Could not find main content container");
+
     return;
   }
 

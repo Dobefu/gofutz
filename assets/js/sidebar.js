@@ -9,6 +9,8 @@ function handleGofutzInit(e) {
   const testFilesContainer = document.querySelector(".sidebar__tests");
 
   if (!testFilesContainer) {
+    console.error("Could not find test files container");
+
     return;
   }
 
@@ -51,4 +53,18 @@ function handleGofutzInit(e) {
 
 (() => {
   window.addEventListener("gofutz:init", handleGofutzInit);
+
+  const btnRunAllTests = document.querySelectorAll(".btn__run-tests");
+
+  if (!btnRunAllTests.length) {
+    console.error("Could not find any buttons to run all tests");
+
+    return;
+  }
+
+  for (const btn of btnRunAllTests) {
+    btn.addEventListener("click", () => {
+      window.dispatchEvent(new CustomEvent("gofutz:run-all-tests"));
+    });
+  }
 })();

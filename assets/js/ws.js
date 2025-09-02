@@ -37,6 +37,10 @@ function initWebSocket(url) {
     }
 
     wss.send(JSON.stringify({ method: "gofutz:init" }));
+
+    window.addEventListener("gofutz:run-all-tests", () => {
+      sendMessage("gofutz:run-all-tests");
+    });
   };
 
   /**
@@ -98,6 +102,19 @@ function initWebSocket(url) {
       initWebSocket(url);
     }, 1000);
   };
+}
+
+/**
+ * @param {string} method
+ */
+function sendMessage(method) {
+  if (!wss) {
+    console.error("Websocket not found, could not send message");
+
+    return;
+  }
+
+  wss.send(JSON.stringify({ method }));
 }
 
 function closeWebSocket() {

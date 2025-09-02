@@ -20,7 +20,7 @@ var (
 		Subprotocols:      []string{},
 		Error:             nil,
 		CheckOrigin:       func(_ *http.Request) bool { return true },
-		EnableCompression: true,
+		EnableCompression: false,
 	}
 )
 
