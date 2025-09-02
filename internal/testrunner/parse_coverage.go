@@ -1,7 +1,6 @@
 package testrunner
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -39,25 +38,25 @@ func (t *TestRunner) ParseCoverage(coverageFile string) ([]CoverageLine, error) 
 		startLine, startColumn, err := getCoverageStartLineAndColumn(line)
 
 		if err != nil {
-			return nil, fmt.Errorf("coverage file not valid: %s", err.Error())
+			return nil, err
 		}
 
 		endLine, endColumn, err := getCoverageEndLineAndColumn(line)
 
 		if err != nil {
-			return nil, fmt.Errorf("coverage file not valid: %s", err.Error())
+			return nil, err
 		}
 
 		executionCount, err := getCoverageExecutionCount(line)
 
 		if err != nil {
-			return nil, fmt.Errorf("coverage file not valid: %s", err.Error())
+			return nil, err
 		}
 
 		numberOfStatements, err := getCoverageNumberOfStatements(line)
 
 		if err != nil {
-			return nil, fmt.Errorf("coverage file not valid: %s", err.Error())
+			return nil, err
 		}
 
 		coverageLines = append(coverageLines, CoverageLine{
