@@ -55,7 +55,17 @@ func TestGetTestsFromFiles(t *testing.T) {}
 				`,
 				"package testrunner",
 			},
-			expected: []Test{{Name: "TestGetTestsFromFiles"}},
+			expected: []Test{
+				{
+					Name: "TestGetTestsFromFiles",
+					Result: TestResult{
+						Status:       TestStatusPending,
+						Output:       []string{},
+						Coverage:     0,
+						CoveredLines: []Line{},
+					},
+				},
+			},
 		},
 	}
 

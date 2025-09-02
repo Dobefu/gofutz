@@ -8,8 +8,8 @@ import (
 	"strings"
 )
 
-// CollectAllTestFiles collects all test files.
-func CollectAllTestFiles() ([]string, error) {
+// CollectAllFiles collects all files.
+func CollectAllFiles() ([]string, error) {
 	cwd, err := os.Getwd()
 
 	if err != nil {
@@ -19,7 +19,7 @@ func CollectAllTestFiles() ([]string, error) {
 		)
 	}
 
-	testFiles := []string{}
+	files := []string{}
 
 	err = filepath.Walk(cwd, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
@@ -30,8 +30,8 @@ func CollectAllTestFiles() ([]string, error) {
 			return nil
 		}
 
-		isTestFile, err := filepath.Match(
-			filepath.Join(path, "..", "*_test.go"),
+		isFile, err := filepath.Match(
+			filepath.Join(path, "..", "*.go"),
 			path,
 		)
 
@@ -39,19 +39,19 @@ func CollectAllTestFiles() ([]string, error) {
 			return err
 		}
 
-		if !isTestFile {
+		if !isFile {
 			return nil
 		}
 
 		path = strings.TrimPrefix(path, fmt.Sprintf("%s/", cwd))
-		testFiles = append(testFiles, path)
+		files = append(files, path)
 
 		return nil
 	})
 
 	if err != nil {
-		return []string{}, fmt.Errorf("could not find any test files: %s", err.Error())
+		return []string{}, fmt.Errorf("could not find any files: %s", err.Error())
 	}
 
-	return testFiles, nil
+	return files, nil
 }

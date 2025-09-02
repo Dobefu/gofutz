@@ -2,7 +2,7 @@ package filewatcher
 
 import "testing"
 
-func TestCollectAllTestFiles(t *testing.T) {
+func TestCollectAllFiles(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
@@ -17,7 +17,7 @@ func TestCollectAllTestFiles(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			files, err := CollectAllTestFiles()
+			files, err := CollectAllFiles()
 
 			if err != nil {
 				t.Fatalf("expected no error, got: %s", err.Error())

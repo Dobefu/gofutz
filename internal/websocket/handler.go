@@ -3,6 +3,7 @@ package websocket
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"sync"
 
 	"github.com/Dobefu/gofutz/internal/filewatcher"
@@ -14,11 +15,12 @@ import (
 type Handler struct {
 	runner *testrunner.TestRunner
 	mu     sync.Mutex
+	wsChan chan Message
 }
 
 // NewHandler creates a new handler.
 func NewHandler() (*Handler, error) {
-	files, err := filewatcher.CollectAllTestFiles()
+	files, err := filewatcher.CollectAllFiles()
 
 	if err != nil {
 		return nil, err
@@ -33,6 +35,7 @@ func NewHandler() (*Handler, error) {
 	return &Handler{
 		runner: runner,
 		mu:     sync.Mutex{},
+		wsChan: nil,
 	}, nil
 }
 
@@ -42,29 +45,28 @@ func (h *Handler) HandleMessage(
 	messageType int,
 	msg Message,
 ) error {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-
 	if messageType != websocket.TextMessage {
 		return nil
 	}
 
+	if h.wsChan == nil {
+		h.wsChan = make(chan Message, 100)
+		go h.handleMessages(ws)
+	}
+
 	switch msg.Method {
 	case "gofutz:init":
-		return h.SendResponse(ws, Message{
+		return h.SendResponse(Message{
 			Method: "gofutz:init",
 			Error:  "",
 			Params: Params{
-				Files: h.runner.GetTests(),
+				Files: h.runner.GetFiles(),
 			},
 		})
 
 	case "gofutz:run-all-tests":
 		h.runner.RunAllTests(func(test testrunner.Test) error {
-			h.mu.Lock()
-			defer h.mu.Unlock()
-
-			return h.SendResponse(ws, Message{
+			return h.SendResponse(Message{
 				Method: "gofutz:update",
 				Error:  "",
 				Params: Params{
@@ -83,7 +85,7 @@ func (h *Handler) HandleMessage(
 		return nil
 
 	default:
-		return h.SendResponse(ws, Message{
+		return h.SendResponse(Message{
 			Method: "error",
 			Error:  fmt.Sprintf("Unknown method: %s", msg.Method),
 			Params: Params{
@@ -94,18 +96,31 @@ func (h *Handler) HandleMessage(
 }
 
 // SendResponse sends a websocket response.
-func (h *Handler) SendResponse(ws WsInterface, msg Message) error {
-	json, err := json.Marshal(msg)
-
-	if err != nil {
-		return err
-	}
-
-	err = ws.WriteMessage(websocket.TextMessage, json)
-
-	if err != nil {
-		return err
-	}
+func (h *Handler) SendResponse(msg Message) error {
+	h.wsChan <- msg
 
 	return nil
+}
+
+func (h *Handler) handleMessages(ws WsInterface) {
+	for msg := range h.wsChan {
+		h.mu.Lock()
+
+		json, err := json.Marshal(msg)
+
+		if err != nil {
+			h.mu.Unlock()
+
+			continue
+		}
+
+		err = ws.WriteMessage(websocket.TextMessage, json)
+		h.mu.Unlock()
+
+		if err != nil {
+			slog.Error(fmt.Sprintf("Could not send message: %s", err.Error()))
+
+			return
+		}
+	}
 }

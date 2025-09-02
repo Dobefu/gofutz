@@ -47,7 +47,15 @@ func GetTestsFromFile(file string) ([]Test, string, error) {
 			continue
 		}
 
-		tests = append(tests, Test{Name: functionDeclaration.Name.Name})
+		tests = append(tests, Test{
+			Name: functionDeclaration.Name.Name,
+			Result: TestResult{
+				Status:       TestStatusPending,
+				Output:       []string{},
+				Coverage:     0,
+				CoveredLines: []Line{},
+			},
+		})
 	}
 
 	return tests, string(fileContent), nil

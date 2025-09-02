@@ -50,7 +50,17 @@ func TestGetTestsFromFile(t *testing.T) {
 package testrunner
 func TestGetTestsFromFile(t *testing.T) {}
 				`,
-			expected: []Test{{Name: "TestGetTestsFromFile"}},
+			expected: []Test{
+				{
+					Name: "TestGetTestsFromFile",
+					Result: TestResult{
+						Status:       TestStatusPending,
+						Output:       []string{},
+						Coverage:     0,
+						CoveredLines: []Line{},
+					},
+				},
+			},
 		},
 		{
 			name: "generic test function",
@@ -58,7 +68,17 @@ func TestGetTestsFromFile(t *testing.T) {}
 package testrunner
 func TestGetTestsFromFile[T any](t *testing.T) {}
 				`,
-			expected: []Test{{Name: "TestGetTestsFromFile"}},
+			expected: []Test{
+				{
+					Name: "TestGetTestsFromFile",
+					Result: TestResult{
+						Status:       TestStatusPending,
+						Output:       []string{},
+						Coverage:     0,
+						CoveredLines: []Line{},
+					},
+				},
+			},
 		},
 		{
 			name: "non-test function",

@@ -16,7 +16,17 @@ func TestNewTestRunner(t *testing.T) {
 				package testrunner
 				func TestGetTestsFromFile(t *testing.T) {}
 			`},
-			expected: []Test{{Name: "TestGetTestsFromFile"}},
+			expected: []Test{
+				{
+					Name: "TestGetTestsFromFile",
+					Result: TestResult{
+						Status:       TestStatusPending,
+						Output:       []string{},
+						Coverage:     0,
+						CoveredLines: []Line{},
+					},
+				},
+			},
 		},
 	}
 
@@ -43,7 +53,7 @@ func TestNewTestRunner(t *testing.T) {
 				t.Fatalf("expected no error, got: %s", err.Error())
 			}
 
-			for _, fileTest := range runner.GetTests() {
+			for _, fileTest := range runner.GetFiles() {
 				if fileTest.Tests[0].Name == test.expected[0].Name {
 					return
 				}
@@ -52,7 +62,7 @@ func TestNewTestRunner(t *testing.T) {
 			t.Fatalf(
 				"expected \"%s\", got \"%s\"",
 				test.expected[0].Name,
-				runner.GetTests()[filePaths[0]].Tests[0].Name,
+				runner.GetFiles()[filePaths[0]].Tests[0].Name,
 			)
 		})
 	}
