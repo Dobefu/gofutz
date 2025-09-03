@@ -72,6 +72,14 @@ function buildFileContent(file, fileItem) {
   const fileItemContainer = document.createElement("div");
   fileItemContainer.classList.add("sidebar__tests--file-container");
 
+  const fileItemStatus = document.createElement("div");
+  fileItemStatus.classList.add("sidebar__tests--file-status");
+  fileItemStatus.classList.add(
+    "sidebar__tests--file-status",
+    `status-${file.status}`,
+  );
+  fileItemContainer.appendChild(fileItemStatus);
+
   const fileItemTitle = document.createElement("div");
   fileItemTitle.classList.add("sidebar__tests--file-title");
   fileItemTitle.textContent = file.name;

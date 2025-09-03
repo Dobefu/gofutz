@@ -130,6 +130,27 @@ func (h *Handler) handleMessages(ws WsInterface) {
 }
 
 func (h *Handler) handleRunAllTests(files map[string]testrunner.File) error {
+	for i, file := range files {
+		files[i] = testrunner.File{
+			Name:            file.Name,
+			Functions:       file.Functions,
+			Code:            file.Code,
+			HighlightedCode: file.HighlightedCode,
+			Status:          testrunner.TestStatusRunning,
+			Coverage:        -1,
+			CoveredLines:    []testrunner.Line{},
+		}
+
+		for j, function := range file.Functions {
+			files[i].Functions[j] = testrunner.Function{
+				Name: function.Name,
+				Result: testrunner.TestResult{
+					Coverage: -1,
+				},
+			}
+		}
+	}
+
 	err := h.SendResponse(Message{
 		Method: "gofutz:update",
 		Error:  "",

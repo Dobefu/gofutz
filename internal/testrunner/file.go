@@ -6,6 +6,7 @@ type File struct {
 	Functions       []Function `json:"functions"`
 	Code            string     `json:"code"`
 	HighlightedCode string     `json:"highlightedCode"`
+	Status          TestStatus `json:"status"`
 	Coverage        float64    `json:"coverage"`
 	CoveredLines    []Line     `json:"coveredLines"`
 }

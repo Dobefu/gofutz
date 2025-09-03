@@ -22,8 +22,7 @@ type Function struct {
 
 // TestResult defines the result of a test.
 type TestResult struct {
-	Status   TestStatus `json:"status"`
-	Coverage float64    `json:"coverage"`
+	Coverage float64 `json:"coverage"`
 }
 
 // Line defines a line of code in a coverage report.

@@ -45,7 +45,6 @@ func GetFunctionsFromFile(file string) ([]Function, string, error) {
 		functions = append(functions, Function{
 			Name: functionDeclaration.Name.Name,
 			Result: TestResult{
-				Status:   TestStatusPending,
 				Coverage: -1,
 			},
 		})

@@ -8,11 +8,19 @@ interface Line {
   executionCount: number;
 }
 
+interface TestStatus {
+  Pending: 0;
+  Running: 1;
+  Passed: 2;
+  Failed: 3;
+}
+
 interface File {
   name: string;
   functions: Function[];
   code: string;
   highlightedCode: string;
+  status: TestStatus;
   coverage: number;
   coveredLines: Line[];
 }
@@ -22,15 +30,7 @@ interface Function {
   result: TestResult;
 }
 
-interface TestStatus {
-  Pending: 0;
-  Running: 1;
-  Passed: 2;
-  Failed: 3;
-}
-
 interface TestResult {
-  status: TestStatus;
   coverage: number;
 }
 

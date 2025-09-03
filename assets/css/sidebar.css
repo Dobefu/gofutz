@@ -64,6 +64,32 @@
   justify-content: space-between;
 }
 
+.sidebar__tests--file-status::after {
+  display: inline-block;
+  text-align: center;
+  width: 1.25rem;
+}
+
+/* Pending */
+.sidebar__tests--file-status.status-0::after {
+  content: "?";
+}
+
+/* Running */
+.sidebar__tests--file-status.status-1::after {
+  content: "🔄";
+}
+
+/* Passed */
+.sidebar__tests--file-status.status-2::after {
+  content: "✅";
+}
+
+/* Failed */
+.sidebar__tests--file-status.status-3::after {
+  content: "❌";
+}
+
 .sidebar__tests--file-title {
   cursor: pointer;
   direction: rtl;

@@ -29,6 +29,7 @@ func (t *TestRunner) ParseCoverageLines(
 
 		if !hasCoverage {
 			file.Coverage = 0
+			file.Status = TestStatusPending
 			file.CoveredLines = []Line{}
 
 			for i, function := range file.Functions {
@@ -50,6 +51,7 @@ func (t *TestRunner) ParseCoverageLines(
 		file.Coverage = getFileCoverage(lines)
 
 		file.CoveredLines = lines
+		file.Status = TestStatusPassed
 		t.files[fileName] = file
 
 		files = append(files, file)
