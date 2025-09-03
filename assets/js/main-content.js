@@ -25,13 +25,22 @@ function handleGofutzToggleFile(e) {
     return;
   }
 
+  const coveredLines = new Set();
+
+  for (const line of file.coveredLines) {
+    coveredLines.add(line.number);
+  }
+
   const code = file.highlightedCode
     .split("\n")
     .map((line, idx) => {
       const processedLine = line.replace(/^<\/span>/g, "");
+      const lineNumber = idx + 1;
+      const isCovered = coveredLines.has(lineNumber);
+      const coveredClass = isCovered ? "covered" : "uncovered";
 
-      return `<div class="main-content__code--line">
-        <span class="main-content__code--line-number">${idx + 1}</span>
+      return `<div class="main-content__code--line ${coveredClass}">
+        <span class="main-content__code--line-number">${lineNumber}</span>
         <span class="main-content__code--line-content">${processedLine}</span></span>
       </div>`;
     })

@@ -15,7 +15,7 @@ type TestRunner struct {
 
 // NewTestRunner creates a new test runner.
 func NewTestRunner(files []string) (*TestRunner, error) {
-	tests, err := GetTestsFromFiles(files)
+	tests, err := GetFunctionsFromFiles(files)
 
 	if err != nil {
 		return nil, err
@@ -50,16 +50,17 @@ func (t *TestRunner) handleFileEvent(path, operation string) {
 
 		t.files[path] = File{
 			Name:            path,
-			Tests:           []Test{},
+			Functions:       []Function{},
 			Code:            "",
 			HighlightedCode: "",
 			Coverage:        0,
+			CoveredLines:    []Line{},
 		}
 
 		fallthrough
 
 	case "WRITE", "MODIFY":
-		tests, code, err := GetTestsFromFile(path)
+		functions, code, err := GetFunctionsFromFile(path)
 
 		if err != nil {
 			slog.Error(err.Error())
@@ -69,10 +70,11 @@ func (t *TestRunner) handleFileEvent(path, operation string) {
 
 		t.files[path] = File{
 			Name:            path,
-			Tests:           tests,
+			Functions:       functions,
 			Code:            code,
 			HighlightedCode: HighlightCode("go", string(code)),
 			Coverage:        0,
+			CoveredLines:    []Line{},
 		}
 
 	case "REMOVE":

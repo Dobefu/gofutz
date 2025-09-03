@@ -110,3 +110,11 @@ h6 {
   tab-size: 4;
   white-space: pre;
 }
+
+.covered {
+  background-color: #05df7222;
+}
+
+.uncovered {
+  background-color: #ff646722;
+}

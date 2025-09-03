@@ -5,15 +5,15 @@ import (
 	"strings"
 )
 
-// GetTestsFromFiles gets all test functions from the supplied files.
-func GetTestsFromFiles(files []string) (map[string]File, error) {
+// GetFunctionsFromFiles gets all functions from the supplied files.
+func GetFunctionsFromFiles(files []string) (map[string]File, error) {
 	moduleName := GetModuleName()
 
-	allTests := map[string]File{}
-	testFiles := map[string][]Test{}
+	allFunctions := map[string]File{}
+	testFiles := map[string][]Function{}
 
 	for _, file := range files {
-		tests, code, err := GetTestsFromFile(file)
+		functions, code, err := GetFunctionsFromFile(file)
 
 		if err != nil {
 			return map[string]File{}, err
@@ -21,7 +21,7 @@ func GetTestsFromFiles(files []string) (map[string]File, error) {
 
 		if strings.HasSuffix(file, "_test.go") {
 			sourceFile := strings.Replace(file, "_test.go", ".go", 1)
-			testFiles[sourceFile] = tests
+			testFiles[sourceFile] = functions
 
 			continue
 		}
@@ -30,29 +30,30 @@ func GetTestsFromFiles(files []string) (map[string]File, error) {
 			file = fmt.Sprintf("%s/%s", moduleName, file)
 		}
 
-		allTests[file] = File{
+		allFunctions[file] = File{
 			Name:            file,
-			Tests:           tests,
+			Functions:       functions,
 			Code:            string(code),
 			HighlightedCode: HighlightCode("go", string(code)),
 			Coverage:        0,
+			CoveredLines:    []Line{},
 		}
 	}
 
-	for sourceFile, tests := range testFiles {
+	for sourceFile, functions := range testFiles {
 		if moduleName != "" {
 			sourceFile = fmt.Sprintf("%s/%s", moduleName, sourceFile)
 		}
 
-		file, hasFile := allTests[sourceFile]
+		file, hasFile := allFunctions[sourceFile]
 
 		if !hasFile {
 			continue
 		}
 
-		file.Tests = append(file.Tests, tests...)
-		allTests[sourceFile] = file
+		file.Functions = append(file.Functions, functions...)
+		allFunctions[sourceFile] = file
 	}
 
-	return allTests, nil
+	return allFunctions, nil
 }

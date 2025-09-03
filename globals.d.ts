@@ -1,12 +1,23 @@
+interface Line {
+  number: number;
+  startLine: number;
+  endLine: number;
+  startColumn: number;
+  endColumn: number;
+  numberOfStatements: number;
+  executionCount: number;
+}
+
 interface File {
   name: string;
-  tests: Test[];
+  functions: Function[];
   code: string;
   highlightedCode: string;
   coverage: number;
+  coveredLines: Line[];
 }
 
-interface Test {
+interface Function {
   name: string;
   result: TestResult;
 }
@@ -18,16 +29,9 @@ interface TestStatus {
   Failed: 3;
 }
 
-interface Line {
-  number: number;
-  executionCount: number;
-}
-
 interface TestResult {
   status: TestStatus;
-  output: string[];
   coverage: number;
-  coveredLines: Line[];
 }
 
 interface Params {

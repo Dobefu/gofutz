@@ -14,22 +14,25 @@ const (
 	TestStatusFailed
 )
 
-// Test defines a single test.
-type Test struct {
+// Function defines a single function.
+type Function struct {
 	Name   string     `json:"name"`
 	Result TestResult `json:"result"`
 }
 
 // TestResult defines the result of a test.
 type TestResult struct {
-	Status       TestStatus `json:"status"`
-	Output       []string   `json:"output"`
-	Coverage     float64    `json:"coverage"`
-	CoveredLines []Line     `json:"coveredLines"`
+	Status   TestStatus `json:"status"`
+	Coverage float64    `json:"coverage"`
 }
 
 // Line defines a line of code in a coverage report.
 type Line struct {
-	Number         int `json:"number"`
-	ExecutionCount int `json:"executionCount"`
+	Number             int `json:"number"`
+	StartLine          int `json:"startLine"`
+	StartColumn        int `json:"startColumn"`
+	EndLine            int `json:"endLine"`
+	EndColumn          int `json:"endColumn"`
+	ExecutionCount     int `json:"executionCount"`
+	NumberOfStatements int `json:"numberOfStatements"`
 }

@@ -1,54 +1,55 @@
 package testrunner
 
-import (
-	"strings"
-)
-
 // ParseCoverageLines parses the coverage lines.
-func (t *TestRunner) ParseCoverageLines(coverageLines []CoverageLine) []File {
+func (t *TestRunner) ParseCoverageLines(
+	coverageLines []CoverageLine,
+	coveragePercentages map[string]map[string]float64,
+) []File {
 	coverage := make(map[string][]Line)
 
 	for _, line := range coverageLines {
 		fileName := line.File
 
 		coverage[fileName] = append(coverage[fileName], Line{
-			Number:         line.StartLine,
-			ExecutionCount: line.ExecutionCount,
+			Number:             line.StartLine,
+			StartLine:          line.StartLine,
+			StartColumn:        line.StartColumn,
+			EndLine:            line.EndLine,
+			EndColumn:          line.EndColumn,
+			ExecutionCount:     line.ExecutionCount,
+			NumberOfStatements: line.NumberOfStatements,
 		})
 	}
 
 	files := []File{}
 
 	for fileName, lines := range coverage {
-		testFile, hasTestFile := t.files[fileName]
-
-		if !hasTestFile {
-			continue
-		}
-
-		var coveragePercentage float64
-		numLines := len(strings.Split(testFile.Code, "\n"))
-		numCoveredLines := 0
-
-		for _, line := range lines {
-			numLines++
-
-			if line.ExecutionCount > 0 {
-				numCoveredLines++
-			}
-		}
-
-		if numLines > 0 {
-			coveragePercentage = float64(numCoveredLines) / float64(numLines) * 100
-		}
-
+		coveragePercentage := coveragePercentages[fileName]
 		file, hasFile := t.files[fileName]
 
 		if !hasFile {
 			continue
 		}
 
-		file.Coverage = coveragePercentage
+		for i, function := range file.Functions {
+			function.Result.Coverage = coveragePercentage[function.Name]
+			file.Functions[i] = function
+		}
+
+		var numCoveredStatements int
+		var totalStatements int
+
+		for _, line := range coverage[fileName] {
+			totalStatements += line.NumberOfStatements
+
+			if line.ExecutionCount > 0 {
+				numCoveredStatements += line.NumberOfStatements
+			}
+		}
+
+		file.Coverage = (float64(numCoveredStatements) / float64(totalStatements)) * 100
+		file.CoveredLines = lines
+
 		t.files[fileName] = file
 
 		files = append(files, file)

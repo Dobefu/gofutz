@@ -7,21 +7,20 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
-// GetTestsFromFile gets all test functions from a file.
-func GetTestsFromFile(file string) ([]Test, string, error) {
-	tests := []Test{}
+// GetFunctionsFromFile gets all functions from a file.
+func GetFunctionsFromFile(file string) ([]Function, string, error) {
+	functions := []Function{}
 
 	if file == "" {
-		return []Test{}, "", fmt.Errorf("file is empty")
+		return []Function{}, "", fmt.Errorf("file is empty")
 	}
 
 	fileContent, err := os.ReadFile(filepath.Clean(file))
 
 	if err != nil {
-		return []Test{}, "", err
+		return []Function{}, "", err
 	}
 
 	fileset := token.NewFileSet()
@@ -33,7 +32,7 @@ func GetTestsFromFile(file string) ([]Test, string, error) {
 	)
 
 	if err != nil {
-		return []Test{}, "", err
+		return []Function{}, "", err
 	}
 
 	for _, declaration := range node.Decls {
@@ -43,20 +42,14 @@ func GetTestsFromFile(file string) ([]Test, string, error) {
 			continue
 		}
 
-		if !strings.HasPrefix(functionDeclaration.Name.Name, "Test") {
-			continue
-		}
-
-		tests = append(tests, Test{
+		functions = append(functions, Function{
 			Name: functionDeclaration.Name.Name,
 			Result: TestResult{
-				Status:       TestStatusPending,
-				Output:       []string{},
-				Coverage:     0,
-				CoveredLines: []Line{},
+				Status:   TestStatusPending,
+				Coverage: 0,
 			},
 		})
 	}
 
-	return tests, string(fileContent), nil
+	return functions, string(fileContent), nil
 }

@@ -15,7 +15,6 @@ func GetModuleName() string {
 		return ""
 	}
 
-	// Recursively check parent directories to find a go.mod file.
 	goModPath := filepath.Join(cwd, "go.mod")
 	file, err := os.Open(filepath.Clean(goModPath))
 

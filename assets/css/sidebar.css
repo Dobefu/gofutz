@@ -81,7 +81,7 @@
 
 .sidebar__tests--tests:empty::after {
   color: #5c6e87;
-  content: "No tests found";
+  content: "No functions found";
   font-style: italic;
 }
 
@@ -96,6 +96,6 @@
 .sidebar__tests--file-coverage,
 .sidebar__tests--test-coverage {
   color: #cad5e2;
-  width: 3.8rem;
+  min-width: 3.5rem;
   text-align: end;
 }

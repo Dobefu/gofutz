@@ -85,7 +85,7 @@ function buildFileContent(file, fileItem) {
 
   const fileItemCoverage = document.createElement("div");
   fileItemCoverage.classList.add("sidebar__tests--file-coverage");
-  fileItemCoverage.textContent = `${file.coverage.toFixed(0)}%`;
+  fileItemCoverage.textContent = `${file.coverage.toFixed(1)}%`;
   fileItemContainer.appendChild(fileItemCoverage);
 
   fileItem.appendChild(fileItemContainer);
@@ -93,17 +93,17 @@ function buildFileContent(file, fileItem) {
   const testsContainer = document.createElement("ul");
   testsContainer.classList.add("sidebar__tests--tests");
 
-  for (const test of file.tests) {
-    const testItem = document.createElement("li");
-    testItem.classList.add("sidebar__tests--test");
-    testItem.textContent = test.name;
-    testItem.title = test.name;
-    testsContainer.appendChild(testItem);
+  for (const func of file.functions) {
+    const funcItem = document.createElement("li");
+    funcItem.classList.add("sidebar__tests--test");
+    funcItem.textContent = func.name;
+    funcItem.title = func.name;
+    testsContainer.appendChild(funcItem);
 
-    const testItemCoverage = document.createElement("div");
-    testItemCoverage.classList.add("sidebar__tests--test-coverage");
-    testItemCoverage.textContent = `${test.result.coverage.toFixed(0)}%`;
-    testItem.appendChild(testItemCoverage);
+    const funcItemCoverage = document.createElement("div");
+    funcItemCoverage.classList.add("sidebar__tests--test-coverage");
+    funcItemCoverage.textContent = `${func.result.coverage.toFixed(1)}%`;
+    funcItem.appendChild(funcItemCoverage);
   }
 
   fileItem.appendChild(testsContainer);

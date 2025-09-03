@@ -38,6 +38,7 @@ func (t *TestRunner) RunAllTests(testCompleteCallback func(file File) error) {
 			filepath.Clean(goPath),
 			"test",
 			"-v",
+			"-json",
 			"-coverprofile",
 			filepath.Clean(coverageFile.Name()),
 			"./...",
@@ -61,7 +62,15 @@ func (t *TestRunner) RunAllTests(testCompleteCallback func(file File) error) {
 			slog.Error(fmt.Sprintf("could not parse coverage: %s", err.Error()))
 		}
 
-		files := t.ParseCoverageLines(coverageLines)
+		coveragePercentages, err := t.GetFuncCoveragePercentages(coverageFile.Name())
+
+		if err != nil {
+			slog.Error(
+				fmt.Sprintf("could not get coverage percentages: %s", err.Error()),
+			)
+		}
+
+		files := t.ParseCoverageLines(coverageLines, coveragePercentages)
 
 		for _, file := range files {
 			err = testCompleteCallback(file)

@@ -39,7 +39,7 @@ func CollectAllFiles() ([]string, error) {
 			return err
 		}
 
-		if !isFile {
+		if !isFile || strings.HasSuffix(path, "_test.go") {
 			return nil
 		}
 

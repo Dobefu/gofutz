@@ -15,8 +15,8 @@ type CoverageLine struct {
 	StartColumn        int    `json:"startColumn"`
 	EndLine            int    `json:"endLine"`
 	EndColumn          int    `json:"endColumn"`
-	ExecutionCount     int    `json:"executionCount"`
 	NumberOfStatements int    `json:"numberOfStatements"`
+	ExecutionCount     int    `json:"executionCount"`
 }
 
 // ParseCoverage parses the coverage report.
@@ -65,8 +65,8 @@ func (t *TestRunner) ParseCoverage(coverageFile string) ([]CoverageLine, error) 
 			EndLine:            endLine,
 			EndColumn:          endColumn,
 			StartColumn:        startColumn,
-			ExecutionCount:     executionCount,
 			NumberOfStatements: numberOfStatements,
+			ExecutionCount:     executionCount,
 		})
 	}
 
@@ -125,13 +125,13 @@ func getCoverageEndLineAndColumn(line string) (int, int, error) {
 	return endLine, endColumn, nil
 }
 
-func getCoverageExecutionCount(line string) (int, error) {
+func getCoverageNumberOfStatements(line string) (int, error) {
 	return strconv.Atoi(regexp.MustCompile(
 		`\s(\d+)`,
 	).FindAllStringSubmatch(line, -1)[0][1])
 }
 
-func getCoverageNumberOfStatements(line string) (int, error) {
+func getCoverageExecutionCount(line string) (int, error) {
 	return strconv.Atoi(regexp.MustCompile(
 		`\s(\d+)`,
 	).FindAllStringSubmatch(line, -1)[1][1])
