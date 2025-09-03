@@ -1,6 +1,23 @@
 "use strict";
 
 /**
+ * @param {number} lineNumber
+ * @param {Line[]} coveredLines
+ * @returns {string | undefined}
+ */
+function getLineCoverageStatus(lineNumber, coveredLines) {
+  const matchingLine = coveredLines.find((line) => {
+    return lineNumber >= line.startLine && lineNumber <= line.endLine;
+  });
+
+  if (!matchingLine) {
+    return;
+  }
+
+  return matchingLine.executionCount > 0 ? "covered" : "uncovered";
+}
+
+/**
  * @param {CustomEvent} e
  */
 function handleGofutzToggleFile(e) {
@@ -25,21 +42,17 @@ function handleGofutzToggleFile(e) {
     return;
   }
 
-  const coveredLines = new Set();
-
-  for (const line of file.coveredLines) {
-    coveredLines.add(line.number);
-  }
-
   const code = file.highlightedCode
     .split("\n")
     .map((line, idx) => {
       const processedLine = line.replace(/^<\/span>/g, "");
       const lineNumber = idx + 1;
-      const isCovered = coveredLines.has(lineNumber);
-      const coveredClass = isCovered ? "covered" : "uncovered";
+      const coverageStatus = getLineCoverageStatus(
+        lineNumber,
+        file.coveredLines,
+      );
 
-      return `<div class="main-content__code--line ${coveredClass}">
+      return `<div class="main-content__code--line ${coverageStatus}">
         <span class="main-content__code--line-number">${lineNumber}</span>
         <span class="main-content__code--line-content">${processedLine}</span></span>
       </div>`;
