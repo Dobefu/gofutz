@@ -3,7 +3,7 @@
 /**
  * @param {number} lineNumber
  * @param {Line[]} coveredLines
- * @returns {string | undefined}
+ * @returns {string}
  */
 function getLineCoverageStatus(lineNumber, coveredLines) {
   const matchingLine = coveredLines.find((line) => {
@@ -11,7 +11,7 @@ function getLineCoverageStatus(lineNumber, coveredLines) {
   });
 
   if (!matchingLine) {
-    return;
+    return "";
   }
 
   return matchingLine.executionCount > 0 ? "covered" : "uncovered";
@@ -23,6 +23,7 @@ function getLineCoverageStatus(lineNumber, coveredLines) {
 function handleGofutzToggleFile(e) {
   /** @type {File} */
   const file = e.detail;
+  /** @type {HTMLDivElement | null} */
   const mainContentContainer = document.querySelector("#main-content");
 
   if (!mainContentContainer) {
@@ -68,6 +69,36 @@ function handleGofutzToggleFile(e) {
   mainContentContainer.appendChild(codeContainer);
 }
 
+/**
+ * @param {CustomEvent} e
+ */
+function handleGofutzUpdate(e) {
+  /** @type {Message} */
+  const details = e.detail;
+  /** @type {HTMLPreElement | null} */
+  const currentCodeContainer = document.querySelector(".main-content__code");
+  /** @type {HTMLDivElement | null} */
+  const mainContentContainer = document.querySelector("#main-content");
+
+  if (!currentCodeContainer || !mainContentContainer) {
+    return;
+  }
+
+  const currentFileName = currentCodeContainer.dataset.file;
+
+  for (const file of Object.values(details.params.files)) {
+    if (file.name === currentFileName) {
+      mainContentContainer.innerHTML = "";
+      handleGofutzToggleFile(
+        new CustomEvent("gofutz:toggle-file", { detail: file }),
+      );
+
+      break;
+    }
+  }
+}
+
 (() => {
   window.addEventListener("gofutz:toggle-file", handleGofutzToggleFile);
+  window.addEventListener("gofutz:update", handleGofutzUpdate);
 })();
