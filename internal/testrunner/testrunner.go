@@ -53,7 +53,7 @@ func (t *TestRunner) handleFileEvent(path, operation string) {
 			Functions:       []Function{},
 			Code:            "",
 			HighlightedCode: "",
-			Coverage:        0,
+			Coverage:        -1,
 			CoveredLines:    []Line{},
 		}
 
@@ -73,7 +73,7 @@ func (t *TestRunner) handleFileEvent(path, operation string) {
 			Functions:       functions,
 			Code:            code,
 			HighlightedCode: HighlightCode("go", string(code)),
-			Coverage:        0,
+			Coverage:        -1,
 			CoveredLines:    []Line{},
 		}
 

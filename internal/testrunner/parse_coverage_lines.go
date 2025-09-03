@@ -23,11 +23,22 @@ func (t *TestRunner) ParseCoverageLines(
 
 	files := []File{}
 
-	for fileName, lines := range coverage {
+	for fileName, file := range t.files {
+		lines, hasCoverage := coverage[fileName]
 		coveragePercentage := coveragePercentages[fileName]
-		file, hasFile := t.files[fileName]
 
-		if !hasFile {
+		if !hasCoverage {
+			file.Coverage = 0
+			file.CoveredLines = []Line{}
+
+			for i, function := range file.Functions {
+				function.Result.Coverage = 0
+				file.Functions[i] = function
+			}
+
+			t.files[fileName] = file
+			files = append(files, file)
+
 			continue
 		}
 
@@ -36,24 +47,32 @@ func (t *TestRunner) ParseCoverageLines(
 			file.Functions[i] = function
 		}
 
-		var numCoveredStatements int
-		var totalStatements int
+		file.Coverage = getFileCoverage(lines)
 
-		for _, line := range coverage[fileName] {
-			totalStatements += line.NumberOfStatements
-
-			if line.ExecutionCount > 0 {
-				numCoveredStatements += line.NumberOfStatements
-			}
-		}
-
-		file.Coverage = (float64(numCoveredStatements) / float64(totalStatements)) * 100
 		file.CoveredLines = lines
-
 		t.files[fileName] = file
 
 		files = append(files, file)
 	}
 
 	return files
+}
+
+func getFileCoverage(lines []Line) float64 {
+	var numCoveredStatements int
+	var totalStatements int
+
+	for _, line := range lines {
+		totalStatements += line.NumberOfStatements
+
+		if line.ExecutionCount > 0 {
+			numCoveredStatements += line.NumberOfStatements
+		}
+	}
+
+	if totalStatements > 0 {
+		return (float64(numCoveredStatements) / float64(totalStatements)) * 100
+	}
+
+	return 0
 }

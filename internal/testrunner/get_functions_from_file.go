@@ -46,7 +46,7 @@ func GetFunctionsFromFile(file string) ([]Function, string, error) {
 			Name: functionDeclaration.Name.Name,
 			Result: TestResult{
 				Status:   TestStatusPending,
-				Coverage: 0,
+				Coverage: -1,
 			},
 		})
 	}

@@ -86,19 +86,7 @@ func (h *Handler) HandleMessage(
 		})
 
 	case "gofutz:run-all-tests":
-		h.runner.RunAllTests(func(fileToUpdate testrunner.File) error {
-			return h.SendResponse(Message{
-				Method: "gofutz:update",
-				Error:  "",
-				Params: Params{
-					Files: map[string]testrunner.File{
-						fileToUpdate.Name: fileToUpdate,
-					},
-				},
-			})
-		})
-
-		return nil
+		return h.handleRunAllTests(files)
 
 	default:
 		return h.SendResponse(Message{
@@ -139,4 +127,32 @@ func (h *Handler) handleMessages(ws WsInterface) {
 			return
 		}
 	}
+}
+
+func (h *Handler) handleRunAllTests(files map[string]testrunner.File) error {
+	err := h.SendResponse(Message{
+		Method: "gofutz:update",
+		Error:  "",
+		Params: Params{
+			Files: files,
+		},
+	})
+
+	if err != nil {
+		return err
+	}
+
+	h.runner.RunAllTests(func(fileToUpdate testrunner.File) error {
+		return h.SendResponse(Message{
+			Method: "gofutz:update",
+			Error:  "",
+			Params: Params{
+				Files: map[string]testrunner.File{
+					fileToUpdate.Name: fileToUpdate,
+				},
+			},
+		})
+	})
+
+	return nil
 }

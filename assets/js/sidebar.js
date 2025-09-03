@@ -85,7 +85,11 @@ function buildFileContent(file, fileItem) {
 
   const fileItemCoverage = document.createElement("div");
   fileItemCoverage.classList.add("sidebar__tests--file-coverage");
-  fileItemCoverage.textContent = `${file.coverage.toFixed(1)}%`;
+  if (file.coverage >= 0) {
+    fileItemCoverage.textContent = `${file.coverage.toFixed(1)}%`;
+  } else {
+    fileItemCoverage.textContent = "…%";
+  }
   fileItemContainer.appendChild(fileItemCoverage);
 
   fileItem.appendChild(fileItemContainer);
@@ -102,7 +106,11 @@ function buildFileContent(file, fileItem) {
 
     const funcItemCoverage = document.createElement("div");
     funcItemCoverage.classList.add("sidebar__tests--test-coverage");
-    funcItemCoverage.textContent = `${func.result.coverage.toFixed(1)}%`;
+    if (func.result.coverage >= 0) {
+      funcItemCoverage.textContent = `${func.result.coverage.toFixed(1)}%`;
+    } else {
+      funcItemCoverage.textContent = "…%";
+    }
     funcItem.appendChild(funcItemCoverage);
   }
 
