@@ -5,7 +5,7 @@ import (
 )
 
 // ParseCoverageLines parses the coverage lines.
-func (t *TestRunner) ParseCoverageLines(coverageLines []CoverageLine) []Test {
+func (t *TestRunner) ParseCoverageLines(coverageLines []CoverageLine) []File {
 	coverage := make(map[string][]Line)
 
 	for _, line := range coverageLines {
@@ -17,7 +17,7 @@ func (t *TestRunner) ParseCoverageLines(coverageLines []CoverageLine) []Test {
 		})
 	}
 
-	tests := []Test{}
+	files := []File{}
 
 	for fileName, lines := range coverage {
 		testFile, hasTestFile := t.files[fileName]
@@ -42,16 +42,17 @@ func (t *TestRunner) ParseCoverageLines(coverageLines []CoverageLine) []Test {
 			coveragePercentage = float64(numCoveredLines) / float64(numLines) * 100
 		}
 
-		tests = append(tests, Test{
-			Name: fileName,
-			Result: TestResult{
-				Status:       TestStatusRunning,
-				Output:       []string{},
-				Coverage:     coveragePercentage,
-				CoveredLines: lines,
-			},
-		})
+		file, hasFile := t.files[fileName]
+
+		if !hasFile {
+			continue
+		}
+
+		file.Coverage = coveragePercentage
+		t.files[fileName] = file
+
+		files = append(files, file)
 	}
 
-	return tests
+	return files
 }

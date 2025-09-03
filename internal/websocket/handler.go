@@ -11,6 +11,11 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+var (
+	sharedRunner         *testrunner.TestRunner
+	initSharedRunnerOnce sync.Once
+)
+
 // Handler defines a websocket handler.
 type Handler struct {
 	runner *testrunner.TestRunner
@@ -20,20 +25,34 @@ type Handler struct {
 
 // NewHandler creates a new handler.
 func NewHandler() (*Handler, error) {
-	files, err := filewatcher.CollectAllFiles()
+	var err error
 
-	if err != nil {
-		return nil, err
-	}
+	initSharedRunnerOnce.Do(func() {
+		files, collectErr := filewatcher.CollectAllFiles()
 
-	runner, err := testrunner.NewTestRunner(files)
+		if collectErr != nil {
+			err = collectErr
+
+			return
+		}
+
+		runner, newRunnerErr := testrunner.NewTestRunner(files)
+
+		if newRunnerErr != nil {
+			err = newRunnerErr
+
+			return
+		}
+
+		sharedRunner = runner
+	})
 
 	if err != nil {
 		return nil, err
 	}
 
 	return &Handler{
-		runner: runner,
+		runner: sharedRunner,
 		mu:     sync.Mutex{},
 		wsChan: nil,
 	}, nil
@@ -45,6 +64,8 @@ func (h *Handler) HandleMessage(
 	messageType int,
 	msg Message,
 ) error {
+	files := h.runner.GetFiles()
+
 	if messageType != websocket.TextMessage {
 		return nil
 	}
@@ -60,23 +81,18 @@ func (h *Handler) HandleMessage(
 			Method: "gofutz:init",
 			Error:  "",
 			Params: Params{
-				Files: h.runner.GetFiles(),
+				Files: files,
 			},
 		})
 
 	case "gofutz:run-all-tests":
-		h.runner.RunAllTests(func(test testrunner.Test) error {
+		h.runner.RunAllTests(func(fileToUpdate testrunner.File) error {
 			return h.SendResponse(Message{
 				Method: "gofutz:update",
 				Error:  "",
 				Params: Params{
 					Files: map[string]testrunner.File{
-						test.Name: {
-							Name:            test.Name,
-							Tests:           []testrunner.Test{test},
-							Code:            "",
-							HighlightedCode: "",
-						},
+						fileToUpdate.Name: fileToUpdate,
 					},
 				},
 			})

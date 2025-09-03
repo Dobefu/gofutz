@@ -17,53 +17,101 @@ function handleGofutzInit(e) {
   testFilesContainer.innerHTML = "";
 
   for (const file of Object.values(details.params.files)) {
-    const fileItem = document.createElement("div");
-    fileItem.classList.add("sidebar__tests--file");
+    renderTestFile(file, testFilesContainer);
+  }
+}
 
-    const fileItemContainer = document.createElement("div");
-    fileItemContainer.classList.add("sidebar__tests--file-container");
+/**
+ * @param {CustomEvent} e
+ */
+function handleGofutzUpdate(e) {
+  /** @type {Message} */
+  const details = e.detail;
+  const testFilesContainer = document.querySelector(".sidebar__tests");
 
-    const fileItemTitle = document.createElement("div");
-    fileItemTitle.classList.add("sidebar__tests--file-title");
-    fileItemTitle.textContent = file.name;
-    fileItemTitle.title = file.name;
-    fileItemTitle.addEventListener("click", () => {
-      window.dispatchEvent(
-        new CustomEvent("gofutz:toggle-file", { detail: file }),
-      );
-    });
-    fileItemContainer.appendChild(fileItemTitle);
+  if (!testFilesContainer) {
+    console.error("Could not find test files container");
 
-    const fileItemCoverage = document.createElement("div");
-    fileItemCoverage.classList.add("sidebar__tests--file-coverage");
-    fileItemCoverage.textContent = `${file.coverage}%`;
-    fileItemContainer.appendChild(fileItemCoverage);
+    return;
+  }
 
-    fileItem.appendChild(fileItemContainer);
+  for (const file of Object.values(details.params.files)) {
+    const fileItem = testFilesContainer.querySelector(
+      `[data-name="${file.name}"]`,
+    );
 
-    const testsContainer = document.createElement("ul");
-    testsContainer.classList.add("sidebar__tests--tests");
+    if (fileItem) {
+      fileItem.innerHTML = "";
+      buildFileContent(file, fileItem);
 
-    for (const test of file.tests) {
-      const testItem = document.createElement("li");
-      testItem.classList.add("sidebar__tests--test");
-      testItem.textContent = test.name;
-      testItem.title = test.name;
-      testsContainer.appendChild(testItem);
-
-      const testItemCoverage = document.createElement("div");
-      testItemCoverage.classList.add("sidebar__tests--test-coverage");
-      testItemCoverage.textContent = `${test.result.coverage}%`;
-      testItem.appendChild(testItemCoverage);
+      continue;
     }
 
-    fileItem.appendChild(testsContainer);
-    testFilesContainer.appendChild(fileItem);
+    renderTestFile(file, testFilesContainer);
   }
+}
+
+/**
+ * @param {File} file
+ * @param {Element} testFilesContainer
+ */
+function renderTestFile(file, testFilesContainer) {
+  const fileItem = document.createElement("div");
+  fileItem.classList.add("sidebar__tests--file");
+  fileItem.dataset.name = file.name;
+
+  buildFileContent(file, fileItem);
+  testFilesContainer.appendChild(fileItem);
+}
+
+/**
+ * @param {File} file
+ * @param {Element} fileItem
+ */
+function buildFileContent(file, fileItem) {
+  const fileItemContainer = document.createElement("div");
+  fileItemContainer.classList.add("sidebar__tests--file-container");
+
+  const fileItemTitle = document.createElement("div");
+  fileItemTitle.classList.add("sidebar__tests--file-title");
+  fileItemTitle.textContent = file.name;
+  fileItemTitle.title = file.name;
+  fileItemTitle.addEventListener("click", () => {
+    window.dispatchEvent(
+      new CustomEvent("gofutz:toggle-file", { detail: file }),
+    );
+  });
+  fileItemContainer.appendChild(fileItemTitle);
+
+  const fileItemCoverage = document.createElement("div");
+  fileItemCoverage.classList.add("sidebar__tests--file-coverage");
+  fileItemCoverage.textContent = `${file.coverage.toFixed(0)}%`;
+  fileItemContainer.appendChild(fileItemCoverage);
+
+  fileItem.appendChild(fileItemContainer);
+
+  const testsContainer = document.createElement("ul");
+  testsContainer.classList.add("sidebar__tests--tests");
+
+  for (const test of file.tests) {
+    const testItem = document.createElement("li");
+    testItem.classList.add("sidebar__tests--test");
+    testItem.textContent = test.name;
+    testItem.title = test.name;
+    testsContainer.appendChild(testItem);
+
+    const testItemCoverage = document.createElement("div");
+    testItemCoverage.classList.add("sidebar__tests--test-coverage");
+    testItemCoverage.textContent = `${test.result.coverage.toFixed(0)}%`;
+    testItem.appendChild(testItemCoverage);
+  }
+
+  fileItem.appendChild(testsContainer);
 }
 
 (() => {
   window.addEventListener("gofutz:init", handleGofutzInit);
+  window.addEventListener("gofutz:update", handleGofutzUpdate);
 
   const btnRunAllTests = document.querySelectorAll(".btn__run-tests");
 

@@ -10,7 +10,7 @@ import (
 )
 
 // RunAllTests runs all tests.
-func (t *TestRunner) RunAllTests(testCompleteCallback func(test Test) error) {
+func (t *TestRunner) RunAllTests(testCompleteCallback func(file File) error) {
 	go func() {
 		coverageFile, err := os.CreateTemp("", "coverage.out")
 
@@ -34,7 +34,7 @@ func (t *TestRunner) RunAllTests(testCompleteCallback func(test Test) error) {
 			return
 		}
 
-		cmd := exec.Command( // #nosec G204 -- The temp directory is safe.
+		cmd := exec.Command( // #nosec G204 - The temp directory is safe.
 			filepath.Clean(goPath),
 			"test",
 			"-v",
@@ -61,15 +61,10 @@ func (t *TestRunner) RunAllTests(testCompleteCallback func(test Test) error) {
 			slog.Error(fmt.Sprintf("could not parse coverage: %s", err.Error()))
 		}
 
-		tests := t.ParseCoverageLines(coverageLines)
+		files := t.ParseCoverageLines(coverageLines)
 
-		slog.Info(fmt.Sprintf("coverage: %v", tests))
-
-		for _, test := range tests {
-			err = testCompleteCallback(Test{
-				Name:   test.Name,
-				Result: test.Result,
-			})
+		for _, file := range files {
+			err = testCompleteCallback(file)
 
 			if err != nil {
 				slog.Error(err.Error())

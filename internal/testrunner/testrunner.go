@@ -2,6 +2,7 @@
 package testrunner
 
 import (
+	"fmt"
 	"log/slog"
 
 	"github.com/Dobefu/gofutz/internal/filewatcher"
@@ -40,7 +41,7 @@ func (t *TestRunner) handleFileEvent(path, operation string) {
 	moduleName := GetModuleName()
 
 	if moduleName != "" {
-		path = moduleName + "/" + path
+		path = fmt.Sprintf("%s/%s", moduleName, path)
 	}
 
 	switch operation {
