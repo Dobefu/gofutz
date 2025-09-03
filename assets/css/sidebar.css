@@ -2,17 +2,20 @@
   background-color: #030712;
   grid-area: sidebar;
   overflow: auto;
-  padding: 1rem;
   scrollbar-gutter: stable;
 }
 
 .sidebar__header {
+  background-color: #030712;
   border-block-end: 1px solid #364153;
   display: flex;
   gap: 1rem;
+  inset-block-start: 0;
   justify-content: space-between;
   margin-block-end: 1rem;
   padding-block-end: 1rem;
+  padding: 1rem;
+  position: sticky;
 }
 
 .btn__run-tests {
@@ -45,6 +48,10 @@
 .btn__run-tests:hover::after,
 .btn__run-tests:focus-visible::after {
   color: #d1d5dc;
+}
+
+.sidebar__tests {
+  padding: 1rem;
 }
 
 .sidebar__tests--file {
