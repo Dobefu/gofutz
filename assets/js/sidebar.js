@@ -63,6 +63,46 @@
   }
 
   /**
+   * @param {CustomEvent} e
+   */
+  function handleGofutzToggleFile(e) {
+    const fileName = e.detail.name;
+    /** @type {HTMLElement | null} */
+    const testFilesContainer = document.querySelector(".sidebar__tests");
+
+    if (!testFilesContainer) {
+      console.error("Could not find test files container");
+
+      return;
+    }
+
+    /** @type {NodeListOf<HTMLElement> | null} */
+    const files = testFilesContainer.querySelectorAll(".sidebar__tests--file");
+
+    if (!files) {
+      console.error("Could not find any files in the test files container");
+
+      return;
+    }
+
+    for (const file of files) {
+      if (file.dataset.name !== fileName) {
+        file.classList.remove("open");
+
+        continue;
+      }
+
+      if (file.classList.contains("open")) {
+        file.classList.remove("open");
+
+        continue;
+      }
+
+      file.classList.add("open");
+    }
+  }
+
+  /**
    * @param {boolean} isRunning
    */
   function updateRunButtonState(isRunning) {
@@ -108,6 +148,11 @@
     const fileItem = document.createElement("div");
     fileItem.classList.add("sidebar__tests--file");
     fileItem.dataset.name = file.name;
+    fileItem.addEventListener("click", () => {
+      window.dispatchEvent(
+        new CustomEvent("gofutz:toggle-file", { detail: file }),
+      );
+    });
 
     buildFileContent(file, fileItem);
     testFilesContainer.appendChild(fileItem);
@@ -133,11 +178,6 @@
     fileItemTitle.classList.add("sidebar__tests--file-title");
     fileItemTitle.textContent = file.name;
     fileItemTitle.title = file.name;
-    fileItemTitle.addEventListener("click", () => {
-      window.dispatchEvent(
-        new CustomEvent("gofutz:toggle-file", { detail: file }),
-      );
-    });
     fileItemContainer.appendChild(fileItemTitle);
 
     const fileItemCoverage = document.createElement("div");
@@ -155,11 +195,15 @@
     testsContainer.classList.add("sidebar__tests--tests");
 
     for (const func of file.functions) {
-      const funcItem = document.createElement("li");
-      funcItem.classList.add("sidebar__tests--test");
+      const funcItemContainer = document.createElement("li");
+      funcItemContainer.classList.add("sidebar__tests--test");
+      testsContainer.appendChild(funcItemContainer);
+
+      const funcItem = document.createElement("div");
+      funcItem.classList.add("sidebar__tests--test-item");
       funcItem.textContent = func.name;
       funcItem.title = func.name;
-      testsContainer.appendChild(funcItem);
+      funcItemContainer.appendChild(funcItem);
 
       const funcItemCoverage = document.createElement("div");
       funcItemCoverage.classList.add("sidebar__tests--test-coverage");
@@ -168,7 +212,7 @@
       } else {
         funcItemCoverage.textContent = "…%";
       }
-      funcItem.appendChild(funcItemCoverage);
+      funcItemContainer.appendChild(funcItemCoverage);
     }
 
     fileItem.appendChild(testsContainer);
@@ -176,6 +220,7 @@
 
   window.addEventListener("gofutz:init", handleGofutzInit);
   window.addEventListener("gofutz:update", handleGofutzUpdate);
+  window.addEventListener("gofutz:toggle-file", handleGofutzToggleFile);
 
   const btnRunAllTests = document.querySelectorAll(".btn__run-tests");
 

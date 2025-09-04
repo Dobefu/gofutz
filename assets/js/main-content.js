@@ -90,6 +90,10 @@
 
     const currentFileName = currentCodeContainer.dataset.file;
 
+    if (!details.params.files) {
+      return;
+    }
+
     for (const file of Object.values(details.params.files)) {
       if (file.name === currentFileName) {
         mainContentContainer.innerHTML = "";
