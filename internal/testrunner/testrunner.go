@@ -6,16 +6,20 @@ import (
 	"log/slog"
 	"os"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/Dobefu/gofutz/internal/filewatcher"
 )
 
 // TestRunner defines a test runner.
 type TestRunner struct {
-	files       map[string]File
-	hasRunTests bool
-	coverage    float64
-	isRunning   bool
+	files         map[string]File
+	hasRunTests   bool
+	coverage      float64
+	isRunning     bool
+	debounceFiles map[string]*time.Timer
+	mu            sync.Mutex
 }
 
 // NewTestRunner creates a new test runner.
@@ -27,10 +31,12 @@ func NewTestRunner(files []string) (*TestRunner, error) {
 	}
 
 	runner := &TestRunner{
-		files:       tests,
-		hasRunTests: false,
-		coverage:    -1,
-		isRunning:   false,
+		files:         tests,
+		hasRunTests:   false,
+		coverage:      -1,
+		isRunning:     false,
+		debounceFiles: make(map[string]*time.Timer),
+		mu:            sync.Mutex{},
 	}
 
 	filewatcher.AddListener(func(path, operation string) {
@@ -76,7 +82,25 @@ func (t *TestRunner) SetRunning(running bool) {
 }
 
 func (t *TestRunner) handleFileEvent(path, operation string) {
-	// fmt.Println(path)
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
+	timer, hasTimer := t.debounceFiles[path]
+
+	if hasTimer {
+		timer.Stop()
+	}
+
+	t.debounceFiles[path] = time.AfterFunc(100*time.Millisecond, func() {
+		t.processFileEvent(path, operation)
+
+		t.mu.Lock()
+		delete(t.debounceFiles, path)
+		t.mu.Unlock()
+	})
+}
+
+func (t *TestRunner) processFileEvent(path, operation string) {
 	cwd, err := os.Getwd()
 
 	if err != nil {
