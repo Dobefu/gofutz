@@ -135,16 +135,6 @@ func (t *TestRunner) processFileEvent(path, operation string) {
 	case "CREATE":
 		delete(t.files, modulePath)
 
-		t.files[modulePath] = File{
-			Name:            modulePath,
-			Functions:       []Function{},
-			Code:            "",
-			HighlightedCode: "",
-			Status:          TestStatusPending,
-			Coverage:        -1,
-			CoveredLines:    []Line{},
-		}
-
 		fallthrough
 
 	case "WRITE", "MODIFY", "RENAME":
@@ -156,10 +146,10 @@ func (t *TestRunner) processFileEvent(path, operation string) {
 			return
 		}
 
-		var status TestStatus = TestStatusPending
-
 		if len(functions) == 0 {
-			status = TestStatusNoCodeToCover
+			delete(t.files, modulePath)
+
+			return
 		}
 
 		t.files[modulePath] = File{
@@ -167,7 +157,7 @@ func (t *TestRunner) processFileEvent(path, operation string) {
 			Functions:       functions,
 			Code:            code,
 			HighlightedCode: HighlightCode("go", string(code)),
-			Status:          status,
+			Status:          TestStatusPending,
 			Coverage:        -1,
 			CoveredLines:    []Line{},
 		}

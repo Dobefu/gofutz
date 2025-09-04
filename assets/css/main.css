@@ -105,7 +105,7 @@ h6 {
   box-shadow: 0 0 0.5rem 0 rgb(0, 0, 0, 0.5) inset;
   grid-area: content;
   overflow: auto;
-  padding: 1rem;
+  padding-block: 1rem;
   position: relative;
   scrollbar-gutter: stable;
 }
@@ -115,7 +115,6 @@ h6 {
     display: none;
   }
 }
-
 
 #main-content:empty::after {
   color: var(--color-foreground-dark);
