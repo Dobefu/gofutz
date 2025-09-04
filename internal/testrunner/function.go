@@ -12,8 +12,8 @@ const (
 	TestStatusPassed
 	// TestStatusFailed represents a test that has failed.
 	TestStatusFailed
-	// TestStatusNoTests represents a file with no test functions.
-	TestStatusNoTests
+	// TestStatusNoCodeToCover represents a file with no code that can be covered.
+	TestStatusNoCodeToCover
 )
 
 // Function defines a single function.

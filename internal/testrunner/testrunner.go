@@ -72,7 +72,7 @@ func (t *TestRunner) handleFileEvent(path, operation string) {
 		var status TestStatus = TestStatusPending
 
 		if len(functions) == 0 {
-			status = TestStatusNoTests
+			status = TestStatusNoCodeToCover
 		}
 
 		t.files[path] = File{

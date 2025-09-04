@@ -33,7 +33,7 @@ func GetFunctionsFromFiles(files []string) (map[string]File, error) {
 		var status TestStatus = TestStatusPending
 
 		if len(functions) == 0 {
-			status = TestStatusNoTests
+			status = TestStatusNoCodeToCover
 		}
 
 		allFunctions[file] = File{

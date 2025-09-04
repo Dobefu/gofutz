@@ -28,10 +28,11 @@ func (t *TestRunner) ParseCoverageLines(
 		coveragePercentage := coveragePercentages[fileName]
 
 		if !hasCoverage {
-			file.Coverage = 0
+			file.Coverage = -1
 
-			if file.Status != TestStatusNoTests {
+			if file.Status != TestStatusNoCodeToCover {
 				file.Status = TestStatusPending
+				file.Coverage = 0
 			}
 
 			file.CoveredLines = []Line{}
@@ -56,7 +57,7 @@ func (t *TestRunner) ParseCoverageLines(
 
 		file.CoveredLines = lines
 
-		if file.Status != TestStatusNoTests {
+		if file.Status != TestStatusNoCodeToCover {
 			file.Status = TestStatusPassed
 		}
 
