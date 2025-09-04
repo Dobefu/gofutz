@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"sync"
+	"time"
 
 	"github.com/Dobefu/gofutz/internal/filewatcher"
 	"github.com/Dobefu/gofutz/internal/testrunner"
@@ -77,6 +78,17 @@ func (h *Handler) HandleMessage(
 
 	switch msg.Method {
 	case "gofutz:init":
+		if !h.runner.HasRunTests() {
+			go func() {
+				time.Sleep(100 * time.Millisecond)
+				err := h.handleRunAllTests(files)
+
+				if err != nil {
+					slog.Error(fmt.Sprintf("Could not run all tests: %s", err.Error()))
+				}
+			}()
+		}
+
 		return h.SendResponse(Message{
 			Method: "gofutz:init",
 			Error:  "",
@@ -130,6 +142,8 @@ func (h *Handler) handleMessages(ws WsInterface) {
 }
 
 func (h *Handler) handleRunAllTests(files map[string]testrunner.File) error {
+	h.runner.SetHasRunTests(true)
+
 	for i, file := range files {
 		var status testrunner.TestStatus = testrunner.TestStatusRunning
 

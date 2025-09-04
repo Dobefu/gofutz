@@ -10,7 +10,8 @@ import (
 
 // TestRunner defines a test runner.
 type TestRunner struct {
-	files map[string]File
+	files       map[string]File
+	hasRunTests bool
 }
 
 // NewTestRunner creates a new test runner.
@@ -22,7 +23,8 @@ func NewTestRunner(files []string) (*TestRunner, error) {
 	}
 
 	runner := &TestRunner{
-		files: tests,
+		files:       tests,
+		hasRunTests: false,
 	}
 
 	filewatcher.AddListener(func(path, operation string) {
@@ -35,6 +37,16 @@ func NewTestRunner(files []string) (*TestRunner, error) {
 // GetFiles gets the files.
 func (t *TestRunner) GetFiles() map[string]File {
 	return t.files
+}
+
+// HasRunTests checks if tests have been run.
+func (t *TestRunner) HasRunTests() bool {
+	return t.hasRunTests
+}
+
+// SetHasRunTests sets if tests have been run.
+func (t *TestRunner) SetHasRunTests(hasRunTests bool) {
+	t.hasRunTests = hasRunTests
 }
 
 func (t *TestRunner) handleFileEvent(path, operation string) {
