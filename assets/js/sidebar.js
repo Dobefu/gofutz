@@ -20,7 +20,11 @@
 
     testFilesContainer.innerHTML = "";
 
-    for (const file of Object.values(details.params.files)) {
+    const files = Object.values(details.params.files).sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    });
+
+    for (const file of files) {
       renderTestFile(file, testFilesContainer);
     }
   }
