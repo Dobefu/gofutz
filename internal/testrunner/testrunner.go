@@ -4,6 +4,8 @@ package testrunner
 import (
 	"fmt"
 	"log/slog"
+	"os"
+	"strings"
 
 	"github.com/Dobefu/gofutz/internal/filewatcher"
 )
@@ -74,18 +76,24 @@ func (t *TestRunner) SetRunning(running bool) {
 }
 
 func (t *TestRunner) handleFileEvent(path, operation string) {
-	moduleName := GetModuleName()
+	// fmt.Println(path)
+	cwd, err := os.Getwd()
 
-	if moduleName != "" {
-		path = fmt.Sprintf("%s/%s", moduleName, path)
+	if err != nil {
+		slog.Error(err.Error())
+
+		return
 	}
+
+	moduleName := GetModuleName()
+	modulePath := fmt.Sprintf("%s%s", moduleName, strings.TrimPrefix(path, cwd))
 
 	switch operation {
 	case "CREATE":
-		delete(t.files, path)
+		delete(t.files, modulePath)
 
-		t.files[path] = File{
-			Name:            path,
+		t.files[modulePath] = File{
+			Name:            modulePath,
 			Functions:       []Function{},
 			Code:            "",
 			HighlightedCode: "",
@@ -96,7 +104,7 @@ func (t *TestRunner) handleFileEvent(path, operation string) {
 
 		fallthrough
 
-	case "WRITE", "MODIFY":
+	case "WRITE", "MODIFY", "RENAME":
 		functions, code, err := GetFunctionsFromFile(path)
 
 		if err != nil {
@@ -111,8 +119,8 @@ func (t *TestRunner) handleFileEvent(path, operation string) {
 			status = TestStatusNoCodeToCover
 		}
 
-		t.files[path] = File{
-			Name:            path,
+		t.files[modulePath] = File{
+			Name:            modulePath,
 			Functions:       functions,
 			Code:            code,
 			HighlightedCode: HighlightCode("go", string(code)),
@@ -122,6 +130,6 @@ func (t *TestRunner) handleFileEvent(path, operation string) {
 		}
 
 	case "REMOVE":
-		delete(t.files, path)
+		delete(t.files, modulePath)
 	}
 }
