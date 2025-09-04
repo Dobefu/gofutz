@@ -37,7 +37,7 @@ func NewHandler() (*Handler, error) {
 			return
 		}
 
-		runner, newRunnerErr := testrunner.NewTestRunner(files)
+		runner, newRunnerErr := testrunner.NewTestRunner(files, nil)
 
 		if newRunnerErr != nil {
 			err = newRunnerErr
@@ -52,11 +52,22 @@ func NewHandler() (*Handler, error) {
 		return nil, err
 	}
 
-	return &Handler{
+	handler := &Handler{
 		runner: sharedRunner,
 		mu:     sync.Mutex{},
 		wsChan: nil,
-	}, nil
+	}
+
+	sharedRunner.SetOnFileChange(func() {
+		files := sharedRunner.GetFiles()
+		err := handler.handleRunAllTests(files)
+
+		if err != nil {
+			slog.Error(fmt.Sprintf("Could not run all tests: %s", err.Error()))
+		}
+	})
+
+	return handler, nil
 }
 
 // HandleMessage handles a websocket message.

@@ -20,10 +20,11 @@ type TestRunner struct {
 	isRunning     bool
 	debounceFiles map[string]*time.Timer
 	mu            sync.Mutex
+	onFileChange  func()
 }
 
 // NewTestRunner creates a new test runner.
-func NewTestRunner(files []string) (*TestRunner, error) {
+func NewTestRunner(files []string, onFileChange func()) (*TestRunner, error) {
 	tests, err := GetFunctionsFromFiles(files)
 
 	if err != nil {
@@ -37,6 +38,7 @@ func NewTestRunner(files []string) (*TestRunner, error) {
 		isRunning:     false,
 		debounceFiles: make(map[string]*time.Timer),
 		mu:            sync.Mutex{},
+		onFileChange:  onFileChange,
 	}
 
 	filewatcher.AddListener(func(path, operation string) {
@@ -79,6 +81,11 @@ func (t *TestRunner) IsRunning() bool {
 // SetRunning sets the running state.
 func (t *TestRunner) SetRunning(running bool) {
 	t.isRunning = running
+}
+
+// SetOnFileChange sets the file change callback.
+func (t *TestRunner) SetOnFileChange(callback func()) {
+	t.onFileChange = callback
 }
 
 func (t *TestRunner) handleFileEvent(path, operation string) {
@@ -155,5 +162,9 @@ func (t *TestRunner) processFileEvent(path, operation string) {
 
 	case "REMOVE":
 		delete(t.files, modulePath)
+	}
+
+	if t.onFileChange != nil && !t.isRunning {
+		go t.onFileChange()
 	}
 }
