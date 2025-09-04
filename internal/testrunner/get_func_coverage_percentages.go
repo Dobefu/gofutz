@@ -1,14 +1,33 @@
 package testrunner
 
 import (
+	"log/slog"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
 
 // GetFuncCoveragePercentages gets coverage percentages for each function.
-func (t *TestRunner) GetFuncCoveragePercentages(coverageFile string) (map[string]map[string]float64, error) {
-	cmd := exec.Command("go", "tool", "cover", "-func", coverageFile)
+func (t *TestRunner) GetFuncCoveragePercentages(
+	coverageFile string,
+) (map[string]map[string]float64, error) {
+	goPath, err := exec.LookPath("go")
+
+	if err != nil {
+		slog.Error("go command not found")
+
+		return nil, err
+	}
+
+	cmd := exec.Command( // #nosec G204 - The temp directory is safe.
+		filepath.Clean(goPath),
+		"tool",
+		"cover",
+		"-func",
+		filepath.Clean(coverageFile),
+	)
+
 	output, err := cmd.CombinedOutput()
 
 	if err != nil {
