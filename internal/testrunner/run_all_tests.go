@@ -10,7 +10,10 @@ import (
 )
 
 // RunAllTests runs all tests.
-func (t *TestRunner) RunAllTests(testCompleteCallback func(file File) error) {
+func (t *TestRunner) RunAllTests(
+	testCompleteCallback func(file File) error,
+	completionCallback func() error,
+) {
 	go func() {
 		coverageFile, err := os.CreateTemp("", "coverage.out")
 
@@ -75,14 +78,40 @@ func (t *TestRunner) RunAllTests(testCompleteCallback func(file File) error) {
 
 		t.SetCoverage(overallCoverage)
 
-		files := t.ParseCoverageLines(coverageLines, coveragePercentages)
+		err = t.sendCallbacks(
+			testCompleteCallback,
+			completionCallback,
+			coverageLines,
+			coveragePercentages,
+		)
 
-		for _, file := range files {
-			err = testCompleteCallback(file)
-
-			if err != nil {
-				slog.Error(err.Error())
-			}
+		if err != nil {
+			slog.Error(fmt.Sprintf("could not send callbacks: %s", err.Error()))
 		}
 	}()
+}
+
+func (t *TestRunner) sendCallbacks(
+	testCompleteCallback func(file File) error,
+	completionCallback func() error,
+	coverageLines []CoverageLine,
+	coveragePercentages map[string]map[string]float64,
+) error {
+	files := t.ParseCoverageLines(coverageLines, coveragePercentages)
+
+	for _, file := range files {
+		err := testCompleteCallback(file)
+
+		if err != nil {
+			slog.Error(err.Error())
+		}
+	}
+
+	err := completionCallback()
+
+	if err != nil {
+		slog.Error(fmt.Sprintf("could not send completion update: %s", err.Error()))
+	}
+
+	return nil
 }

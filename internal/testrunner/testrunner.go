@@ -13,6 +13,7 @@ type TestRunner struct {
 	files       map[string]File
 	hasRunTests bool
 	coverage    float64
+	isRunning   bool
 }
 
 // NewTestRunner creates a new test runner.
@@ -27,6 +28,7 @@ func NewTestRunner(files []string) (*TestRunner, error) {
 		files:       tests,
 		hasRunTests: false,
 		coverage:    -1,
+		isRunning:   false,
 	}
 
 	filewatcher.AddListener(func(path, operation string) {
@@ -59,6 +61,16 @@ func (t *TestRunner) GetCoverage() float64 {
 // SetCoverage sets the overall coverage percentage.
 func (t *TestRunner) SetCoverage(coverage float64) {
 	t.coverage = coverage
+}
+
+// IsRunning returns true if tests are currently running.
+func (t *TestRunner) IsRunning() bool {
+	return t.isRunning
+}
+
+// SetRunning sets the running state.
+func (t *TestRunner) SetRunning(running bool) {
+	t.isRunning = running
 }
 
 func (t *TestRunner) handleFileEvent(path, operation string) {

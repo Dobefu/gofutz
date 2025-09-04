@@ -38,6 +38,7 @@ interface TestResult {
 interface Params {
   files: Record<string, File>;
   coverage: number;
+  isRunning: boolean;
 }
 
 interface Message {

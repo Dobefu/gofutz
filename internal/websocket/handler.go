@@ -93,8 +93,9 @@ func (h *Handler) HandleMessage(
 			Method: "gofutz:init",
 			Error:  "",
 			Params: Params{
-				Files:    files,
-				Coverage: h.runner.GetCoverage(),
+				Files:     files,
+				Coverage:  h.runner.GetCoverage(),
+				IsRunning: h.runner.IsRunning(),
 			},
 		})
 
@@ -106,8 +107,9 @@ func (h *Handler) HandleMessage(
 			Method: "error",
 			Error:  fmt.Sprintf("Unknown method: %s", msg.Method),
 			Params: Params{
-				Files:    nil,
-				Coverage: h.runner.GetCoverage(),
+				Files:     nil,
+				Coverage:  h.runner.GetCoverage(),
+				IsRunning: h.runner.IsRunning(),
 			},
 		})
 	}
@@ -145,6 +147,7 @@ func (h *Handler) handleMessages(ws WsInterface) {
 
 func (h *Handler) handleRunAllTests(files map[string]testrunner.File) error {
 	h.runner.SetHasRunTests(true)
+	h.runner.SetRunning(true)
 
 	for i, file := range files {
 		var status testrunner.TestStatus = testrunner.TestStatusRunning
@@ -177,8 +180,9 @@ func (h *Handler) handleRunAllTests(files map[string]testrunner.File) error {
 		Method: "gofutz:update",
 		Error:  "",
 		Params: Params{
-			Files:    files,
-			Coverage: -1,
+			Files:     files,
+			Coverage:  -1,
+			IsRunning: h.runner.IsRunning(),
 		},
 	})
 
@@ -194,7 +198,20 @@ func (h *Handler) handleRunAllTests(files map[string]testrunner.File) error {
 				Files: map[string]testrunner.File{
 					fileToUpdate.Name: fileToUpdate,
 				},
-				Coverage: h.runner.GetCoverage(),
+				Coverage:  h.runner.GetCoverage(),
+				IsRunning: h.runner.IsRunning(),
+			},
+		})
+	}, func() error {
+		h.runner.SetRunning(false)
+
+		return h.SendResponse(Message{
+			Method: "gofutz:update",
+			Error:  "",
+			Params: Params{
+				Files:     nil,
+				Coverage:  h.runner.GetCoverage(),
+				IsRunning: h.runner.IsRunning(),
 			},
 		})
 	})

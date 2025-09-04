@@ -32,6 +32,11 @@
     color 0.2s;
 }
 
+.btn__run-tests:disabled {
+  cursor: not-allowed;
+  opacity: 50%;
+}
+
 .btn__run-tests::after {
   color: #99a1af;
   content: "▶";

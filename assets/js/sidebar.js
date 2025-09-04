@@ -16,6 +16,7 @@
     }
 
     renderCoverage(details);
+    updateRunButtonState(details.params.isRunning);
 
     testFilesContainer.innerHTML = "";
 
@@ -39,6 +40,11 @@
     }
 
     renderCoverage(details);
+    updateRunButtonState(details.params.isRunning);
+
+    if (!details.params.files) {
+      return;
+    }
 
     for (const file of Object.values(details.params.files)) {
       const fileItem = testFilesContainer.querySelector(
@@ -54,6 +60,22 @@
 
       renderTestFile(file, testFilesContainer);
     }
+  }
+
+  /**
+   * @param {boolean} isRunning
+   */
+  function updateRunButtonState(isRunning) {
+    /** @type {HTMLButtonElement | null} */
+    const runBtn = document.querySelector(".btn__run-tests");
+
+    if (!runBtn) {
+      console.error("Could not find run button");
+
+      return;
+    }
+
+    runBtn.disabled = isRunning;
   }
 
   /**
