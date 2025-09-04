@@ -40,7 +40,7 @@ func (t *TestRunner) RunAllTests(
 		cmd := exec.Command( // #nosec G204 - The temp directory is safe.
 			filepath.Clean(goPath),
 			"test",
-			"-v",
+			"-json",
 			"-coverprofile",
 			filepath.Clean(coverageFile.Name()),
 			"./...",
@@ -50,8 +50,30 @@ func (t *TestRunner) RunAllTests(
 
 		if err != nil {
 			slog.Error(
-				fmt.Sprintf("tests failed: %s: %s", err.Error(), string(output)),
+				fmt.Sprintf("tests failed: %s", err.Error()),
 			)
+
+			coverageLines := []CoverageLine{}
+			coveragePercentages := make(map[string]map[string]float64)
+
+			failingTests := t.parseFailedTestFilesFromOutput(string(output))
+
+			err = t.sendCallbacks(
+				testCompleteCallback,
+				completionCallback,
+				coverageLines,
+				coveragePercentages,
+				failingTests,
+			)
+
+			if err != nil {
+				slog.Error(
+					fmt.Sprintf(
+						"could not send callbacks after test failure: %s",
+						err.Error(),
+					),
+				)
+			}
 
 			return
 		}
@@ -83,6 +105,7 @@ func (t *TestRunner) RunAllTests(
 			completionCallback,
 			coverageLines,
 			coveragePercentages,
+			nil,
 		)
 
 		if err != nil {
@@ -96,8 +119,30 @@ func (t *TestRunner) sendCallbacks(
 	completionCallback func() error,
 	coverageLines []CoverageLine,
 	coveragePercentages map[string]map[string]float64,
+	failingTests map[string]bool,
 ) error {
 	files := t.ParseCoverageLines(coverageLines, coveragePercentages)
+
+	if len(failingTests) > 0 {
+		t.coverage = -1
+	}
+
+	for i := range files {
+		if failingTests != nil && failingTests[files[i].Name] {
+			files[i].Status = TestStatusFailed
+		}
+
+		if len(failingTests) > 0 {
+			files[i].Coverage = -1
+			files[i].CoveredLines = []Line{}
+
+			for j := range files[i].Functions {
+				files[i].Functions[j].Result.Coverage = -1
+			}
+		}
+
+		t.files[files[i].Name] = files[i]
+	}
 
 	for _, file := range files {
 		err := testCompleteCallback(file)
