@@ -99,7 +99,15 @@ func (t *TestRunner) handleFileEvent(path, operation string) {
 	}
 
 	t.debounceFiles[path] = time.AfterFunc(100*time.Millisecond, func() {
+		if !strings.HasSuffix(path, ".go") {
+			return
+		}
+
 		t.processFileEvent(path, operation)
+
+		if t.onFileChange != nil && !t.isRunning {
+			go t.onFileChange()
+		}
 
 		t.mu.Lock()
 		delete(t.debounceFiles, path)
@@ -108,6 +116,10 @@ func (t *TestRunner) handleFileEvent(path, operation string) {
 }
 
 func (t *TestRunner) processFileEvent(path, operation string) {
+	if strings.HasSuffix(path, "_test.go") {
+		return
+	}
+
 	cwd, err := os.Getwd()
 
 	if err != nil {
@@ -162,9 +174,5 @@ func (t *TestRunner) processFileEvent(path, operation string) {
 
 	case "REMOVE":
 		delete(t.files, modulePath)
-	}
-
-	if t.onFileChange != nil && !t.isRunning {
-		go t.onFileChange()
 	}
 }

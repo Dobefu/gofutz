@@ -4,6 +4,8 @@ package filewatcher
 import (
 	"log/slog"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/fsnotify/fsnotify"
 )
@@ -31,7 +33,7 @@ func init() {
 		os.Exit(1)
 	}
 
-	err = watcher.Add(cwd)
+	err = addDirectory(cwd)
 
 	if err != nil {
 		slog.Error(err.Error())
@@ -64,6 +66,36 @@ func handleFileEvents() {
 // AddListener adds an event listener.
 func AddListener(listener func(string, string)) {
 	listeners = append(listeners, listener)
+}
+
+// addDirectory adds all directories in the given directory to the watcher.
+func addDirectory(dir string) error {
+	err := watcher.Add(dir)
+
+	if err != nil {
+		return err
+	}
+
+	entries, err := os.ReadDir(dir)
+
+	if err != nil {
+		return err
+	}
+
+	for _, entry := range entries {
+		if !entry.IsDir() || strings.HasPrefix(entry.Name(), ".") {
+			continue
+		}
+
+		subDir := filepath.Join(dir, entry.Name())
+		err = addDirectory(subDir)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // Close shuts down the file watcher.

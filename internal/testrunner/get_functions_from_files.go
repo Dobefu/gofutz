@@ -2,7 +2,6 @@ package testrunner
 
 import (
 	"fmt"
-	"strings"
 )
 
 // GetFunctionsFromFiles gets all functions from the supplied files.
@@ -17,13 +16,6 @@ func GetFunctionsFromFiles(files []string) (map[string]File, error) {
 
 		if err != nil {
 			return map[string]File{}, err
-		}
-
-		if strings.HasSuffix(file, "_test.go") {
-			sourceFile := strings.Replace(file, "_test.go", ".go", 1)
-			testFiles[sourceFile] = functions
-
-			continue
 		}
 
 		if moduleName != "" {
