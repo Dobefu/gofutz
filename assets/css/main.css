@@ -1,3 +1,21 @@
+:root {
+  --color-header: #024a70;
+  --color-background: #1e2939;
+  --color-foreground: #fff;
+  --color-foreground-dark: #5c6e87;
+  --color-sidebar-background: #030712;
+  --color-sidebar-border: #364153;
+  --color-line-covered: #05df7222;
+  --color-line-uncovered: #ff646722;
+  --color-coverage-bar-covered: #016630;
+  --color-coverage-bar-uncovered: #9f0712;
+  --color-btn: #99a1af;
+  --color-btn-hover: #d1d5dc;
+  --color-sidebar-foreground: #cad5e2;
+  --color-footer-background: #18181b;
+  --color-footer-border: #09090b;
+}
+
 *,
 *::before,
 *::after {
@@ -14,8 +32,8 @@ html {
 
 body {
   -webkit-font-smoothing: antialiased;
-  background-color: #1e2939;
-  color: white;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
   display: grid;
   font-family: sans-serif;
   height: 100%;
@@ -81,7 +99,7 @@ h6 {
 }
 
 #main-content:empty::after {
-  color: #5c6e87;
+  color: var(--color-foreground-dark);
   content: "Please select a file to check its coverage";
   inset-inline: 0;
   padding: 1rem;
@@ -98,8 +116,8 @@ h6 {
 }
 
 .main-content__code--line-number {
-  border-inline-end: 1px solid #5c6e87;
-  color: #5c6e87;
+  border-inline-end: 1px solid var(--color-foreground-dark);
+  color: var(--color-foreground-dark);
   padding-inline-end: 1rem;
   text-align: end;
   user-select: none;
@@ -112,9 +130,9 @@ h6 {
 }
 
 .covered {
-  background-color: #05df7222;
+  background-color: var(--color-line-covered);
 }
 
 .uncovered {
-  background-color: #ff646722;
+  background-color: var(--color-line-uncovered);
 }

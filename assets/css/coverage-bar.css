@@ -4,12 +4,12 @@
 }
 
 .coverage-bar > .covered {
-  background-color: #016630;
+  background-color: var(--color-coverage-bar-covered);
   transition: width 0.5s;
   width: 0%;
 }
 
 .coverage-bar > .uncovered {
-  background-color: #9f0712;
+  background-color: var(--color-coverage-bar-uncovered);
   flex: 1;
 }

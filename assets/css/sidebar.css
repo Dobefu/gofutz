@@ -1,5 +1,5 @@
 .sidebar {
-  background-color: #030712;
+  background-color: var(--color-sidebar-background);
   display: flex;
   flex-direction: column;
   grid-area: sidebar;
@@ -7,7 +7,7 @@
 
 .sidebar__header {
   align-items: center;
-  border-block-end: 1px solid #364153;
+  border-block-end: 1px solid var(--color-sidebar-border);
   display: flex;
   font-size: 1.25rem;
   gap: 1rem;
@@ -20,7 +20,7 @@
 
 .btn__run-tests {
   background-color: transparent;
-  border: 2px solid #99a1af;
+  border: 2px solid var(--color-btn);
   border-radius: 50%;
   cursor: pointer;
   padding: 1.25rem;
@@ -36,7 +36,7 @@
 }
 
 .btn__run-tests::after {
-  color: #99a1af;
+  color: var(--color-btn);
   content: "▶";
   font-size: 1.5rem;
   inset: 50% 0 0 50%;
@@ -47,12 +47,12 @@
 
 .btn__run-tests:hover,
 .btn__run-tests:focus-visible {
-  border-color: #d1d5dc;
+  border-color: var(--color-btn-hover);
 }
 
 .btn__run-tests:hover::after,
 .btn__run-tests:focus-visible::after {
-  color: #d1d5dc;
+  color: var(--color-btn-hover);
 }
 
 .sidebar__tests {
@@ -72,7 +72,7 @@
 }
 
 .sidebar__tests--file.open {
-  border-left-color: #5c6e87;
+  border-left-color: var(--color-foreground-dark);
 }
 
 .sidebar__tests--file-container {
@@ -135,13 +135,13 @@
 }
 
 .sidebar__tests--tests:empty::after {
-  color: #5c6e87;
+  color: var(--color-foreground-dark);
   content: "No functions found";
   font-style: italic;
 }
 
 .sidebar__tests--test {
-  color: #cad5e2;
+  color: var(--color-sidebar-foreground);
   display: flex;
   gap: 1rem;
   justify-content: space-between;
@@ -156,7 +156,7 @@
 
 .sidebar__tests--file-coverage,
 .sidebar__tests--test-coverage {
-  color: #cad5e2;
+  color: var(--color-sidebar-foreground);
   min-width: 3.5rem;
   text-align: end;
 }

@@ -1,6 +1,6 @@
 header {
   align-items: center;
-  background-color: #024a70;
+  background-color: var(--color-header);
   display: flex;
   grid-area: header;
   padding: 1rem;
