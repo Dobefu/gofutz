@@ -1,20 +1,18 @@
 .sidebar {
   background-color: #030712;
+  display: flex;
+  flex-direction: column;
   grid-area: sidebar;
-  overflow: auto;
-  scrollbar-gutter: stable;
 }
 
 .sidebar__header {
   align-items: center;
-  background-color: #030712;
   border-block-end: 1px solid #364153;
   display: flex;
   font-size: 1.25rem;
   gap: 1rem;
   inset-block-start: 0;
   justify-content: space-between;
-  margin-block-end: 1rem;
   padding-block-end: 1rem;
   padding: 1rem;
   position: sticky;
@@ -58,8 +56,10 @@
 }
 
 .sidebar__tests {
+  overflow: auto;
   padding: 1rem;
   padding-inline-start: calc(0.5rem + 1px);
+  scrollbar-gutter: stable;
 }
 
 .sidebar__tests--file {
