@@ -149,6 +149,14 @@
     fileItem.classList.add("sidebar__tests--file");
     fileItem.dataset.name = file.name;
     fileItem.addEventListener("click", () => {
+      /** @type {HTMLDivElement | null} */
+      const mainContentContainer = document.querySelector("#main-content");
+
+      // If the main content container is not visible, disable file toggling.
+      if (mainContentContainer && mainContentContainer.clientWidth <= 0) {
+        return;
+      }
+
       window.dispatchEvent(
         new CustomEvent("gofutz:toggle-file", { detail: file }),
       );

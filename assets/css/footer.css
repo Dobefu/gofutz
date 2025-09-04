@@ -4,3 +4,9 @@ footer {
   grid-area: footer;
   padding: 1rem;
 }
+
+@media (width < 64rem) {
+  footer {
+    display: none;
+  }
+}

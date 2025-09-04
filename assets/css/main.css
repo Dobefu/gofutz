@@ -89,6 +89,18 @@ h6 {
   grid-template-rows: 4rem 0.5rem 1fr min(16rem, calc(50vh - 4.5rem));
 }
 
+@media (width < 64rem) {
+  .layout--default {
+    grid-template-areas:
+      "header"
+      "coverage-bar"
+      "sidebar"
+      "footer";
+    grid-template-columns: 100%;
+    grid-template-rows: 4rem 0.5rem 1fr;
+  }
+}
+
 #main-content {
   box-shadow: 0 0 0.5rem 0 rgb(0, 0, 0, 0.5) inset;
   grid-area: content;
@@ -97,6 +109,13 @@ h6 {
   position: relative;
   scrollbar-gutter: stable;
 }
+
+@media (width < 64rem) {
+  #main-content {
+    display: none;
+  }
+}
+
 
 #main-content:empty::after {
   color: var(--color-foreground-dark);
