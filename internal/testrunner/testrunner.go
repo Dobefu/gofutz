@@ -69,12 +69,18 @@ func (t *TestRunner) handleFileEvent(path, operation string) {
 			return
 		}
 
+		var status TestStatus = TestStatusPending
+
+		if len(functions) == 0 {
+			status = TestStatusNoTests
+		}
+
 		t.files[path] = File{
 			Name:            path,
 			Functions:       functions,
 			Code:            code,
 			HighlightedCode: HighlightCode("go", string(code)),
-			Status:          TestStatusPending,
+			Status:          status,
 			Coverage:        -1,
 			CoveredLines:    []Line{},
 		}

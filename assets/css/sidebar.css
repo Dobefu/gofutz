@@ -90,6 +90,11 @@
   content: "❌";
 }
 
+/* No Tests */
+.sidebar__tests--file-status.status-4::after {
+  content: "—";
+}
+
 .sidebar__tests--file-title {
   cursor: pointer;
   direction: rtl;

@@ -131,12 +131,18 @@ func (h *Handler) handleMessages(ws WsInterface) {
 
 func (h *Handler) handleRunAllTests(files map[string]testrunner.File) error {
 	for i, file := range files {
+		var status testrunner.TestStatus = testrunner.TestStatusRunning
+
+		if len(file.Functions) == 0 {
+			status = file.Status
+		}
+
 		files[i] = testrunner.File{
 			Name:            file.Name,
 			Functions:       file.Functions,
 			Code:            file.Code,
 			HighlightedCode: file.HighlightedCode,
-			Status:          testrunner.TestStatusRunning,
+			Status:          status,
 			Coverage:        -1,
 			CoveredLines:    []testrunner.Line{},
 		}

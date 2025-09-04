@@ -13,6 +13,7 @@ interface TestStatus {
   Running: 1;
   Passed: 2;
   Failed: 3;
+  NoTests: 4;
 }
 
 interface File {

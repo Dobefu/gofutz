@@ -30,12 +30,18 @@ func GetFunctionsFromFiles(files []string) (map[string]File, error) {
 			file = fmt.Sprintf("%s/%s", moduleName, file)
 		}
 
+		var status TestStatus = TestStatusPending
+
+		if len(functions) == 0 {
+			status = TestStatusNoTests
+		}
+
 		allFunctions[file] = File{
 			Name:            file,
 			Functions:       functions,
 			Code:            string(code),
 			HighlightedCode: HighlightCode("go", string(code)),
-			Status:          TestStatusPending,
+			Status:          status,
 			Coverage:        -1,
 			CoveredLines:    []Line{},
 		}
