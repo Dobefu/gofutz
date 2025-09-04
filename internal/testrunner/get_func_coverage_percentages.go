@@ -11,13 +11,13 @@ import (
 // GetFuncCoveragePercentages gets coverage percentages for each function.
 func (t *TestRunner) GetFuncCoveragePercentages(
 	coverageFile string,
-) (map[string]map[string]float64, error) {
+) (map[string]map[string]float64, float64, error) {
 	goPath, err := exec.LookPath("go")
 
 	if err != nil {
 		slog.Error("go command not found")
 
-		return nil, err
+		return nil, -1, err
 	}
 
 	cmd := exec.Command( // #nosec G204 - The temp directory is safe.
@@ -31,7 +31,7 @@ func (t *TestRunner) GetFuncCoveragePercentages(
 	output, err := cmd.CombinedOutput()
 
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
 
 	percentages := make(map[string]map[string]float64)
@@ -69,5 +69,5 @@ func (t *TestRunner) GetFuncCoveragePercentages(
 		percentages[fileName][testName] = percentage
 	}
 
-	return percentages, nil
+	return percentages, GetOverallCoveragePercentage(output), nil
 }

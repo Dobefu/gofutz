@@ -6,5 +6,6 @@ import (
 
 // Params defines a set of message parameters.
 type Params struct {
-	Files map[string]testrunner.File `json:"files"`
+	Files    map[string]testrunner.File `json:"files"`
+	Coverage float64                    `json:"coverage"`
 }

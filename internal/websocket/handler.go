@@ -93,7 +93,8 @@ func (h *Handler) HandleMessage(
 			Method: "gofutz:init",
 			Error:  "",
 			Params: Params{
-				Files: files,
+				Files:    files,
+				Coverage: h.runner.GetCoverage(),
 			},
 		})
 
@@ -105,7 +106,8 @@ func (h *Handler) HandleMessage(
 			Method: "error",
 			Error:  fmt.Sprintf("Unknown method: %s", msg.Method),
 			Params: Params{
-				Files: nil,
+				Files:    nil,
+				Coverage: h.runner.GetCoverage(),
 			},
 		})
 	}
@@ -175,7 +177,8 @@ func (h *Handler) handleRunAllTests(files map[string]testrunner.File) error {
 		Method: "gofutz:update",
 		Error:  "",
 		Params: Params{
-			Files: files,
+			Files:    files,
+			Coverage: -1,
 		},
 	})
 
@@ -191,6 +194,7 @@ func (h *Handler) handleRunAllTests(files map[string]testrunner.File) error {
 				Files: map[string]testrunner.File{
 					fileToUpdate.Name: fileToUpdate,
 				},
+				Coverage: h.runner.GetCoverage(),
 			},
 		})
 	})

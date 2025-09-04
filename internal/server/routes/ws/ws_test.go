@@ -44,7 +44,8 @@ func TestHandle(t *testing.T) {
 				Method: "gofutz:init",
 				Error:  "",
 				Params: websocket.Params{
-					Files: nil,
+					Files:    nil,
+					Coverage: 0,
 				},
 			}
 

@@ -12,6 +12,7 @@ import (
 type TestRunner struct {
 	files       map[string]File
 	hasRunTests bool
+	coverage    float64
 }
 
 // NewTestRunner creates a new test runner.
@@ -25,6 +26,7 @@ func NewTestRunner(files []string) (*TestRunner, error) {
 	runner := &TestRunner{
 		files:       tests,
 		hasRunTests: false,
+		coverage:    -1,
 	}
 
 	filewatcher.AddListener(func(path, operation string) {
@@ -47,6 +49,16 @@ func (t *TestRunner) HasRunTests() bool {
 // SetHasRunTests sets if tests have been run.
 func (t *TestRunner) SetHasRunTests(hasRunTests bool) {
 	t.hasRunTests = hasRunTests
+}
+
+// GetCoverage returns the overall coverage percentage from the last test run.
+func (t *TestRunner) GetCoverage() float64 {
+	return t.coverage
+}
+
+// SetCoverage sets the overall coverage percentage.
+func (t *TestRunner) SetCoverage(coverage float64) {
+	t.coverage = coverage
 }
 
 func (t *TestRunner) handleFileEvent(path, operation string) {

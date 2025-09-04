@@ -6,6 +6,7 @@
 .coverage-bar > .covered {
   background-color: #016630;
   transition: width 0.5s;
+  width: 0%;
 }
 
 .coverage-bar > .uncovered {

@@ -37,6 +37,7 @@ interface TestResult {
 
 interface Params {
   files: Record<string, File>;
+  coverage: number;
 }
 
 interface Message {
