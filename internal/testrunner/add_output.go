@@ -1,7 +1,7 @@
 package testrunner
 
 // AddOutput adds output lines to the output buffer.
-func (t *TestRunner) AddOutput(output []string) ([]string, error) {
+func (t *TestRunner) AddOutput(output []string) []string {
 	t.output = append(t.output, output...)
 
 	maxLines := 200
@@ -10,5 +10,5 @@ func (t *TestRunner) AddOutput(output []string) ([]string, error) {
 		t.output = t.output[len(t.output)-maxLines:]
 	}
 
-	return t.output, nil
+	return t.output
 }

@@ -4,17 +4,7 @@
   /**
    * @param {CustomEvent} e
    */
-  function handleGofutzInit(e) {
-    /** @type {InitMessage} */
-    const details = e.detail;
-
-    renderCoverage(details.params.coverage);
-  }
-
-  /**
-   * @param {CustomEvent} e
-   */
-  function handleGofutzUpdate(e) {
+  function handleGofutzUpdates(e) {
     /** @type {UpdateMessage} */
     const details = e.detail;
 
@@ -39,6 +29,6 @@
     }
   }
 
-  window.addEventListener("gofutz:init", handleGofutzInit);
-  window.addEventListener("gofutz:update", handleGofutzUpdate);
+  window.addEventListener("gofutz:init", handleGofutzUpdates);
+  window.addEventListener("gofutz:update", handleGofutzUpdates);
 })();

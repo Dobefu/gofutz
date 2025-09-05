@@ -12,11 +12,7 @@ func (h *Handler) AddOutput(output string) error {
 		outputLines = outputLines[:len(outputLines)-1]
 	}
 
-	newOutput, err := h.runner.AddOutput(outputLines)
-
-	if err != nil {
-		return err
-	}
+	newOutput := h.runner.AddOutput(outputLines)
 
 	return h.SendResponse(OutputMessage{
 		Method: "gofutz:output",

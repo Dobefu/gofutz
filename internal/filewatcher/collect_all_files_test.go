@@ -1,6 +1,8 @@
 package filewatcher
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestCollectAllFiles(t *testing.T) {
 	t.Parallel()

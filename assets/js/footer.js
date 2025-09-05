@@ -4,18 +4,8 @@
   /**
    * @param {CustomEvent} e
    */
-  function handleGofutzInit(e) {
+  function handleGofutzUpdates(e) {
     /** @type {InitMessage} */
-    const details = e.detail;
-
-    renderFooterOutput(details.params.output);
-  }
-
-  /**
-   * @param {CustomEvent} e
-   */
-  function handleGofutzOutput(e) {
-    /** @type {OutputMessage} */
     const details = e.detail;
 
     renderFooterOutput(details.params.output);
@@ -54,6 +44,5 @@
     }
   }
 
-  window.addEventListener("gofutz:init", handleGofutzInit);
-  window.addEventListener("gofutz:output", handleGofutzOutput);
+  window.addEventListener("gofutz:init", handleGofutzUpdates);
 })();
