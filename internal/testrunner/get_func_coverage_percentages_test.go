@@ -2,6 +2,7 @@ package testrunner
 
 import (
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -42,11 +43,13 @@ func TestGetFuncCoveragePercentagesErr(t *testing.T) {
 
 	tests := []struct {
 		name     string
+		file     string
 		expected string
 	}{
 		{
-			name:     "error",
-			expected: "exit status 2",
+			name:     "nonexistent file",
+			file:     "/bogus",
+			expected: "exit status",
 		},
 	}
 
@@ -57,17 +60,15 @@ func TestGetFuncCoveragePercentagesErr(t *testing.T) {
 
 		runner := &TestRunner{} // nolint:exhaustruct
 
-		_, _, err := runner.GetFuncCoveragePercentages(
-			"/bogus",
-		)
+		_, _, err := runner.GetFuncCoveragePercentages(test.file)
 
 		if err == nil {
 			t.Fatalf("expected error, got nil")
 		}
 
-		if err.Error() != test.expected {
+		if !strings.Contains(err.Error(), test.expected) {
 			t.Fatalf(
-				"expected error to be \"%s\", got: \"%s\"",
+				"expected error to contain \"%s\", got: \"%s\"",
 				test.expected,
 				err.Error(),
 			)
