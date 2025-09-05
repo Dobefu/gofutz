@@ -5,7 +5,7 @@
    * @param {CustomEvent} e
    */
   function handleGofutzInit(e) {
-    /** @type {Message} */
+    /** @type {UpdateMessage} */
     const details = e.detail;
     const testFilesContainer = document.querySelector(".sidebar__tests");
 
@@ -33,7 +33,7 @@
    * @param {CustomEvent} e
    */
   function handleGofutzUpdate(e) {
-    /** @type {Message} */
+    /** @type {UpdateMessage} */
     const details = e.detail;
     const testFilesContainer = document.querySelector(".sidebar__tests");
 
@@ -123,7 +123,7 @@
   }
 
   /**
-   * @param {Message} details
+   * @param {UpdateMessage} details
    */
   function renderCoverage(details) {
     /** @type {Element | null} */

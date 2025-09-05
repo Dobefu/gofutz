@@ -35,14 +35,37 @@ interface TestResult {
   coverage: number;
 }
 
-interface Params {
+interface InitParams {
+  files: Record<string, File>;
+  coverage: number;
+  isRunning: boolean;
+  output: string[];
+}
+
+interface InitMessage {
+  method: string;
+  error: string;
+  params: InitParams;
+}
+
+interface UpdateParams {
   files: Record<string, File>;
   coverage: number;
   isRunning: boolean;
 }
 
-interface Message {
+interface UpdateMessage {
   method: string;
   error: string;
-  params: Params;
+  params: UpdateParams;
+}
+
+interface OutputParams {
+  output: string[];
+}
+
+interface OutputMessage {
+  method: string;
+  error: string;
+  params: OutputParams;
 }

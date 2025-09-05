@@ -12,7 +12,8 @@ import (
 // RunAllTests runs all tests.
 func (t *TestRunner) RunAllTests(
 	testCompleteCallback func(file File) error,
-	completionCallback func() error,
+	outputCallback func(output string) error,
+	completionCallback func(),
 ) {
 	go func() {
 		coverageFile, err := os.CreateTemp("", "coverage.out")
@@ -27,7 +28,7 @@ func (t *TestRunner) RunAllTests(
 		defer func() { _ = os.Remove(coverageFile.Name()) }()
 
 		startTime := time.Now()
-		slog.Info("Running all tests")
+		_ = outputCallback("Running all tests")
 
 		goPath, err := exec.LookPath("go")
 
@@ -49,7 +50,7 @@ func (t *TestRunner) RunAllTests(
 		output, err := cmd.CombinedOutput()
 
 		if err != nil {
-			slog.Error(
+			_ = outputCallback(
 				fmt.Sprintf("tests failed: %s", err.Error()),
 			)
 
@@ -78,7 +79,10 @@ func (t *TestRunner) RunAllTests(
 			return
 		}
 
-		slog.Info(fmt.Sprintf("tests completed in %s", time.Since(startTime)))
+		_ = outputCallback(string(output))
+		_ = outputCallback(
+			fmt.Sprintf("tests completed in %s", time.Since(startTime)),
+		)
 
 		coverageLines, err := t.ParseCoverage(coverageFile.Name())
 
@@ -116,7 +120,7 @@ func (t *TestRunner) RunAllTests(
 
 func (t *TestRunner) sendCallbacks(
 	testCompleteCallback func(file File) error,
-	completionCallback func() error,
+	completionCallback func(),
 	coverageLines []CoverageLine,
 	coveragePercentages map[string]map[string]float64,
 	failingTests map[string]bool,
@@ -144,18 +148,14 @@ func (t *TestRunner) sendCallbacks(
 		t.files[files[i].Name] = files[i]
 	}
 
+	completionCallback()
+
 	for _, file := range files {
 		err := testCompleteCallback(file)
 
 		if err != nil {
 			slog.Error(err.Error())
 		}
-	}
-
-	err := completionCallback()
-
-	if err != nil {
-		slog.Error(fmt.Sprintf("could not send completion update: %s", err.Error()))
 	}
 
 	return nil

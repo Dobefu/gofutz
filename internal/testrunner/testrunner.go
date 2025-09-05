@@ -17,6 +17,7 @@ type TestRunner struct {
 	files         map[string]File
 	hasRunTests   bool
 	coverage      float64
+	output        []string
 	isRunning     bool
 	debounceFiles map[string]*time.Timer
 	mu            sync.Mutex
@@ -35,6 +36,7 @@ func NewTestRunner(files []string, onFileChange func()) (*TestRunner, error) {
 		files:         tests,
 		hasRunTests:   false,
 		coverage:      -1,
+		output:        []string{},
 		isRunning:     false,
 		debounceFiles: make(map[string]*time.Timer),
 		mu:            sync.Mutex{},

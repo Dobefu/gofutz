@@ -5,7 +5,7 @@
    * @param {CustomEvent} e
    */
   function handleGofutzInit(e) {
-    /** @type {Message} */
+    /** @type {InitMessage} */
     const details = e.detail;
 
     renderCoverage(details.params.coverage);
@@ -15,7 +15,7 @@
    * @param {CustomEvent} e
    */
   function handleGofutzUpdate(e) {
-    /** @type {Message} */
+    /** @type {UpdateMessage} */
     const details = e.detail;
 
     renderCoverage(details.params.coverage);

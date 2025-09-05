@@ -77,7 +77,7 @@
    * @param {CustomEvent} e
    */
   function handleGofutzUpdate(e) {
-    /** @type {Message} */
+    /** @type {UpdateMessage} */
     const details = e.detail;
     /** @type {HTMLPreElement | null} */
     const currentCodeContainer = document.querySelector(".main-content__code");

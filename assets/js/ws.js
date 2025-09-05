@@ -48,7 +48,7 @@
      * @param {MessageEvent} e
      */
     wss.onmessage = (e) => {
-      /** @type {Message} */
+      /** @type {UpdateMessage} */
       const msg = JSON.parse(e.data);
 
       switch (msg.method) {
@@ -59,6 +59,12 @@
         case "gofutz:update":
           window.dispatchEvent(
             new CustomEvent("gofutz:update", { detail: msg }),
+          );
+          break;
+
+        case "gofutz:output":
+          window.dispatchEvent(
+            new CustomEvent("gofutz:output", { detail: msg }),
           );
           break;
 

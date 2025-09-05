@@ -40,10 +40,10 @@ func TestHandle(t *testing.T) {
 
 			defer func() { _ = ws.Close() }()
 
-			initMessage := websocket.Message{
+			initMessage := websocket.UpdateMessage{
 				Method: "gofutz:init",
 				Error:  "",
-				Params: websocket.Params{
+				Params: websocket.UpdateParams{
 					Files:     nil,
 					Coverage:  0,
 					IsRunning: false,

@@ -74,7 +74,7 @@ func NewHandler() (*Handler, error) {
 func (h *Handler) HandleMessage(
 	ws WsInterface,
 	messageType int,
-	msg Message,
+	msg UpdateMessage,
 ) error {
 	files := h.runner.GetFiles()
 
@@ -100,13 +100,14 @@ func (h *Handler) HandleMessage(
 			}()
 		}
 
-		return h.SendResponse(Message{
+		return h.SendResponse(InitMessage{
 			Method: "gofutz:init",
 			Error:  "",
-			Params: Params{
+			Params: InitParams{
 				Files:     files,
 				Coverage:  h.runner.GetCoverage(),
 				IsRunning: h.runner.IsRunning(),
+				Output:    h.runner.GetOutput(),
 			},
 		})
 
@@ -114,10 +115,10 @@ func (h *Handler) HandleMessage(
 		return h.handleRunAllTests(files)
 
 	default:
-		return h.SendResponse(Message{
+		return h.SendResponse(UpdateMessage{
 			Method: "error",
 			Error:  fmt.Sprintf("Unknown method: %s", msg.Method),
-			Params: Params{
+			Params: UpdateParams{
 				Files:     nil,
 				Coverage:  h.runner.GetCoverage(),
 				IsRunning: h.runner.IsRunning(),
@@ -187,10 +188,10 @@ func (h *Handler) handleRunAllTests(files map[string]testrunner.File) error {
 		}
 	}
 
-	err := h.SendResponse(Message{
+	err := h.SendResponse(UpdateMessage{
 		Method: "gofutz:update",
 		Error:  "",
-		Params: Params{
+		Params: UpdateParams{
 			Files:     files,
 			Coverage:  -1,
 			IsRunning: h.runner.IsRunning(),
@@ -202,10 +203,10 @@ func (h *Handler) handleRunAllTests(files map[string]testrunner.File) error {
 	}
 
 	h.runner.RunAllTests(func(fileToUpdate testrunner.File) error {
-		return h.SendResponse(Message{
+		return h.SendResponse(UpdateMessage{
 			Method: "gofutz:update",
 			Error:  "",
-			Params: Params{
+			Params: UpdateParams{
 				Files: map[string]testrunner.File{
 					fileToUpdate.Name: fileToUpdate,
 				},
@@ -213,18 +214,10 @@ func (h *Handler) handleRunAllTests(files map[string]testrunner.File) error {
 				IsRunning: h.runner.IsRunning(),
 			},
 		})
-	}, func() error {
+	}, func(output string) error {
+		return h.AddOutput(output)
+	}, func() {
 		h.runner.SetRunning(false)
-
-		return h.SendResponse(Message{
-			Method: "gofutz:update",
-			Error:  "",
-			Params: Params{
-				Files:     nil,
-				Coverage:  h.runner.GetCoverage(),
-				IsRunning: h.runner.IsRunning(),
-			},
-		})
 	})
 
 	return nil

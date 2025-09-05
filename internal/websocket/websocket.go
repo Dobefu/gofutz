@@ -138,7 +138,7 @@ func (w *Websocket) HandleMessages(ws WsInterface) error {
 			break
 		}
 
-		msg := &Message{} // nolint:exhaustruct
+		msg := &UpdateMessage{} // nolint:exhaustruct
 		err = json.Unmarshal(message, &msg)
 
 		if err != nil {

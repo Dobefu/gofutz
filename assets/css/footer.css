@@ -2,11 +2,31 @@ footer {
   background-color: var(--color-footer-background);
   border-top: 0.5rem solid var(--color-footer-border);
   grid-area: footer;
+  overflow: auto;
   padding: 1rem;
+  position: relative;
+  scrollbar-gutter: stable;
 }
 
 @media (width < 64rem) {
   footer {
     display: none;
   }
+}
+
+.footer__output {
+  font-family: monospace;
+  font-size: 0.875rem;
+  white-space: pre-wrap;
+}
+
+.footer__output:empty::after {
+  color: var(--color-foreground-dark);
+  content: "CLI output will appear here";
+  inset-inline: 0;
+  padding: 1rem;
+  position: absolute;
+  text-align: center;
+  top: 50%;
+  transform: translateY(-50%);
 }
