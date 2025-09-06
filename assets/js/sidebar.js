@@ -94,7 +94,12 @@
     }
 
     for (const file of files) {
-      if (file.dataset.name !== fileName) {
+      const hashFileName = decodeURIComponent(window.location.hash.slice(1));
+
+      if (
+        file.dataset.name !== fileName &&
+        file.dataset.name !== hashFileName
+      ) {
         file.classList.remove("open");
 
         continue;
@@ -164,6 +169,8 @@
       if (mainContentContainer && mainContentContainer.clientWidth <= 0) {
         return;
       }
+
+      window.location.hash = encodeURIComponent(file.name);
 
       window.dispatchEvent(
         new CustomEvent("gofutz:toggle-file", { detail: file }),

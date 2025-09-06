@@ -2,6 +2,25 @@
 
 (() => {
   /**
+   * @param {CustomEvent} e
+   */
+  function handleGofutzInit(e) {
+    /** @type {InitMessage} */
+    const details = e.detail;
+
+    if (window.location.hash) {
+      const fileName = decodeURIComponent(window.location.hash.slice(1));
+      const file = details.params.files[fileName];
+
+      if (file) {
+        window.dispatchEvent(
+          new CustomEvent("gofutz:toggle-file", { detail: file }),
+        );
+      }
+    }
+  }
+
+  /**
    * @param {number} lineNumber
    * @param {Line[]} coveredLines
    * @returns {string}
@@ -106,6 +125,7 @@
     }
   }
 
+  window.addEventListener("gofutz:init", handleGofutzInit);
   window.addEventListener("gofutz:toggle-file", handleGofutzToggleFile);
   window.addEventListener("gofutz:update", handleGofutzUpdate);
 })();
