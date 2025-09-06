@@ -1,25 +1,70 @@
 package testrunner
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 )
 
-func TestGetModuleNameErr(t *testing.T) {
+func createGoModFile(
+	t *testing.T,
+	name string,
+	content string,
+) (string, func()) {
+	t.Helper()
+
+	if content == "" {
+		return "", func() {}
+	}
+
+	modFile := filepath.Join(
+		os.TempDir(),
+		fmt.Sprintf("get_module_name/%s/go.mod", filepath.Clean(name)),
+	)
+
+	err := os.MkdirAll(filepath.Dir(modFile), 0700)
+
+	if err != nil {
+		t.Fatalf("expected no error, got: %s", err.Error())
+	}
+
+	err = os.WriteFile(modFile, []byte(content), 0600)
+
+	if err != nil {
+		t.Fatalf("expected no error, got: %s", err.Error())
+	}
+
+	return modFile, func() { _ = os.Remove(modFile) }
+}
+
+func TestGetModuleName(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name     string
-		expected string
+		name      string
+		modString string
+		expected  string
 	}{
 		{
-			name:     "cannot find go.mod",
-			expected: "",
+			name:      "valid go.mod",
+			modString: "module github.com/example/project\n\nrequire github.com/example/dependency v1.0.0\n",
+			expected:  "github.com/example/project",
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
+
+			modFile, cleanup := createGoModFile(t, test.name, test.modString)
+			err := os.Chdir(filepath.Dir(modFile))
+
+			if err != nil {
+				t.Fatalf("expected no error, got: %s", err.Error())
+			}
+
+			defer cleanup()
 
 			moduleName := GetModuleName()
 

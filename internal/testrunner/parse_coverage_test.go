@@ -12,11 +12,11 @@ import (
 func createCoverageFile(
 	t *testing.T,
 	name string,
-	coverageString string,
+	content string,
 ) (string, func()) {
 	t.Helper()
 
-	if coverageString == "" {
+	if content == "" {
 		return "/bogus", func() {}
 	}
 
@@ -25,7 +25,7 @@ func createCoverageFile(
 		fmt.Sprintf("%s.coverage", name),
 	)
 
-	err := os.WriteFile(coverageFile, []byte(coverageString), 0600)
+	err := os.WriteFile(coverageFile, []byte(content), 0600)
 
 	if err != nil {
 		t.Fatalf("expected no error, got: %s", err.Error())
