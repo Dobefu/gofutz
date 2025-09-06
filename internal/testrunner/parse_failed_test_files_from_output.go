@@ -2,7 +2,6 @@ package testrunner
 
 import (
 	"encoding/json"
-	"fmt"
 	"strings"
 )
 
@@ -34,23 +33,34 @@ func (t *TestRunner) parseFailedTestFilesFromOutput(
 			continue
 		}
 
-		packageParts := strings.Split(event.Package, "/")
-
-		if len(packageParts) < 2 {
+		if event.Test == "" || strings.Contains(event.Test, "/") {
 			continue
 		}
 
-		packageName := packageParts[len(packageParts)-1]
-		sourceFileName := fmt.Sprintf("%s.go", packageName)
+		t.addFailedTestsFromFiles(event, failedTestFiles)
+	}
 
-		for filePath := range t.files {
-			if strings.HasSuffix(filePath, fmt.Sprintf("/%s", sourceFileName)) {
-				failedTestFiles[filePath] = true
+	return failedTestFiles
+}
+
+func (t *TestRunner) addFailedTestsFromFiles(
+	event TestEvent,
+	failedTestFiles map[string]bool,
+) {
+	for filePath, file := range t.files {
+		if !strings.HasPrefix(filePath, event.Package) {
+			continue
+		}
+
+		for _, function := range file.Functions {
+			funcName := strings.TrimPrefix(strings.ToLower(function.Name), "test")
+			eventTest := strings.TrimPrefix(strings.ToLower(event.Test), "test")
+
+			if funcName == eventTest {
+				failedTestFiles[file.Name] = true
 
 				break
 			}
 		}
 	}
-
-	return failedTestFiles
 }

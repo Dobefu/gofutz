@@ -14,7 +14,7 @@ func TestParseFailedTestFilesFromOutput(t *testing.T) {
 	}{
 		{
 			name:   "success",
-			output: `{"time":"2021-01-01T00:00:00Z","action":"fail","package":"path/to/test","test":"Test","output":"","elapsed":0}`,
+			output: `{"time":"2021-01-01T00:00:00Z","action":"fail","package":"/path/to/test","test":"TestSomething","output":"","elapsed":0}`,
 			expected: map[string]bool{
 				"/path/to/test.go": true,
 			},
@@ -29,9 +29,15 @@ func TestParseFailedTestFilesFromOutput(t *testing.T) {
 				files: map[string]File{
 					"test.go": { // nolint:exhaustruct
 						Name: "test.go",
+						Functions: []Function{
+							{Name: "TestSomething"}, // nolint:exhaustruct
+						},
 					},
 					"/path/to/test.go": { // nolint:exhaustruct
 						Name: "/path/to/test.go",
+						Functions: []Function{
+							{Name: "TestSomething"}, // nolint:exhaustruct
+						},
 					},
 				},
 			}
