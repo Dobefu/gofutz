@@ -2,5 +2,9 @@ package testrunner
 
 // GetOutput gets the output buffer.
 func (t *TestRunner) GetOutput() []string {
-	return t.output
+	t.mu.Lock()
+	result := t.output
+	t.mu.Unlock()
+
+	return result
 }

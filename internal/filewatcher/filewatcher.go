@@ -6,71 +6,109 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/fsnotify/fsnotify"
 )
 
-var (
+// FileWatcher defines a file watcher.
+type FileWatcher struct {
 	watcher   *fsnotify.Watcher
 	listeners []func(string, string)
-)
+	mu        sync.RWMutex
+	stopCh    chan struct{}
+}
 
-func init() {
-	var err error
-	watcher, err = fsnotify.NewWatcher()
+// NewFileWatcher creates a new FileWatcher instance.
+func NewFileWatcher() (*FileWatcher, error) {
+	watcher, err := fsnotify.NewWatcher()
 
 	if err != nil {
-		slog.Error(err.Error())
-		os.Exit(1)
+		return nil, err
 	}
 
-	go handleFileEvents()
+	fw := &FileWatcher{
+		watcher:   watcher,
+		listeners: make([]func(string, string), 0),
+		mu:        sync.RWMutex{},
+		stopCh:    make(chan struct{}),
+	}
 
+	go fw.handleFileEvents()
 	cwd, err := os.Getwd()
 
 	if err != nil {
-		slog.Error(err.Error())
-		os.Exit(1)
+		_ = fw.Close()
+
+		return nil, err
 	}
 
-	err = addDirectory(cwd)
+	err = fw.addDirectory(cwd)
 
 	if err != nil {
-		slog.Error(err.Error())
-		os.Exit(1)
+		_ = fw.Close()
+
+		return nil, err
 	}
+
+	return fw, nil
 }
 
-func handleFileEvents() {
+func (fw *FileWatcher) handleFileEvents() {
 	for {
 		select {
-		case event, ok := <-watcher.Events:
+		case event, ok := <-fw.watcher.Events:
 			if !ok {
 				return
 			}
 
-			for _, listener := range listeners {
+			fw.mu.RLock()
+
+			for _, listener := range fw.listeners {
 				listener(event.Name, event.Op.String())
 			}
 
-		case err, ok := <-watcher.Errors:
+			fw.mu.RUnlock()
+
+		case err, ok := <-fw.watcher.Errors:
 			if !ok {
 				return
 			}
 
 			slog.Error(err.Error())
+
+		case <-fw.stopCh:
+			return
 		}
 	}
 }
 
 // AddListener adds an event listener.
-func AddListener(listener func(string, string)) {
-	listeners = append(listeners, listener)
+func (fw *FileWatcher) AddListener(listener func(string, string)) {
+	fw.mu.Lock()
+	fw.listeners = append(fw.listeners, listener)
+	fw.mu.Unlock()
+}
+
+// GetListenerCount returns the current number of listeners.
+func (fw *FileWatcher) GetListenerCount() int {
+	fw.mu.RLock()
+	count := len(fw.listeners)
+	fw.mu.RUnlock()
+
+	return count
+}
+
+// ResetListeners resets all listeners.
+func (fw *FileWatcher) ResetListeners() {
+	fw.mu.Lock()
+	fw.listeners = nil
+	fw.mu.Unlock()
 }
 
 // addDirectory adds all directories in the given directory to the watcher.
-func addDirectory(dir string) error {
-	err := watcher.Add(dir)
+func (fw *FileWatcher) addDirectory(dir string) error {
+	err := fw.watcher.Add(dir)
 
 	if err != nil {
 		return err
@@ -88,7 +126,7 @@ func addDirectory(dir string) error {
 		}
 
 		subDir := filepath.Join(dir, entry.Name())
-		err = addDirectory(subDir)
+		err = fw.addDirectory(subDir)
 
 		if err != nil {
 			return err
@@ -99,9 +137,11 @@ func addDirectory(dir string) error {
 }
 
 // Close shuts down the file watcher.
-func Close() error {
-	if watcher != nil {
-		return watcher.Close()
+func (fw *FileWatcher) Close() error {
+	close(fw.stopCh)
+
+	if fw.watcher != nil {
+		return fw.watcher.Close()
 	}
 
 	return nil

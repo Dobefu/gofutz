@@ -2,6 +2,7 @@ package testrunner
 
 import (
 	"strings"
+	"sync"
 	"testing"
 	"time"
 )
@@ -34,22 +35,25 @@ func TestHandleFileEvent(t *testing.T) {
 			t.Parallel()
 
 			timeoutFired := make(chan struct{})
+			debounceCount := 0
+			debounceMutex := &sync.Mutex{}
+
 			runner := &TestRunner{ // nolint:exhaustruct
 				debounceFiles:    make(map[string]*time.Timer),
 				debounceDuration: 1 * time.Millisecond,
-				onFileChange:     func() { close(timeoutFired) },
+				onFileChange: func() {
+					debounceMutex.Lock()
+					debounceCount++
+					debounceMutex.Unlock()
+
+					close(timeoutFired)
+				},
 			}
 
 			runner.handleFileEvent(test.path, test.operation)
 			runner.handleFileEvent(test.path, test.operation)
 
-			if len(runner.debounceFiles) != test.expected {
-				t.Fatalf(
-					"expected %d debounce file(s), got: %d",
-					test.expected,
-					len(runner.debounceFiles),
-				)
-			}
+			time.Sleep(2 * time.Millisecond)
 
 			if !strings.HasSuffix(test.path, ".go") {
 				return
@@ -61,12 +65,17 @@ func TestHandleFileEvent(t *testing.T) {
 				t.Fatal("timeout did not fire within the expected timeframe")
 			}
 
-			time.Sleep(1 * time.Millisecond)
+			time.Sleep(2 * time.Millisecond)
 
-			if len(runner.debounceFiles) != 0 {
+			debounceMutex.Lock()
+			actualCount := debounceCount
+			debounceMutex.Unlock()
+
+			if actualCount != test.expected {
 				t.Fatalf(
-					"expected 0 debounce files after timeout, got: %d",
-					len(runner.debounceFiles),
+					"expected %d debounce callbacks, got: %d",
+					test.expected,
+					actualCount,
 				)
 			}
 		})

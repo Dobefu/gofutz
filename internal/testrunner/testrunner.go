@@ -22,7 +22,11 @@ type TestRunner struct {
 }
 
 // NewTestRunner creates a new test runner.
-func NewTestRunner(files []string, onFileChange func()) (*TestRunner, error) {
+func NewTestRunner(
+	files []string,
+	fw *filewatcher.FileWatcher,
+	onFileChange func(),
+) (*TestRunner, error) {
 	tests, err := GetFunctionsFromFiles(files)
 
 	if err != nil {
@@ -41,7 +45,7 @@ func NewTestRunner(files []string, onFileChange func()) (*TestRunner, error) {
 		onFileChange:     onFileChange,
 	}
 
-	filewatcher.AddListener(func(path, operation string) {
+	fw.AddListener(func(path, operation string) {
 		go runner.handleFileEvent(path, operation)
 	})
 

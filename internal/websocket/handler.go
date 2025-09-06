@@ -37,10 +37,17 @@ func NewHandler() (*Handler, error) {
 			return
 		}
 
-		runner, newRunnerErr := testrunner.NewTestRunner(files, nil)
+		var sharedWatcher *filewatcher.FileWatcher
+		sharedWatcher, err = filewatcher.NewFileWatcher()
 
-		if newRunnerErr != nil {
-			err = newRunnerErr
+		if err != nil {
+			return
+		}
+
+		runner, err := testrunner.NewTestRunner(files, sharedWatcher, nil)
+
+		if err != nil {
+			_ = sharedWatcher.Close()
 
 			return
 		}
@@ -57,15 +64,6 @@ func NewHandler() (*Handler, error) {
 		mu:     sync.Mutex{},
 		wsChan: nil,
 	}
-
-	sharedRunner.SetOnFileChange(func() {
-		files := sharedRunner.GetFiles()
-		err := handler.handleRunAllTests(files)
-
-		if err != nil {
-			slog.Error(fmt.Sprintf("Could not run all tests: %s", err.Error()))
-		}
-	})
 
 	return handler, nil
 }
@@ -92,7 +90,7 @@ func (h *Handler) HandleMessage(
 		if !h.runner.GetHasRunTests() {
 			go func() {
 				time.Sleep(100 * time.Millisecond)
-				err := h.handleRunAllTests(files)
+				err := h.handleRunAllTests()
 
 				if err != nil {
 					slog.Error(fmt.Sprintf("Could not run all tests: %s", err.Error()))
@@ -112,7 +110,7 @@ func (h *Handler) HandleMessage(
 		})
 
 	case "gofutz:run-all-tests":
-		return h.handleRunAllTests(files)
+		return h.handleRunAllTests()
 
 	default:
 		return h.SendResponse(UpdateMessage{
@@ -161,20 +159,23 @@ func (h *Handler) handleMessages(ws WsInterface) {
 	}
 }
 
-func (h *Handler) handleRunAllTests(files map[string]testrunner.File) error {
+func (h *Handler) handleRunAllTests() error {
 	h.runner.SetHasRunTests(true)
 	h.runner.SetIsRunning(true)
 
-	for i, file := range files {
+	files := h.runner.GetFiles()
+	newFiles := make(map[string]testrunner.File)
+
+	for name, file := range files {
 		var status testrunner.TestStatus = testrunner.TestStatusRunning
 
 		if len(file.Functions) == 0 {
 			status = file.Status
 		}
 
-		files[i] = testrunner.File{
+		newFile := testrunner.File{
 			Name:            file.Name,
-			Functions:       file.Functions,
+			Functions:       make([]testrunner.Function, len(file.Functions)),
 			Code:            file.Code,
 			HighlightedCode: file.HighlightedCode,
 			Status:          status,
@@ -183,20 +184,22 @@ func (h *Handler) handleRunAllTests(files map[string]testrunner.File) error {
 		}
 
 		for j, function := range file.Functions {
-			files[i].Functions[j] = testrunner.Function{
+			newFile.Functions[j] = testrunner.Function{
 				Name: function.Name,
 				Result: testrunner.TestResult{
 					Coverage: -1,
 				},
 			}
 		}
+
+		newFiles[name] = newFile
 	}
 
 	err := h.SendResponse(UpdateMessage{
 		Method: "gofutz:update",
 		Error:  "",
 		Params: UpdateParams{
-			Files:     files,
+			Files:     newFiles,
 			Coverage:  -1,
 			IsRunning: h.runner.GetIsRunning(),
 		},

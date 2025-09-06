@@ -7,8 +7,6 @@ import (
 
 func (t *TestRunner) handleFileEvent(path, operation string) {
 	t.mu.Lock()
-	defer t.mu.Unlock()
-
 	timer, hasTimer := t.debounceFiles[path]
 
 	if hasTimer {
@@ -26,12 +24,15 @@ func (t *TestRunner) handleFileEvent(path, operation string) {
 
 		t.processFileEvent(path, operation)
 
-		if t.onFileChange != nil && !t.isRunning {
-			go t.onFileChange()
-		}
-
 		t.mu.Lock()
+		shouldCallOnFileChange := t.onFileChange != nil && !t.isRunning
 		delete(t.debounceFiles, path)
 		t.mu.Unlock()
+
+		if shouldCallOnFileChange {
+			go t.onFileChange()
+		}
 	})
+
+	t.mu.Unlock()
 }

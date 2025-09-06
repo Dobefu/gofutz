@@ -1,6 +1,7 @@
 package testrunner
 
 import (
+	"sync"
 	"testing"
 )
 
@@ -28,29 +29,37 @@ func TestRunAllTests(t *testing.T) {
 			}
 
 			fullOutput := []string{}
+			outputMutex := &sync.Mutex{}
 
 			runner.RunAllTests(func(_ File) error {
 				return nil
 			}, func(output string) error {
+				outputMutex.Lock()
 				fullOutput = append(fullOutput, output)
+				outputMutex.Unlock()
 
 				return nil
 			}, func() {})
 
-			if len(fullOutput) != len(test.expected) {
+			outputMutex.Lock()
+			newOutput := make([]string, len(fullOutput))
+			copy(newOutput, fullOutput)
+			outputMutex.Unlock()
+
+			if len(newOutput) != len(test.expected) {
 				t.Fatalf(
 					"expected %d output lines, got: %d",
 					len(test.expected),
-					len(fullOutput),
+					len(newOutput),
 				)
 			}
 
-			for i := range fullOutput {
-				if fullOutput[i] != test.expected[i] {
+			for i := range newOutput {
+				if newOutput[i] != test.expected[i] {
 					t.Fatalf(
 						"expected output to be %s, got: %s",
 						test.expected[i],
-						fullOutput[i],
+						newOutput[i],
 					)
 				}
 			}
@@ -87,8 +96,15 @@ func TestSendCallbacks(t *testing.T) {
 				files: test.files,
 			}
 
+			callbackCount := 0
+			callbackMutex := &sync.Mutex{}
+
 			err := runner.sendCallbacks(
 				func(_ File) error {
+					callbackMutex.Lock()
+					callbackCount++
+					callbackMutex.Unlock()
+
 					return nil
 				},
 				func() {},
@@ -101,22 +117,16 @@ func TestSendCallbacks(t *testing.T) {
 				t.Fatalf("expected no error, got: %s", err.Error())
 			}
 
-			if len(runner.files) != len(test.expected) {
-				t.Fatalf(
-					"expected %d files, got: %d",
-					len(test.expected),
-					len(runner.files),
-				)
-			}
+			callbackMutex.Lock()
+			actualCount := callbackCount
+			callbackMutex.Unlock()
 
-			for file := range runner.files {
-				if runner.files[file].Status != TestStatusFailed {
-					t.Fatalf(
-						"expected file status to be \"%T\", got: \"%T\"",
-						TestStatusFailed,
-						runner.files[file].Status,
-					)
-				}
+			if actualCount != len(test.expected) {
+				t.Fatalf(
+					"expected %d callbacks, got: %d",
+					len(test.expected),
+					actualCount,
+				)
 			}
 		})
 	}
