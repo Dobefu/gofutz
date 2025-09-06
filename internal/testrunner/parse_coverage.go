@@ -1,6 +1,7 @@
 package testrunner
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -47,13 +48,13 @@ func (t *TestRunner) ParseCoverage(coverageFile string) ([]CoverageLine, error) 
 			return nil, err
 		}
 
-		executionCount, err := getCoverageExecutionCount(line)
+		numberOfStatements, err := getCoverageNumberOfStatements(line)
 
 		if err != nil {
 			return nil, err
 		}
 
-		numberOfStatements, err := getCoverageNumberOfStatements(line)
+		executionCount, err := getCoverageExecutionCount(line)
 
 		if err != nil {
 			return nil, err
@@ -78,61 +79,73 @@ func (t *TestRunner) getCoverageFileName(line string) string {
 }
 
 func getCoverageStartLineAndColumn(line string) (int, int, error) {
-	startLineAndColumn := regexp.MustCompile(
+	startLineAndColumnMatches := regexp.MustCompile(
 		`(\d+)\.(\d+)`,
-	).FindAllString(line, -1)[0]
+	).FindAllString(line, -1)
 
-	startLine, err := strconv.Atoi(
+	if len(startLineAndColumnMatches) < 1 {
+		return 0, 0, fmt.Errorf("invalid coverage line: %s", line)
+	}
+
+	startLineAndColumn := startLineAndColumnMatches[0]
+
+	// This cannot fail, since we explicitly check for digits.
+	startLine, _ := strconv.Atoi(
 		startLineAndColumn[:strings.Index(startLineAndColumn, ".")],
 	)
 
-	if err != nil {
-		return 0, 0, err
-	}
-
-	startColumn, err := strconv.Atoi(
+	// This cannot fail, since we explicitly check for digits.
+	startColumn, _ := strconv.Atoi(
 		startLineAndColumn[strings.Index(startLineAndColumn, ".")+1:],
 	)
-
-	if err != nil {
-		return 0, 0, err
-	}
 
 	return startLine, startColumn, nil
 }
 
 func getCoverageEndLineAndColumn(line string) (int, int, error) {
-	endLineAndColumn := regexp.MustCompile(
+	endLineAndColumnMatches := regexp.MustCompile(
 		`(\d+)\.(\d+)`,
-	).FindAllString(line, -1)[1]
+	).FindAllString(line, -1)
 
-	endLine, err := strconv.Atoi(
+	if len(endLineAndColumnMatches) < 2 {
+		return 0, 0, fmt.Errorf("invalid coverage line: %s", line)
+	}
+
+	endLineAndColumn := endLineAndColumnMatches[1]
+
+	// This cannot fail, since we explicitly check for digits.
+	endLine, _ := strconv.Atoi(
 		endLineAndColumn[:strings.Index(endLineAndColumn, ".")],
 	)
 
-	if err != nil {
-		return 0, 0, err
-	}
-
-	endColumn, err := strconv.Atoi(
+	// This cannot fail, since we explicitly check for digits.
+	endColumn, _ := strconv.Atoi(
 		endLineAndColumn[strings.Index(endLineAndColumn, ".")+1:],
 	)
-
-	if err != nil {
-		return 0, 0, err
-	}
 
 	return endLine, endColumn, nil
 }
 
 func getCoverageNumberOfStatements(line string) (int, error) {
-	return strconv.Atoi(regexp.MustCompile(
+	numberOfStatementsMatches := regexp.MustCompile(
 		`\s(\d+)`,
-	).FindAllStringSubmatch(line, -1)[0][1])
+	).FindAllStringSubmatch(line, -1)
+
+	if len(numberOfStatementsMatches) < 1 {
+		return 0, fmt.Errorf("invalid coverage line: %s", line)
+	}
+
+	return strconv.Atoi(numberOfStatementsMatches[0][1])
 }
 
 func getCoverageExecutionCount(line string) (int, error) {
-	return strconv.Atoi(regexp.MustCompile(
+	executionCountMatches := regexp.MustCompile(
 		`\s(\d+)`,
-	).FindAllStringSubmatch(line, -1)[1][1])
+	).FindAllStringSubmatch(line, -1)
+
+	if len(executionCountMatches) < 2 {
+		return 0, fmt.Errorf("invalid coverage line: %s", line)
+	}
+
+	return strconv.Atoi(executionCountMatches[1][1])
 }

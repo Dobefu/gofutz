@@ -1,22 +1,61 @@
 package testrunner
 
 import (
+	"encoding/json"
+	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 )
+
+func createCoverageFile(
+	t *testing.T,
+	name string,
+	coverageString string,
+) (string, func()) {
+	t.Helper()
+
+	if coverageString == "" {
+		return "/bogus", func() {}
+	}
+
+	coverageFile := filepath.Join(
+		os.TempDir(),
+		fmt.Sprintf("%s.coverage", name),
+	)
+
+	err := os.WriteFile(coverageFile, []byte(coverageString), 0600)
+
+	if err != nil {
+		t.Fatalf("expected no error, got: %s", err.Error())
+	}
+
+	return coverageFile, func() { _ = os.Remove(coverageFile) }
+}
 
 func TestParseCoverage(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name          string
-		coverageFile  string
-		expectedLines []CoverageLine
+		name           string
+		coverageString string
+		expectedLines  []CoverageLine
 	}{
 		{
-			name:          "nonexistent file",
-			coverageFile:  os.DevNull,
-			expectedLines: []CoverageLine{},
+			name:           "success",
+			coverageString: "mode:set\ntest.go:1.2:3.4 5 6",
+			expectedLines: []CoverageLine{
+				{
+					File:               "test.go",
+					StartLine:          1,
+					StartColumn:        2,
+					EndLine:            3,
+					EndColumn:          4,
+					NumberOfStatements: 5,
+					ExecutionCount:     6,
+				},
+			},
 		},
 	}
 
@@ -24,9 +63,17 @@ func TestParseCoverage(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
+			coverageFile, cleanup := createCoverageFile(
+				t,
+				test.name,
+				test.coverageString,
+			)
+
+			defer cleanup()
+
 			runner := &TestRunner{} // nolint:exhaustruct
 
-			lines, err := runner.ParseCoverage(test.coverageFile)
+			lines, err := runner.ParseCoverage(coverageFile)
 
 			if err != nil {
 				t.Fatalf("expected no error, got: %s", err.Error())
@@ -36,75 +83,83 @@ func TestParseCoverage(t *testing.T) {
 				t.Fatalf("expected %d lines, got: %d", len(test.expectedLines), len(lines))
 			}
 
-			for i, line := range lines {
-				if line.File != test.expectedLines[i].File {
-					t.Fatalf("expected file to be %s, got: %s", test.expectedLines[i].File, line.File)
-				}
+			linesJSON, err := json.Marshal(lines)
+
+			if err != nil {
+				t.Fatalf("expected no error, got: %s", err.Error())
+			}
+
+			expectedLinesJSON, _ := json.Marshal(test.expectedLines)
+
+			if string(linesJSON) != string(expectedLinesJSON) {
+				t.Fatalf("expected \"%s\", got \"%s\"", expectedLinesJSON, string(linesJSON))
 			}
 		})
 	}
 }
 
-func TestGetCoverageStartLineAndColumn(t *testing.T) {
+func TestParseCoverageErr(t *testing.T) {
 	t.Parallel()
 
-	startLine, startColumn, err := getCoverageStartLineAndColumn("test.go:1.2:0.0 0 0")
-
-	if err != nil {
-		t.Errorf("expected no error, got: %s", err.Error())
+	tests := []struct {
+		name           string
+		coverageString string
+		expected       string
+	}{
+		{
+			name:           "no coverage file",
+			coverageString: "",
+			expected:       "no such file or directory",
+		},
+		{
+			name:           "invalid coverage file - missing start line",
+			coverageString: "mode:set\ntest.go:1",
+			expected:       "invalid coverage line:",
+		},
+		{
+			name:           "invalid coverage file - missing end column",
+			coverageString: "mode:set\ntest.go:1.2:3",
+			expected:       "invalid coverage line:",
+		},
+		{
+			name:           "invalid coverage file - missing number of statements",
+			coverageString: "mode:set\ntest.go:1.2:3.4 5",
+			expected:       "invalid coverage line:",
+		},
+		{
+			name:           "invalid coverage file - missing execution count",
+			coverageString: "mode:set\ntest.go:1.2:3.4",
+			expected:       "invalid coverage line:",
+		},
 	}
 
-	if startLine != 1 {
-		t.Errorf("expected start line to be 1, got: %d", startLine)
-	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-	if startColumn != 2 {
-		t.Errorf("expected start column to be 2, got: %d", startColumn)
-	}
-}
+			coverageFile, cleanup := createCoverageFile(
+				t,
+				test.name,
+				test.coverageString,
+			)
 
-func TestGetCoverageEndLineAndColumn(t *testing.T) {
-	t.Parallel()
+			defer cleanup()
 
-	endLine, endColumn, err := getCoverageEndLineAndColumn("test.go:0.0:1.2 0 0")
+			runner := &TestRunner{} // nolint:exhaustruct
 
-	if err != nil {
-		t.Errorf("expected no error, got: %s", err.Error())
-	}
+			_, err := runner.ParseCoverage(coverageFile)
 
-	if endLine != 1 {
-		t.Errorf("expected end line to be 1, got: %d", endLine)
-	}
+			if err == nil {
+				t.Fatalf("expected error, got nil")
+			}
 
-	if endColumn != 2 {
-		t.Errorf("expected end column to be 2, got: %d", endColumn)
-	}
-}
-
-func TestGetCoverageNumberOfStatements(t *testing.T) {
-	t.Parallel()
-
-	numberOfStatements, err := getCoverageNumberOfStatements("test.go:0.0:0.0 1 0")
-
-	if err != nil {
-		t.Errorf("expected no error, got: %s", err.Error())
-	}
-
-	if numberOfStatements != 1 {
-		t.Errorf("expected number of statements to be 1, got: %d", numberOfStatements)
-	}
-}
-
-func TestGetCoverageExecutionCount(t *testing.T) {
-	t.Parallel()
-
-	numberOfStatements, err := getCoverageExecutionCount("test.go:0.0:0.0 0 1")
-
-	if err != nil {
-		t.Errorf("expected no error, got: %s", err.Error())
-	}
-
-	if numberOfStatements != 1 {
-		t.Errorf("expected number of statements to be 1, got: %d", numberOfStatements)
+			if !strings.Contains(err.Error(), test.expected) {
+				t.Fatalf(
+					"expected error to contain \"%s\", got \"%s\"",
+					test.expected,
+					err.Error(),
+				)
+			}
+		})
 	}
 }
