@@ -129,6 +129,10 @@ func (h *Handler) HandleMessage(
 
 // SendResponse sends a websocket response.
 func (h *Handler) SendResponse(msg Message) error {
+	if h.wsChan == nil {
+		return nil
+	}
+
 	h.wsChan <- msg
 
 	return nil
