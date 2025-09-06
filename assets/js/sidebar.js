@@ -245,6 +245,7 @@
   window.addEventListener("gofutz:update", handleGofutzUpdate);
   window.addEventListener("gofutz:toggle-file", handleGofutzToggleFile);
 
+  /** @type {NodeListOf<HTMLButtonElement> | null} */
   const btnRunAllTests = document.querySelectorAll(".btn__run-tests");
 
   if (!btnRunAllTests.length) {
@@ -258,4 +259,21 @@
       window.dispatchEvent(new CustomEvent("gofutz:run-all-tests"));
     });
   }
+
+  btnRunAllTests.forEach((btn) => {
+    if (navigator.userAgent.includes("Mac")) {
+      btn.title += " (Cmd+Enter)";
+
+      return;
+    }
+
+    btn.title += " (Ctrl+Enter)";
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      e.preventDefault();
+      window.dispatchEvent(new CustomEvent("gofutz:run-all-tests"));
+    }
+  });
 })();
