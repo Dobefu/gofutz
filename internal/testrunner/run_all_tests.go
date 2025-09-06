@@ -51,7 +51,11 @@ func (t *TestRunner) RunAllTests(
 
 		if err != nil {
 			_ = outputCallback(
-				fmt.Sprintf("tests failed: %s", err.Error()),
+				fmt.Sprintf(
+					"tests failed: %s\n%s",
+					err.Error(),
+					t.ParseErrorFromOutput(string(output)),
+				),
 			)
 
 			coverageLines := []CoverageLine{}

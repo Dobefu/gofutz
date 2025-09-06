@@ -61,4 +61,5 @@
   }
 
   window.addEventListener("gofutz:init", handleGofutzUpdates);
+  window.addEventListener("gofutz:output", handleGofutzUpdates);
 })();
