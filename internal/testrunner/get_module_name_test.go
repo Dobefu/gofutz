@@ -1,6 +1,8 @@
 package testrunner
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestGetModuleNameErr(t *testing.T) {
 	t.Parallel()

@@ -89,7 +89,7 @@ func (h *Handler) HandleMessage(
 
 	switch msg.Method {
 	case "gofutz:init":
-		if !h.runner.HasRunTests() {
+		if !h.runner.GetHasRunTests() {
 			go func() {
 				time.Sleep(100 * time.Millisecond)
 				err := h.handleRunAllTests(files)
@@ -106,7 +106,7 @@ func (h *Handler) HandleMessage(
 			Params: InitParams{
 				Files:     files,
 				Coverage:  h.runner.GetCoverage(),
-				IsRunning: h.runner.IsRunning(),
+				IsRunning: h.runner.GetIsRunning(),
 				Output:    h.runner.GetOutput(),
 			},
 		})
@@ -121,7 +121,7 @@ func (h *Handler) HandleMessage(
 			Params: UpdateParams{
 				Files:     nil,
 				Coverage:  h.runner.GetCoverage(),
-				IsRunning: h.runner.IsRunning(),
+				IsRunning: h.runner.GetIsRunning(),
 			},
 		})
 	}
@@ -159,7 +159,7 @@ func (h *Handler) handleMessages(ws WsInterface) {
 
 func (h *Handler) handleRunAllTests(files map[string]testrunner.File) error {
 	h.runner.SetHasRunTests(true)
-	h.runner.SetRunning(true)
+	h.runner.SetIsRunning(true)
 
 	for i, file := range files {
 		var status testrunner.TestStatus = testrunner.TestStatusRunning
@@ -194,7 +194,7 @@ func (h *Handler) handleRunAllTests(files map[string]testrunner.File) error {
 		Params: UpdateParams{
 			Files:     files,
 			Coverage:  -1,
-			IsRunning: h.runner.IsRunning(),
+			IsRunning: h.runner.GetIsRunning(),
 		},
 	})
 
@@ -211,13 +211,13 @@ func (h *Handler) handleRunAllTests(files map[string]testrunner.File) error {
 					fileToUpdate.Name: fileToUpdate,
 				},
 				Coverage:  h.runner.GetCoverage(),
-				IsRunning: h.runner.IsRunning(),
+				IsRunning: h.runner.GetIsRunning(),
 			},
 		})
 	}, func(output string) error {
 		return h.AddOutput(output)
 	}, func() {
-		h.runner.SetRunning(false)
+		h.runner.SetIsRunning(false)
 	})
 
 	return nil
