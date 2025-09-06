@@ -15,6 +15,8 @@ import (
 var (
 	sharedRunner         *testrunner.TestRunner
 	initSharedRunnerOnce sync.Once
+	activeHandlers       []*Handler
+	handlersMutex        sync.RWMutex
 )
 
 // Handler defines a websocket handler.
@@ -44,7 +46,24 @@ func NewHandler() (*Handler, error) {
 			return
 		}
 
-		runner, err := testrunner.NewTestRunner(files, sharedWatcher, nil)
+		runner, err := testrunner.NewTestRunner(files, sharedWatcher, func() {
+			handlersMutex.RLock()
+
+			for _, handler := range activeHandlers {
+				go func(h *Handler) {
+					if err := h.handleRunAllTests(); err != nil {
+						slog.Error(
+							fmt.Sprintf(
+								"Could not run tests on file change: %s",
+								err.Error(),
+							),
+						)
+					}
+				}(handler)
+			}
+
+			handlersMutex.RUnlock()
+		})
 
 		if err != nil {
 			_ = sharedWatcher.Close()
@@ -65,6 +84,10 @@ func NewHandler() (*Handler, error) {
 		wsChan: nil,
 	}
 
+	handlersMutex.Lock()
+	activeHandlers = append(activeHandlers, handler)
+	handlersMutex.Unlock()
+
 	return handler, nil
 }
 
@@ -72,7 +95,7 @@ func NewHandler() (*Handler, error) {
 func (h *Handler) HandleMessage(
 	ws WsInterface,
 	messageType int,
-	msg UpdateMessage,
+	msg Message,
 ) error {
 	files := h.runner.GetFiles()
 
@@ -85,7 +108,7 @@ func (h *Handler) HandleMessage(
 		go h.handleMessages(ws)
 	}
 
-	switch msg.Method {
+	switch msg.GetMethod() {
 	case "gofutz:init":
 		if !h.runner.GetHasRunTests() {
 			go func() {
@@ -115,7 +138,7 @@ func (h *Handler) HandleMessage(
 	default:
 		return h.SendResponse(UpdateMessage{
 			Method: "error",
-			Error:  fmt.Sprintf("Unknown method: %s", msg.Method),
+			Error:  fmt.Sprintf("Unknown method: %s", msg.GetMethod()),
 			Params: UpdateParams{
 				Files:     nil,
 				Coverage:  h.runner.GetCoverage(),
@@ -143,6 +166,12 @@ func (h *Handler) handleMessages(ws WsInterface) {
 		json, err := json.Marshal(msg)
 
 		if err != nil {
+			h.mu.Unlock()
+
+			continue
+		}
+
+		if ws == nil {
 			h.mu.Unlock()
 
 			continue
@@ -228,4 +257,19 @@ func (h *Handler) handleRunAllTests() error {
 	})
 
 	return nil
+}
+
+// Close closes the handler.
+func (h *Handler) Close() {
+	handlersMutex.Lock()
+
+	for i, handler := range activeHandlers {
+		if handler == h {
+			activeHandlers = append(activeHandlers[:i], activeHandlers[i+1:]...)
+
+			break
+		}
+	}
+
+	handlersMutex.Unlock()
 }

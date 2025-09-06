@@ -164,5 +164,6 @@ func (w *Websocket) Close() {
 	close(w.close)
 	w.wg.Wait()
 
+	w.handler.Close()
 	_ = w.ws.Close()
 }
