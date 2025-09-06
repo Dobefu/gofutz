@@ -1,18 +1,11 @@
 package testrunner
 
 import (
-	"os"
 	"testing"
 )
 
 func TestRunAllTests(t *testing.T) {
 	t.Parallel()
-
-	cwd, err := os.Getwd()
-
-	if err != nil {
-		t.Fatalf("could not get current working directory: %s", err.Error())
-	}
 
 	tests := []struct {
 		name     string
