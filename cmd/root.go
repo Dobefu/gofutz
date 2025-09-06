@@ -1,10 +1,16 @@
 package cmd
 
 import (
+	"context"
+	"fmt"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/Dobefu/gofutz/internal/server"
+	"github.com/Dobefu/gofutz/internal/websocket"
 	"github.com/spf13/cobra"
 )
 
@@ -26,14 +32,45 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().IntVarP(&port, "port", "p", 7357, "The port to run the test server on")
+	rootCmd.Flags().IntVarP(
+		&port,
+		"port",
+		"p",
+		7357,
+		"The port to run the test server on",
+	)
 }
 
 func runRootCmd(_ *cobra.Command, _ []string) {
-	err := server.NewServer("127.0.0.1", port).Start()
+	srv := server.NewServer("127.0.0.1", port)
 
-	if err != nil {
-		slog.Error("Could not start server", "error", err.Error())
-		os.Exit(1)
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+
+	serverErr := make(chan error, 1)
+
+	go func() {
+		serverErr <- srv.Start()
+	}()
+
+	select {
+	case err := <-serverErr:
+		if err != nil {
+			slog.Error(fmt.Sprintf("Could not start server: %s", err.Error()))
+			os.Exit(1)
+		}
+	case sig := <-sigChan:
+		slog.Info(fmt.Sprintf("Received shutdown signal: %s", sig.String()))
+
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		websocket.CloseAll()
+		err := srv.Shutdown(ctx)
+
+		if err != nil {
+			slog.Error(fmt.Sprintf("Server shutdown error: %s", err.Error()))
+			os.Exit(1)
+		}
 	}
 }

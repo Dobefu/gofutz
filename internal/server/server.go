@@ -2,6 +2,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -43,4 +44,11 @@ func (s *Server) Start() error {
 	slog.Info(fmt.Sprintf("Starting server on %s", url))
 
 	return s.httpServer.ListenAndServe()
+}
+
+// Shutdown shuts down the server.
+func (s *Server) Shutdown(ctx context.Context) error {
+	slog.Info("Shutting down server...")
+
+	return s.httpServer.Shutdown(ctx)
 }
