@@ -18,13 +18,13 @@ func TestHandleFileEvent(t *testing.T) {
 		{
 			name:      "write event",
 			path:      "test.go",
-			operation: "write",
+			operation: "WRITE",
 			expected:  1,
 		},
 		{
 			name:      "non-go file event",
 			path:      "test",
-			operation: "write",
+			operation: "WRITE",
 			expected:  1,
 		},
 	}
