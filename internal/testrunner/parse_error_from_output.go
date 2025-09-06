@@ -25,9 +25,7 @@ func (t *TestRunner) ParseErrorFromOutput(output string) string {
 		if strings.Contains(event.Output, "FAIL") ||
 			strings.Contains(event.Output, "Error:") ||
 			strings.Contains(event.Output, "panic:") ||
-			strings.Contains(event.Output, "--- FAIL:") ||
-			strings.Contains(event.Output, "expected:") ||
-			strings.Contains(event.Output, "got:") {
+			strings.Contains(event.Output, "expected") {
 			errorMessages = append(errorMessages, event.Output)
 		}
 	}
