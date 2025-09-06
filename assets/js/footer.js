@@ -33,6 +33,22 @@
       return;
     }
 
+    output = output
+      .map((line) => {
+        if (line.startsWith("{") && line.endsWith("}")) {
+          const json = JSON.parse(line);
+
+          if (!("Output" in json)) {
+            return "";
+          }
+
+          return json.Output.replace(/\n$/, "");
+        }
+
+        return line;
+      })
+      .filter((line) => line !== "");
+
     const scrollThreshold = 10;
     const scrollPos = footer.scrollTop + footer.clientHeight;
     const shouldScroll = scrollPos >= footer.scrollHeight - scrollThreshold;
