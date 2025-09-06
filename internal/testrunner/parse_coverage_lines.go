@@ -1,5 +1,9 @@
 package testrunner
 
+import (
+	"maps"
+)
+
 // ParseCoverageLines parses the coverage lines.
 func (t *TestRunner) ParseCoverageLines(
 	coverageLines []CoverageLine,
@@ -23,7 +27,12 @@ func (t *TestRunner) ParseCoverageLines(
 
 	files := []File{}
 
-	for fileName, file := range t.files {
+	t.mu.Lock()
+	newFiles := make(map[string]File)
+	maps.Copy(newFiles, t.files)
+	t.mu.Unlock()
+
+	for fileName, file := range newFiles {
 		lines, hasCoverage := coverage[fileName]
 		coveragePercentage := coveragePercentages[fileName]
 
@@ -42,7 +51,9 @@ func (t *TestRunner) ParseCoverageLines(
 				file.Functions[i] = function
 			}
 
+			t.mu.Lock()
 			t.files[fileName] = file
+			t.mu.Unlock()
 			files = append(files, file)
 
 			continue
@@ -61,7 +72,9 @@ func (t *TestRunner) ParseCoverageLines(
 			file.Status = TestStatusPassed
 		}
 
+		t.mu.Lock()
 		t.files[fileName] = file
+		t.mu.Unlock()
 
 		files = append(files, file)
 	}

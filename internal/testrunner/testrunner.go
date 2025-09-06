@@ -10,14 +10,15 @@ import (
 
 // TestRunner defines a test runner.
 type TestRunner struct {
-	files         map[string]File
-	hasRunTests   bool
-	coverage      float64
-	output        []string
-	isRunning     bool
-	debounceFiles map[string]*time.Timer
-	mu            sync.Mutex
-	onFileChange  func()
+	files            map[string]File
+	hasRunTests      bool
+	coverage         float64
+	output           []string
+	isRunning        bool
+	debounceFiles    map[string]*time.Timer
+	debounceDuration time.Duration
+	mu               sync.Mutex
+	onFileChange     func()
 }
 
 // NewTestRunner creates a new test runner.
@@ -29,14 +30,15 @@ func NewTestRunner(files []string, onFileChange func()) (*TestRunner, error) {
 	}
 
 	runner := &TestRunner{
-		files:         tests,
-		hasRunTests:   false,
-		coverage:      -1,
-		output:        []string{},
-		isRunning:     false,
-		debounceFiles: make(map[string]*time.Timer),
-		mu:            sync.Mutex{},
-		onFileChange:  onFileChange,
+		files:            tests,
+		hasRunTests:      false,
+		coverage:         -1,
+		output:           []string{},
+		isRunning:        false,
+		debounceFiles:    make(map[string]*time.Timer),
+		debounceDuration: 100 * time.Millisecond,
+		mu:               sync.Mutex{},
+		onFileChange:     onFileChange,
 	}
 
 	filewatcher.AddListener(func(path, operation string) {

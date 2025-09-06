@@ -145,7 +145,9 @@ func (t *TestRunner) sendCallbacks(
 			}
 		}
 
+		t.mu.Lock()
 		t.files[files[i].Name] = files[i]
+		t.mu.Unlock()
 	}
 
 	completionCallback()

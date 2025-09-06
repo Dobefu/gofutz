@@ -8,6 +8,9 @@ import (
 )
 
 func (t *TestRunner) processFileEvent(path, operation string) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
 	if strings.HasSuffix(path, "_test.go") {
 		return
 	}

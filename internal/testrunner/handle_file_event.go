@@ -15,8 +15,12 @@ func (t *TestRunner) handleFileEvent(path, operation string) {
 		timer.Stop()
 	}
 
-	t.debounceFiles[path] = time.AfterFunc(100*time.Millisecond, func() {
+	t.debounceFiles[path] = time.AfterFunc(t.debounceDuration, func() {
 		if !strings.HasSuffix(path, ".go") {
+			t.mu.Lock()
+			delete(t.debounceFiles, path)
+			t.mu.Unlock()
+
 			return
 		}
 
