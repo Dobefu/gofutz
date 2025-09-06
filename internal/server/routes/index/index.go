@@ -23,9 +23,11 @@ func Handle(w http.ResponseWriter, _ *http.Request) {
 		return
 	}
 
-	err = tmpl.ExecuteTemplate(w, fmt.Sprintf("pages/%s", tmplName), routes.PageVars{
-		Title: "Home",
-	})
+	err = tmpl.ExecuteTemplate(
+		w,
+		fmt.Sprintf("pages/%s", tmplName),
+		routes.PageVars{Title: "Gofutz"},
+	)
 
 	if err != nil {
 		slog.Error(fmt.Sprintf("Could not load template: %s", err.Error()))
