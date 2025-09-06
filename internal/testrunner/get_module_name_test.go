@@ -47,7 +47,7 @@ func TestGetModuleName(t *testing.T) {
 		expected  string
 	}{
 		{
-			name:      "valid go.mod",
+			name:      "valid go mod",
 			modString: "module github.com/example/project\n\nrequire github.com/example/dependency v1.0.0\n",
 			expected:  "github.com/example/project",
 		},
