@@ -135,6 +135,9 @@ func (h *Handler) HandleMessage(
 	case "gofutz:run-all-tests":
 		return h.handleRunAllTests()
 
+	case "gofutz:stop-tests":
+		return h.handleStopTests()
+
 	default:
 		return h.SendResponse(UpdateMessage{
 			Method: "error",
@@ -257,6 +260,21 @@ func (h *Handler) handleRunAllTests() error {
 	})
 
 	return nil
+}
+
+func (h *Handler) handleStopTests() error {
+	h.runner.StopTests()
+	h.runner.SetIsRunning(false)
+
+	return h.SendResponse(UpdateMessage{
+		Method: "gofutz:update",
+		Error:  "",
+		Params: UpdateParams{
+			Files:     nil,
+			Coverage:  h.runner.GetCoverage(),
+			IsRunning: h.runner.GetIsRunning(),
+		},
+	})
 }
 
 // Close closes the handler.

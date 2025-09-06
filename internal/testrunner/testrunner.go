@@ -2,6 +2,7 @@
 package testrunner
 
 import (
+	"context"
 	"sync"
 	"time"
 
@@ -19,6 +20,7 @@ type TestRunner struct {
 	debounceDuration time.Duration
 	mu               sync.Mutex
 	onFileChange     func()
+	cancelFunc       context.CancelFunc
 }
 
 // NewTestRunner creates a new test runner.
@@ -43,6 +45,7 @@ func NewTestRunner(
 		debounceDuration: 100 * time.Millisecond,
 		mu:               sync.Mutex{},
 		onFileChange:     onFileChange,
+		cancelFunc:       nil,
 	}
 
 	fw.AddListener(func(path, operation string) {

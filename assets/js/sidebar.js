@@ -128,7 +128,21 @@
       return;
     }
 
-    runBtn.disabled = isRunning;
+    if (isRunning) {
+      runBtn.classList.add("running");
+      runBtn.title = "Stop tests";
+    } else {
+      runBtn.classList.remove("running");
+      runBtn.title = "Run all tests";
+    }
+
+    if (navigator.userAgent.includes("Mac")) {
+      runBtn.title += " (Cmd+Enter)";
+
+      return;
+    }
+
+    runBtn.title += " (Ctrl+Enter)";
   }
 
   /**
@@ -256,23 +270,28 @@
 
   for (const btn of btnRunAllTests) {
     btn.addEventListener("click", () => {
+      if (btn.classList.contains("running")) {
+        window.dispatchEvent(new CustomEvent("gofutz:stop-tests"));
+
+        return;
+      }
+
       window.dispatchEvent(new CustomEvent("gofutz:run-all-tests"));
     });
   }
 
-  btnRunAllTests.forEach((btn) => {
-    if (navigator.userAgent.includes("Mac")) {
-      btn.title += " (Cmd+Enter)";
-
-      return;
-    }
-
-    btn.title += " (Ctrl+Enter)";
-  });
-
   document.addEventListener("keydown", (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
       e.preventDefault();
+      /** @type {HTMLButtonElement | null} */
+      const runBtn = document.querySelector(".btn__run-tests");
+
+      if (runBtn && runBtn.classList.contains("running")) {
+        window.dispatchEvent(new CustomEvent("gofutz:stop-tests"));
+
+        return;
+      }
+
       window.dispatchEvent(new CustomEvent("gofutz:run-all-tests"));
     }
   });

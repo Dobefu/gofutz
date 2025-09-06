@@ -1,6 +1,7 @@
 package testrunner
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"os"
@@ -15,111 +16,154 @@ func (t *TestRunner) RunAllTests(
 	outputCallback func(output string) error,
 	completionCallback func(),
 ) {
-	go func() {
-		coverageFile, err := os.CreateTemp("", "coverage.out")
+	t.mu.Lock()
 
-		if err != nil {
-			slog.Error(fmt.Sprintf("could not create coverage file: %s", err.Error()))
+	if t.cancelFunc != nil {
+		t.cancelFunc()
+	}
 
-			return
-		}
+	ctx, cancel := context.WithCancel(context.Background())
+	t.cancelFunc = cancel
+	t.mu.Unlock()
 
-		defer func() { _ = coverageFile.Close() }()
-		defer func() { _ = os.Remove(coverageFile.Name()) }()
+	go t.doRunAllTests(
+		ctx,
+		testCompleteCallback,
+		outputCallback,
+		completionCallback,
+	)
+}
 
-		startTime := time.Now()
-		_ = outputCallback("Running all tests")
+func (t *TestRunner) doRunAllTests(
+	ctx context.Context,
+	testCompleteCallback func(file File) error,
+	outputCallback func(output string) error,
+	completionCallback func(),
+) {
+	coverageFile, err := os.CreateTemp("", "coverage.out")
 
-		goPath, err := exec.LookPath("go")
+	if err != nil {
+		slog.Error(fmt.Sprintf("could not create coverage file: %s", err.Error()))
+		completionCallback()
 
-		if err != nil {
-			slog.Error("go command not found")
+		return
+	}
 
-			return
-		}
+	defer func() { _ = coverageFile.Close() }()
+	defer func() { _ = os.Remove(coverageFile.Name()) }()
 
-		cmd := exec.Command( // #nosec G204 - The temp directory is safe.
-			filepath.Clean(goPath),
-			"test",
-			"-json",
-			"-coverprofile",
-			filepath.Clean(coverageFile.Name()),
-			"./...",
-		)
+	startTime := time.Now()
+	_ = outputCallback("Running all tests")
 
-		output, err := cmd.CombinedOutput()
+	goPath, err := exec.LookPath("go")
 
-		if err != nil {
-			_ = outputCallback(
-				fmt.Sprintf(
-					"tests failed: %s\n%s",
-					err.Error(),
-					t.ParseErrorFromOutput(string(output)),
-				),
-			)
+	if err != nil {
+		slog.Error("go command not found")
 
-			coverageLines := []CoverageLine{}
-			coveragePercentages := make(map[string]map[string]float64)
+		return
+	}
 
-			failingTests := t.parseFailedTestFilesFromOutput(string(output))
+	cmd := exec.CommandContext(ctx, // #nosec G204 - The temp directory is safe.
+		filepath.Clean(goPath),
+		"test",
+		"-json",
+		"-coverprofile",
+		filepath.Clean(coverageFile.Name()),
+		"./...",
+	)
 
-			err = t.sendCallbacks(
-				testCompleteCallback,
-				completionCallback,
-				coverageLines,
-				coveragePercentages,
-				failingTests,
-			)
+	output, err := cmd.CombinedOutput()
 
-			if err != nil {
-				slog.Error(
-					fmt.Sprintf(
-						"could not send callbacks after test failure: %s",
-						err.Error(),
-					),
-				)
-			}
+	if ctx.Err() == context.Canceled {
+		_ = outputCallback("Tests stopped by user")
 
-			return
-		}
+		t.mu.Lock()
+		t.cancelFunc = nil
+		t.mu.Unlock()
 
-		_ = outputCallback(string(output))
+		completionCallback()
+
+		return
+	}
+
+	if err != nil {
 		_ = outputCallback(
-			fmt.Sprintf("tests completed in %s", time.Since(startTime)),
+			fmt.Sprintf(
+				"tests failed: %s\n%s",
+				err.Error(),
+				t.ParseErrorFromOutput(string(output)),
+			),
 		)
 
-		coverageLines, err := t.ParseCoverage(coverageFile.Name())
+		coverageLines := []CoverageLine{}
+		coveragePercentages := make(map[string]map[string]float64)
 
-		if err != nil {
-			slog.Error(fmt.Sprintf("could not parse coverage: %s", err.Error()))
-		}
-
-		coveragePercentages, overallCoverage, err := t.GetFuncCoveragePercentages(
-			coverageFile.Name(),
-		)
-
-		if err != nil {
-			slog.Error(
-				fmt.Sprintf("could not get coverage percentages: %s", err.Error()),
-			)
-
-			return
-		}
-
-		t.SetCoverage(overallCoverage)
+		failingTests := t.parseFailedTestFilesFromOutput(string(output))
 
 		err = t.sendCallbacks(
 			testCompleteCallback,
 			completionCallback,
 			coverageLines,
 			coveragePercentages,
-			nil,
+			failingTests,
 		)
 
 		if err != nil {
-			slog.Error(fmt.Sprintf("could not send callbacks: %s", err.Error()))
+			slog.Error(
+				fmt.Sprintf(
+					"could not send callbacks after test failure: %s",
+					err.Error(),
+				),
+			)
 		}
-	}()
+
+		t.mu.Lock()
+		t.cancelFunc = nil
+		t.mu.Unlock()
+
+		return
+	}
+
+	_ = outputCallback(string(output))
+	_ = outputCallback(
+		fmt.Sprintf("tests completed in %s", time.Since(startTime)),
+	)
+
+	coverageLines, err := t.ParseCoverage(coverageFile.Name())
+
+	if err != nil {
+		slog.Error(fmt.Sprintf("could not parse coverage: %s", err.Error()))
+	}
+
+	coveragePercentages, overallCoverage, err := t.GetFuncCoveragePercentages(
+		coverageFile.Name(),
+	)
+
+	if err != nil {
+		slog.Error(
+			fmt.Sprintf("could not get coverage percentages: %s", err.Error()),
+		)
+
+		return
+	}
+
+	t.SetCoverage(overallCoverage)
+
+	err = t.sendCallbacks(
+		testCompleteCallback,
+		completionCallback,
+		coverageLines,
+		coveragePercentages,
+		nil,
+	)
+
+	if err != nil {
+		slog.Error(fmt.Sprintf("could not send callbacks: %s", err.Error()))
+	}
+
+	t.mu.Lock()
+	t.cancelFunc = nil
+	t.mu.Unlock()
 }
 
 func (t *TestRunner) sendCallbacks(

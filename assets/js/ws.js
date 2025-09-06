@@ -42,6 +42,10 @@
       window.addEventListener("gofutz:run-all-tests", () => {
         sendMessage("gofutz:run-all-tests");
       });
+
+      window.addEventListener("gofutz:stop-tests", () => {
+        sendMessage("gofutz:stop-tests");
+      });
     };
 
     /**

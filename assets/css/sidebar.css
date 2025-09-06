@@ -46,6 +46,10 @@
   transform: translate(-50%, -50%);
 }
 
+.btn__run-tests.running::after {
+  content: "⏹";
+}
+
 .btn__run-tests:hover,
 .btn__run-tests:focus-visible {
   border-color: var(--color-btn-hover);
