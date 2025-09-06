@@ -47,7 +47,7 @@ func TestGetModuleName(t *testing.T) {
 		expected  string
 	}{
 		{
-			name:      "valid go mod",
+			name:      "valid go.mod",
 			modString: "module github.com/example/project\n\nrequire github.com/example/dependency v1.0.0\n",
 			expected:  "github.com/example/project",
 		},
@@ -58,15 +58,9 @@ func TestGetModuleName(t *testing.T) {
 			t.Parallel()
 
 			modFile, cleanup := createGoModFile(t, test.name, test.modString)
-			err := os.Chdir(filepath.Dir(modFile))
-
-			if err != nil {
-				t.Fatalf("expected no error, got: %s", err.Error())
-			}
-
 			defer cleanup()
 
-			moduleName := GetModuleName()
+			moduleName := GetModuleName(modFile)
 
 			if moduleName != test.expected {
 				t.Fatalf(

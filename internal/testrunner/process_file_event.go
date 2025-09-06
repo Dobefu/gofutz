@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -23,7 +24,7 @@ func (t *TestRunner) processFileEvent(path, operation string) {
 		return
 	}
 
-	moduleName := GetModuleName()
+	moduleName := GetModuleName(filepath.Join(cwd, "go.mod"))
 	modulePath := fmt.Sprintf("%s%s", moduleName, strings.TrimPrefix(path, cwd))
 
 	switch operation {

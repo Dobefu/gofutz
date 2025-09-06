@@ -7,16 +7,9 @@ import (
 	"strings"
 )
 
-// GetModuleName gets the module name of the Go project in the current directory.
-func GetModuleName() string {
-	cwd, err := os.Getwd()
-
-	if err != nil {
-		return ""
-	}
-
-	goModPath := filepath.Join(cwd, "go.mod")
-	file, err := os.Open(filepath.Clean(goModPath))
+// GetModuleName gets the module name of the Go project in the specified path.
+func GetModuleName(path string) string {
+	file, err := os.Open(filepath.Clean(path))
 
 	if err != nil {
 		return ""

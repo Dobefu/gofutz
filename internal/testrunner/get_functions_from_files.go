@@ -2,11 +2,19 @@ package testrunner
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 )
 
 // GetFunctionsFromFiles gets all functions from the supplied files.
 func GetFunctionsFromFiles(files []string) (map[string]File, error) {
-	moduleName := GetModuleName()
+	cwd, err := os.Getwd()
+
+	if err != nil {
+		return map[string]File{}, err
+	}
+
+	moduleName := GetModuleName(filepath.Join(cwd, "go.mod"))
 
 	allFunctions := map[string]File{}
 	testFiles := map[string][]Function{}
