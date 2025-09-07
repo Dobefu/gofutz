@@ -159,9 +159,12 @@ func (h *Handler) SendResponse(msg Message) error {
 		return nil
 	}
 
-	h.wsChan <- msg
-
-	return nil
+	select {
+	case h.wsChan <- msg:
+		return nil
+	default:
+		return nil
+	}
 }
 
 func (h *Handler) handleMessages(ws WsInterface) {

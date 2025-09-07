@@ -286,7 +286,13 @@
       /** @type {HTMLButtonElement | null} */
       const runBtn = document.querySelector(".btn__run-tests");
 
-      if (runBtn && runBtn.classList.contains("running")) {
+      if (!runBtn) {
+        console.error("Could not find run button");
+
+        return;
+      }
+
+      if (runBtn.classList.contains("running")) {
         window.dispatchEvent(new CustomEvent("gofutz:stop-tests"));
 
         return;
