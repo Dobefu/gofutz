@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"testing"
 )
 
@@ -33,5 +34,21 @@ func TestNewServer(t *testing.T) {
 				t.Fatal("expected httpServer, got nil")
 			}
 		})
+	}
+}
+
+func TestShutdown(t *testing.T) {
+	t.Parallel()
+
+	server := NewServer("127.0.0.1", 7357)
+
+	if server == nil {
+		t.Fatal("expected server, got nil")
+	}
+
+	err := server.Shutdown(context.Background())
+
+	if err != nil {
+		t.Fatalf("expected no error, got: \"%s\"", err.Error())
 	}
 }
