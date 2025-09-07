@@ -1,7 +1,6 @@
 package filewatcher
 
 import (
-	"os"
 	"slices"
 	"testing"
 )
@@ -16,8 +15,10 @@ func TestFilewatcher(t *testing.T) {
 		{
 			name: "regular test files",
 			expected: []string{
+				"add_directory.go",
 				"collect_all_files.go",
 				"filewatcher.go",
+				"handle_file_events.go",
 			},
 		},
 	}
@@ -78,47 +79,6 @@ func TestAddListener(t *testing.T) {
 					test.expected,
 					fw.GetListenerCount(),
 				)
-			}
-		})
-	}
-}
-
-func TestAddDirectory(t *testing.T) {
-	t.Parallel()
-
-	cwd, err := os.Getwd()
-
-	if err != nil {
-		t.Fatalf("expected no error, got: \"%s\"", err.Error())
-	}
-
-	tests := []struct {
-		name string
-	}{
-		{
-			name: "regular test files",
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			t.Parallel()
-
-			fw, err := NewFileWatcher()
-
-			if err != nil {
-				t.Fatalf(
-					"expected no error creating filewatcher, got: \"%s\"",
-					err.Error(),
-				)
-			}
-
-			defer func() { _ = fw.Close() }()
-
-			err = fw.addDirectory(cwd)
-
-			if err != nil {
-				t.Fatalf("expected no error, got: \"%s\"", err.Error())
 			}
 		})
 	}

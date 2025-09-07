@@ -2,10 +2,7 @@
 package filewatcher
 
 import (
-	"log/slog"
 	"os"
-	"path/filepath"
-	"strings"
 	"sync"
 
 	"github.com/fsnotify/fsnotify"
@@ -54,35 +51,6 @@ func NewFileWatcher() (*FileWatcher, error) {
 	return fw, nil
 }
 
-func (fw *FileWatcher) handleFileEvents() {
-	for {
-		select {
-		case event, ok := <-fw.watcher.Events:
-			if !ok {
-				return
-			}
-
-			fw.mu.RLock()
-
-			for _, listener := range fw.listeners {
-				listener(event.Name, event.Op.String())
-			}
-
-			fw.mu.RUnlock()
-
-		case err, ok := <-fw.watcher.Errors:
-			if !ok {
-				return
-			}
-
-			slog.Error(err.Error())
-
-		case <-fw.stopCh:
-			return
-		}
-	}
-}
-
 // AddListener adds an event listener.
 func (fw *FileWatcher) AddListener(listener func(string, string)) {
 	fw.mu.Lock()
@@ -104,36 +72,6 @@ func (fw *FileWatcher) ResetListeners() {
 	fw.mu.Lock()
 	fw.listeners = nil
 	fw.mu.Unlock()
-}
-
-// addDirectory adds all directories in the given directory to the watcher.
-func (fw *FileWatcher) addDirectory(dir string) error {
-	err := fw.watcher.Add(dir)
-
-	if err != nil {
-		return err
-	}
-
-	entries, err := os.ReadDir(dir)
-
-	if err != nil {
-		return err
-	}
-
-	for _, entry := range entries {
-		if !entry.IsDir() || strings.HasPrefix(entry.Name(), ".") {
-			continue
-		}
-
-		subDir := filepath.Join(dir, entry.Name())
-		err = fw.addDirectory(subDir)
-
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 // Close shuts down the file watcher.
