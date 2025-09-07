@@ -12,6 +12,7 @@ import (
 var (
 	sharedRunner         *testrunner.TestRunner
 	initSharedRunnerOnce sync.Once
+	initErr              error
 	activeHandlers       []*Handler
 	handlersMutex        sync.RWMutex
 )
@@ -26,8 +27,6 @@ type Handler struct {
 
 // NewHandler creates a new handler.
 func NewHandler() (*Handler, error) {
-	var initErr error
-
 	initSharedRunnerOnce.Do(func() {
 		files, err := filewatcher.CollectAllFiles()
 
