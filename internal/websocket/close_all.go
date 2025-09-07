@@ -9,7 +9,7 @@ func CloseAll() {
 		handler.mu.Lock()
 
 		if handler.wsChan != nil {
-			handler.channelClosed = true
+			handler.isChannelClosed = true
 			close(handler.wsChan)
 		}
 

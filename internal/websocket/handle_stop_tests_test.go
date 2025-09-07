@@ -11,9 +11,10 @@ func TestHandleStopTests(t *testing.T) {
 	t.Parallel()
 
 	handler := &Handler{
-		runner: &testrunner.TestRunner{},
-		mu:     sync.Mutex{},
-		wsChan: make(chan Message, 100),
+		runner:          &testrunner.TestRunner{},
+		mu:              sync.Mutex{},
+		wsChan:          make(chan Message, 100),
+		isChannelClosed: false,
 	}
 
 	err := handler.handleStopTests()
