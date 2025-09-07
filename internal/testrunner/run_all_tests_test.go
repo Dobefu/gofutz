@@ -1,8 +1,11 @@
 package testrunner
 
 import (
+	"errors"
+	"os"
 	"sync"
 	"testing"
+	"time"
 )
 
 func TestRunAllTests(t *testing.T) {
@@ -64,6 +67,125 @@ func TestRunAllTests(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestRunAllTestsCancel(t *testing.T) {
+	t.Parallel()
+
+	runner := &TestRunner{ // nolint:exhaustruct
+		files: map[string]File{},
+	}
+
+	var isCompletionCalled bool
+	var mu sync.Mutex
+
+	runner.RunAllTests(
+		func(_ File) error { return nil },
+		func(_ string) error { return nil },
+		func() {
+			mu.Lock()
+			isCompletionCalled = true
+			mu.Unlock()
+		},
+	)
+
+	runner.StopTests()
+	time.Sleep(100 * time.Millisecond)
+
+	if !isCompletionCalled {
+		t.Fatalf("expected completion callback to be called")
+	}
+}
+
+func TestHandleTestFailure(t *testing.T) {
+	t.Parallel()
+
+	runner := &TestRunner{ // nolint:exhaustruct
+		files:      map[string]File{},
+		cancelFunc: func() {},
+	}
+
+	runner.handleTestFailure(
+		[]byte{},
+		errors.New("test error"),
+		func(_ File) error { return nil },
+		func(_ string) error { return nil },
+		func() {},
+	)
+
+	if runner.cancelFunc != nil {
+		t.Fatalf("expected cancel func to be nil, got: %T", runner.cancelFunc)
+	}
+}
+
+func TestHandleTestSuccess(t *testing.T) {
+	t.Parallel()
+
+	coverageFile, err := os.CreateTemp("", "coverage_TestHandleTestSuccess.out")
+
+	if err != nil {
+		t.Fatalf("expected no error, got: %s", err.Error())
+	}
+
+	defer func() { _ = os.Remove(coverageFile.Name()) }()
+
+	var isCompletionCalled bool
+	var mu sync.Mutex
+
+	runner := &TestRunner{ // nolint:exhaustruct
+		files:      map[string]File{},
+		cancelFunc: func() {},
+	}
+
+	runner.handleTestSuccess(
+		[]byte{},
+		coverageFile.Name(),
+		time.Now(),
+		func(_ File) error { return nil },
+		func(_ string) error { return nil },
+		func() {
+			mu.Lock()
+			isCompletionCalled = true
+			mu.Unlock()
+		},
+	)
+
+	if runner.cancelFunc != nil {
+		t.Fatalf("expected cancel func to be nil, got: %T", runner.cancelFunc)
+	}
+
+	if !isCompletionCalled {
+		t.Fatalf("expected completion callback to be called")
+	}
+}
+
+func TestHandleTestSuccessErr(t *testing.T) {
+	t.Parallel()
+
+	var isCompletionCalled bool
+	var mu sync.Mutex
+
+	runner := &TestRunner{ // nolint:exhaustruct
+		files:      map[string]File{},
+		cancelFunc: func() {},
+	}
+
+	runner.handleTestSuccess(
+		[]byte{},
+		"coverage.out",
+		time.Now(),
+		func(_ File) error { return nil },
+		func(_ string) error { return nil },
+		func() {
+			mu.Lock()
+			isCompletionCalled = true
+			mu.Unlock()
+		},
+	)
+
+	if isCompletionCalled {
+		t.Fatalf("expected completion callback to not be called")
 	}
 }
 

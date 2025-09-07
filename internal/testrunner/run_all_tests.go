@@ -77,68 +77,109 @@ func (t *TestRunner) doRunAllTests(
 	output, err := cmd.CombinedOutput()
 
 	if ctx.Err() == context.Canceled {
-		_ = outputCallback("Tests stopped by user")
-
-		t.mu.Lock()
-		t.cancelFunc = nil
-		t.mu.Unlock()
-
-		completionCallback()
+		t.handleTestCancellation(outputCallback, completionCallback)
 
 		return
 	}
 
 	if err != nil {
-		_ = outputCallback(
-			fmt.Sprintf(
-				"tests failed: %s\n%s",
-				err.Error(),
-				t.ParseErrorFromOutput(string(output)),
-			),
-		)
-
-		coverageLines := []CoverageLine{}
-		coveragePercentages := make(map[string]map[string]float64)
-
-		failingTests := t.parseFailedTestFilesFromOutput(string(output))
-
-		err = t.sendCallbacks(
+		t.handleTestFailure(
+			output,
+			err,
 			testCompleteCallback,
+			outputCallback,
 			completionCallback,
-			coverageLines,
-			coveragePercentages,
-			failingTests,
 		)
-
-		if err != nil {
-			slog.Error(
-				fmt.Sprintf(
-					"could not send callbacks after test failure: %s",
-					err.Error(),
-				),
-			)
-		}
-
-		t.mu.Lock()
-		t.cancelFunc = nil
-		t.mu.Unlock()
 
 		return
 	}
 
+	t.handleTestSuccess(
+		output,
+		coverageFile.Name(),
+		startTime,
+		testCompleteCallback,
+		outputCallback,
+		completionCallback,
+	)
+}
+
+func (t *TestRunner) handleTestCancellation(
+	outputCallback func(output string) error,
+	completionCallback func(),
+) {
+	_ = outputCallback("Tests stopped by user")
+
+	t.mu.Lock()
+	t.cancelFunc = nil
+	t.mu.Unlock()
+
+	completionCallback()
+}
+
+func (t *TestRunner) handleTestFailure(
+	output []byte,
+	err error,
+	testCompleteCallback func(file File) error,
+	outputCallback func(output string) error,
+	completionCallback func(),
+) {
+	_ = outputCallback(
+		fmt.Sprintf(
+			"tests failed: %s\n%s",
+			err.Error(),
+			t.ParseErrorFromOutput(string(output)),
+		),
+	)
+
+	coverageLines := []CoverageLine{}
+	coveragePercentages := make(map[string]map[string]float64)
+
+	failingTests := t.parseFailedTestFilesFromOutput(string(output))
+
+	err = t.sendCallbacks(
+		testCompleteCallback,
+		completionCallback,
+		coverageLines,
+		coveragePercentages,
+		failingTests,
+	)
+
+	if err != nil {
+		slog.Error(
+			fmt.Sprintf(
+				"could not send callbacks after test failure: %s",
+				err.Error(),
+			),
+		)
+	}
+
+	t.mu.Lock()
+	t.cancelFunc = nil
+	t.mu.Unlock()
+}
+
+func (t *TestRunner) handleTestSuccess(
+	output []byte,
+	coverageFileName string,
+	startTime time.Time,
+	testCompleteCallback func(file File) error,
+	outputCallback func(output string) error,
+	completionCallback func(),
+) {
 	_ = outputCallback(string(output))
 	_ = outputCallback(
 		fmt.Sprintf("tests completed in %s", time.Since(startTime)),
 	)
 
-	coverageLines, err := t.ParseCoverage(coverageFile.Name())
+	coverageLines, err := t.ParseCoverage(coverageFileName)
 
 	if err != nil {
 		slog.Error(fmt.Sprintf("could not parse coverage: %s", err.Error()))
 	}
 
 	coveragePercentages, overallCoverage, err := t.GetFuncCoveragePercentages(
-		coverageFile.Name(),
+		coverageFileName,
 	)
 
 	if err != nil {
