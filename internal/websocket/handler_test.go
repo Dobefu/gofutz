@@ -62,8 +62,13 @@ func TestSendResponse(t *testing.T) {
 			t.Parallel()
 
 			handler, err := NewHandler()
+
 			if err != nil {
 				t.Fatalf("expected no error, got: %s", err.Error())
+			}
+
+			if handler == nil {
+				t.Fatalf("expected handler, got nil")
 			}
 
 			test.setup(handler)
