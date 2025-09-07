@@ -171,9 +171,23 @@ func TestHandleTestSuccessErr(t *testing.T) {
 		cancelFunc: func() {},
 	}
 
+	tmpFile, err := os.CreateTemp(
+		"",
+		"invalid-coverage-TestHandleTestSuccessErr.out",
+	)
+
+	if err != nil {
+		t.Fatalf("failed to create temp file: %v", err)
+	}
+
+	defer func() { _ = os.Remove(tmpFile.Name()) }()
+
+	_, _ = tmpFile.WriteString("bogus")
+	_ = tmpFile.Close()
+
 	runner.handleTestSuccess(
 		[]byte{},
-		"/nonexistent/coverage.out",
+		tmpFile.Name(),
 		time.Now(),
 		func(_ File) error { return nil },
 		func(_ string) error { return nil },
