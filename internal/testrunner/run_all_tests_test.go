@@ -173,7 +173,7 @@ func TestHandleTestSuccessErr(t *testing.T) {
 
 	runner.handleTestSuccess(
 		[]byte{},
-		"coverage.out",
+		"/nonexistent/coverage.out",
 		time.Now(),
 		func(_ File) error { return nil },
 		func(_ string) error { return nil },

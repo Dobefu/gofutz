@@ -42,8 +42,8 @@ jobs:
 
       - name: Run tests
         run: |
-          go test "./..." -coverprofile="test-results/coverage.out" -covermode=count
-          go test "./..." -coverprofile="coverage.out" -covermode=count -json > test-report.out
+          go test "./..." -v -coverprofile="test-results/coverage.out" -covermode=count
+          go test "./..." -v -coverprofile="coverage.out" -covermode=count -json > test-report.out
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@8c71dc039c2dd71d3821e89a2b58ecc7fee6ced9
