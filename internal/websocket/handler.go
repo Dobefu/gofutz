@@ -26,11 +26,13 @@ type Handler struct {
 
 // NewHandler creates a new handler.
 func NewHandler() (*Handler, error) {
+	var initErr error
+
 	initSharedRunnerOnce.Do(func() {
 		files, err := filewatcher.CollectAllFiles()
 
 		if err != nil {
-			slog.Error(fmt.Sprintf("Could not collect all files: %s", err.Error()))
+			initErr = fmt.Errorf("could not collect all files: %s", err.Error())
 
 			return
 		}
@@ -39,7 +41,7 @@ func NewHandler() (*Handler, error) {
 		sharedWatcher, err = filewatcher.NewFileWatcher()
 
 		if err != nil {
-			slog.Error(fmt.Sprintf("Could not create file watcher: %s", err.Error()))
+			initErr = fmt.Errorf("could not create file watcher: %s", err.Error())
 
 			return
 		}
@@ -67,7 +69,7 @@ func NewHandler() (*Handler, error) {
 
 		if err != nil {
 			_ = sharedWatcher.Close()
-			slog.Error(fmt.Sprintf("Could not initialize runner: %s", err.Error()))
+			initErr = fmt.Errorf("could not initialize runner: %s", err.Error())
 
 			return
 		}
@@ -75,8 +77,8 @@ func NewHandler() (*Handler, error) {
 		sharedRunner = runner
 	})
 
-	if sharedRunner == nil {
-		return nil, fmt.Errorf("no shared runner instance found")
+	if initErr != nil {
+		return nil, initErr
 	}
 
 	handler := &Handler{
