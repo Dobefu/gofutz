@@ -6,9 +6,14 @@ func CloseAll() {
 	defer handlersMutex.Unlock()
 
 	for _, handler := range activeHandlers {
+		handler.mu.Lock()
+
 		if handler.wsChan != nil {
+			handler.channelClosed = true
 			close(handler.wsChan)
 		}
+
+		handler.mu.Unlock()
 	}
 
 	activeHandlers = nil

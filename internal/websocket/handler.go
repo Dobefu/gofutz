@@ -18,9 +18,10 @@ var (
 
 // Handler defines a websocket handler.
 type Handler struct {
-	runner *testrunner.TestRunner
-	mu     sync.Mutex
-	wsChan chan Message
+	runner        *testrunner.TestRunner
+	mu            sync.Mutex
+	wsChan        chan Message
+	channelClosed bool
 }
 
 // NewHandler creates a new handler.
@@ -75,9 +76,10 @@ func NewHandler() (*Handler, error) {
 	})
 
 	handler := &Handler{
-		runner: sharedRunner,
-		mu:     sync.Mutex{},
-		wsChan: nil,
+		runner:        sharedRunner,
+		mu:            sync.Mutex{},
+		wsChan:        nil,
+		channelClosed: false,
 	}
 
 	handlersMutex.Lock()
@@ -89,7 +91,10 @@ func NewHandler() (*Handler, error) {
 
 // SendResponse sends a websocket response.
 func (h *Handler) SendResponse(msg Message) error {
-	if h.wsChan == nil {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	if h.wsChan == nil || h.channelClosed {
 		return nil
 	}
 
@@ -174,6 +179,15 @@ func (h *Handler) handleRunAllTests() error {
 
 // Close closes the handler.
 func (h *Handler) Close() {
+	h.mu.Lock()
+
+	if h.wsChan != nil {
+		h.channelClosed = true
+		close(h.wsChan)
+	}
+
+	h.mu.Unlock()
+
 	handlersMutex.Lock()
 
 	for i, handler := range activeHandlers {
