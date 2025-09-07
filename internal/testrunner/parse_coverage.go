@@ -84,7 +84,7 @@ func getCoverageStartLineAndColumn(line string) (int, int, error) {
 	).FindAllString(line, -1)
 
 	if len(startLineAndColumnMatches) < 1 {
-		return 0, 0, fmt.Errorf("invalid coverage line: %s", line)
+		return 0, 0, fmt.Errorf("missing start line and column: %s", line)
 	}
 
 	startLineAndColumn := startLineAndColumnMatches[0]
@@ -108,7 +108,7 @@ func getCoverageEndLineAndColumn(line string) (int, int, error) {
 	).FindAllString(line, -1)
 
 	if len(endLineAndColumnMatches) < 2 {
-		return 0, 0, fmt.Errorf("invalid coverage line: %s", line)
+		return 0, 0, fmt.Errorf("missing end line and column: %s", line)
 	}
 
 	endLineAndColumn := endLineAndColumnMatches[1]
@@ -132,7 +132,7 @@ func getCoverageNumberOfStatements(line string) (int, error) {
 	).FindAllStringSubmatch(line, -1)
 
 	if len(numberOfStatementsMatches) < 1 {
-		return 0, fmt.Errorf("invalid coverage line: %s", line)
+		return 0, fmt.Errorf("missing number of statements: %s", line)
 	}
 
 	return strconv.Atoi(numberOfStatementsMatches[0][1])
@@ -144,7 +144,7 @@ func getCoverageExecutionCount(line string) (int, error) {
 	).FindAllStringSubmatch(line, -1)
 
 	if len(executionCountMatches) < 2 {
-		return 0, fmt.Errorf("invalid coverage line: %s", line)
+		return 0, fmt.Errorf("missing execution count: %s", line)
 	}
 
 	return strconv.Atoi(executionCountMatches[1][1])

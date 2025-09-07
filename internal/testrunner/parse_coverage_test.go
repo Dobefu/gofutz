@@ -114,22 +114,22 @@ func TestParseCoverageErr(t *testing.T) {
 		{
 			name:           "invalid coverage file - missing start line",
 			coverageString: "mode:set\ntest.go:1",
-			expected:       "invalid coverage line:",
+			expected:       "missing start line and column:",
 		},
 		{
 			name:           "invalid coverage file - missing end column",
 			coverageString: "mode:set\ntest.go:1.2:3",
-			expected:       "invalid coverage line:",
-		},
-		{
-			name:           "invalid coverage file - missing number of statements",
-			coverageString: "mode:set\ntest.go:1.2:3.4 5",
-			expected:       "invalid coverage line:",
+			expected:       "missing end line and column:",
 		},
 		{
 			name:           "invalid coverage file - missing execution count",
+			coverageString: "mode:set\ntest.go:1.2:3.4 5",
+			expected:       "missing execution count:",
+		},
+		{
+			name:           "invalid coverage file - missing number of statements",
 			coverageString: "mode:set\ntest.go:1.2:3.4",
-			expected:       "invalid coverage line:",
+			expected:       "missing number of statements:",
 		},
 	}
 
