@@ -67,6 +67,8 @@ func (t *TestRunner) doRunAllTests(
 		filepath.Clean(goPath),
 		"test",
 		"-json",
+		"-timeout",
+		"30s",
 		"-coverprofile",
 		filepath.Clean(coverageFile.Name()),
 		"./...",
