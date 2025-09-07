@@ -1,15 +1,12 @@
 package websocket
 
 import (
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"sync"
-	"time"
 
 	"github.com/Dobefu/gofutz/internal/filewatcher"
 	"github.com/Dobefu/gofutz/internal/testrunner"
-	"github.com/gorilla/websocket"
 )
 
 var (
@@ -28,13 +25,11 @@ type Handler struct {
 
 // NewHandler creates a new handler.
 func NewHandler() (*Handler, error) {
-	var err error
-
 	initSharedRunnerOnce.Do(func() {
-		files, collectErr := filewatcher.CollectAllFiles()
+		files, err := filewatcher.CollectAllFiles()
 
-		if collectErr != nil {
-			err = collectErr
+		if err != nil {
+			slog.Error(fmt.Sprintf("Could not collect all files: %s", err.Error()))
 
 			return
 		}
@@ -43,6 +38,8 @@ func NewHandler() (*Handler, error) {
 		sharedWatcher, err = filewatcher.NewFileWatcher()
 
 		if err != nil {
+			slog.Error(fmt.Sprintf("Could not create file watcher: %s", err.Error()))
+
 			return
 		}
 
@@ -69,16 +66,13 @@ func NewHandler() (*Handler, error) {
 
 		if err != nil {
 			_ = sharedWatcher.Close()
+			slog.Error(fmt.Sprintf("Could not initialize runner: %s", err.Error()))
 
 			return
 		}
 
 		sharedRunner = runner
 	})
-
-	if err != nil {
-		return nil, err
-	}
 
 	handler := &Handler{
 		runner: sharedRunner,
@@ -93,66 +87,6 @@ func NewHandler() (*Handler, error) {
 	return handler, nil
 }
 
-// HandleMessage handles a websocket message.
-func (h *Handler) HandleMessage(
-	ws WsInterface,
-	messageType int,
-	msg Message,
-) error {
-	files := h.runner.GetFiles()
-
-	if messageType != websocket.TextMessage {
-		return nil
-	}
-
-	if h.wsChan == nil {
-		h.wsChan = make(chan Message, 100)
-		go h.handleMessages(ws)
-	}
-
-	switch msg.GetMethod() {
-	case "gofutz:init":
-		if !h.runner.GetHasRunTests() {
-			go func() {
-				time.Sleep(100 * time.Millisecond)
-				err := h.handleRunAllTests()
-
-				if err != nil {
-					slog.Error(fmt.Sprintf("Could not run all tests: %s", err.Error()))
-				}
-			}()
-		}
-
-		return h.SendResponse(InitMessage{
-			Method: "gofutz:init",
-			Error:  "",
-			Params: InitParams{
-				Files:     files,
-				Coverage:  h.runner.GetCoverage(),
-				IsRunning: h.runner.GetIsRunning(),
-				Output:    h.runner.GetOutput(),
-			},
-		})
-
-	case "gofutz:run-all-tests":
-		return h.handleRunAllTests()
-
-	case "gofutz:stop-tests":
-		return h.handleStopTests()
-
-	default:
-		return h.SendResponse(UpdateMessage{
-			Method: "error",
-			Error:  fmt.Sprintf("Unknown method: %s", msg.GetMethod()),
-			Params: UpdateParams{
-				Files:     nil,
-				Coverage:  h.runner.GetCoverage(),
-				IsRunning: h.runner.GetIsRunning(),
-			},
-		})
-	}
-}
-
 // SendResponse sends a websocket response.
 func (h *Handler) SendResponse(msg Message) error {
 	if h.wsChan == nil {
@@ -164,35 +98,6 @@ func (h *Handler) SendResponse(msg Message) error {
 		return nil
 	default:
 		return nil
-	}
-}
-
-func (h *Handler) handleMessages(ws WsInterface) {
-	for msg := range h.wsChan {
-		h.mu.Lock()
-
-		json, err := json.Marshal(msg)
-
-		if err != nil {
-			h.mu.Unlock()
-
-			continue
-		}
-
-		if ws == nil {
-			h.mu.Unlock()
-
-			continue
-		}
-
-		err = ws.WriteMessage(websocket.TextMessage, json)
-		h.mu.Unlock()
-
-		if err != nil {
-			slog.Error(fmt.Sprintf("Could not send message: %s", err.Error()))
-
-			return
-		}
 	}
 }
 
