@@ -51,6 +51,11 @@ func TestGetModuleName(t *testing.T) {
 			modString: "module github.com/example/project\n\nrequire github.com/example/dependency v1.0.0\n",
 			expected:  "github.com/example/project",
 		},
+		{
+			name:      "empty go.mod",
+			modString: "",
+			expected:  "",
+		},
 	}
 
 	for _, test := range tests {
