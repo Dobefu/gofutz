@@ -6,6 +6,14 @@ import (
 )
 
 func (t *TestRunner) handleFileEvent(path, operation string) {
+	if !strings.HasSuffix(path, ".go") {
+		return
+	}
+
+	if operation == "CHMOD" || operation == "RENAME" {
+		return
+	}
+
 	t.mu.Lock()
 	timer, hasTimer := t.debounceFiles[path]
 
@@ -14,13 +22,16 @@ func (t *TestRunner) handleFileEvent(path, operation string) {
 	}
 
 	t.debounceFiles[path] = time.AfterFunc(t.debounceDuration, func() {
-		if !strings.HasSuffix(path, ".go") {
-			t.mu.Lock()
+		t.mu.Lock()
+
+		if t.isRunning {
 			delete(t.debounceFiles, path)
 			t.mu.Unlock()
 
 			return
 		}
+
+		t.mu.Unlock()
 
 		t.processFileEvent(path, operation)
 
