@@ -28,6 +28,18 @@ func TestHandleFileEvent(t *testing.T) {
 			operation: "WRITE",
 			expected:  1,
 		},
+		{
+			name:      "chmod event",
+			path:      "test.go",
+			operation: "CHMOD",
+			expected:  0,
+		},
+		{
+			name:      "rename event",
+			path:      "test.go",
+			operation: "RENAME",
+			expected:  0,
+		},
 	}
 
 	for _, test := range tests {
@@ -59,10 +71,12 @@ func TestHandleFileEvent(t *testing.T) {
 				return
 			}
 
-			select {
-			case <-timeoutFired:
-			case <-time.After(100 * time.Millisecond):
-				t.Fatal("timeout did not fire within the expected timeframe")
+			if test.expected > 0 {
+				select {
+				case <-timeoutFired:
+				case <-time.After(100 * time.Millisecond):
+					t.Fatal("timeout did not fire within the expected timeframe")
+				}
 			}
 
 			time.Sleep(2 * time.Millisecond)
