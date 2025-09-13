@@ -7,9 +7,12 @@
       const file = globalThis.testData.files[fileName];
 
       if (file) {
-        window.dispatchEvent(
-          new CustomEvent("gofutz:toggle-file", { detail: file }),
-        );
+        /** @type {HTMLDivElement | null} */
+        const mainContentContainer = document.querySelector("#main-content");
+
+        if (mainContentContainer) {
+          renderFileContent(file, mainContentContainer);
+        }
       }
     }
   }
