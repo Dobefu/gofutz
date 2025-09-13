@@ -33,7 +33,7 @@
     wss = new WebSocket(url);
 
     wss.onopen = () => {
-      if (!wss) {
+      if (!wss || !abortController) {
         return;
       }
 
@@ -41,39 +41,65 @@
 
       window.addEventListener("gofutz:run-all-tests", () => {
         sendMessage("gofutz:run-all-tests");
-      });
+      }, { signal: abortController.signal });
 
       window.addEventListener("gofutz:stop-tests", () => {
         sendMessage("gofutz:stop-tests");
-      });
+      }, { signal: abortController.signal });
     };
 
     /**
      * @param {MessageEvent} e
      */
     wss.onmessage = (e) => {
-      /** @type {UpdateMessage} */
+      /** @type {InitMessage | UpdateMessage | OutputMessage} */
       const msg = JSON.parse(e.data);
 
       switch (msg.method) {
         case "gofutz:init":
-          window.dispatchEvent(new CustomEvent("gofutz:init", { detail: msg }));
+          if (!("files" in msg.params) || !("output" in msg.params)) {
+            return;
+          }
+
+          globalThis.testData.files = msg.params.files;
+          globalThis.testData.coverage = msg.params.coverage;
+          globalThis.testData.isRunning = msg.params.isRunning;
+          globalThis.testData.output = msg.params.output;
+
+          window.dispatchEvent(new CustomEvent("gofutz:init"));
+
           break;
 
         case "gofutz:update":
-          window.dispatchEvent(
-            new CustomEvent("gofutz:update", { detail: msg }),
-          );
+          if ("output" in msg.params) {
+            return;
+          }
+
+          globalThis.testData.coverage = msg.params.coverage;
+          globalThis.testData.isRunning = msg.params.isRunning;
+
+          for (const file of Object.values(msg.params.files)) {
+            globalThis.testData.files[file.name] = file;
+          }
+
+          window.dispatchEvent(new CustomEvent("gofutz:update"));
+
           break;
 
         case "gofutz:output":
-          window.dispatchEvent(
-            new CustomEvent("gofutz:output", { detail: msg }),
-          );
+          if (!("output" in msg.params)) {
+            return;
+          }
+
+          globalThis.testData.output = msg.params.output;
+
+          window.dispatchEvent(new CustomEvent("gofutz:output"));
+
           break;
 
         default:
           console.log({ "Unknown event": msg });
+
           break;
       }
     };

@@ -1,3 +1,9 @@
+declare global {
+  interface Window {
+    documents: Record<string, File>;
+  }
+}
+
 interface Line {
   number: number;
   startLine: number;

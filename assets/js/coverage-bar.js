@@ -1,20 +1,11 @@
 "use strict";
 
 (() => {
-  /**
-   * @param {CustomEvent} e
-   */
-  function handleGofutzUpdates(e) {
-    /** @type {UpdateMessage} */
-    const details = e.detail;
-
-    renderCoverage(details.params.coverage);
+  function handleGofutzUpdates() {
+    renderCoverage();
   }
 
-  /**
-   * @param {number} coverage
-   */
-  function renderCoverage(coverage) {
+  function renderCoverage() {
     /** @type {HTMLDivElement | null} */
     const coveredContainer = document.querySelector(".covered");
 
@@ -24,8 +15,8 @@
       return;
     }
 
-    if (coverage >= 0) {
-      coveredContainer.style.width = `${coverage}%`;
+    if (globalThis.testData.coverage >= 0) {
+      coveredContainer.style.width = `${globalThis.testData.coverage}%`;
     }
   }
 

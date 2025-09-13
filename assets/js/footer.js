@@ -1,20 +1,11 @@
 "use strict";
 
 (() => {
-  /**
-   * @param {CustomEvent} e
-   */
-  function handleGofutzUpdates(e) {
-    /** @type {InitMessage} */
-    const details = e.detail;
-
-    renderFooterOutput(details.params.output);
+  function handleGofutzUpdates() {
+    renderFooterOutput();
   }
 
-  /**
-   * @param {string[]} output
-   */
-  function renderFooterOutput(output) {
+  function renderFooterOutput() {
     /** @type {HTMLPreElement | null} */
     const footerOutput = document.querySelector(".footer__output");
 
@@ -33,16 +24,20 @@
       return;
     }
 
-    output = output
+    globalThis.testData.output = globalThis.testData.output
       .map((line) => {
         if (line.startsWith("{") && line.endsWith("}")) {
-          const json = JSON.parse(line);
+          try {
+            const json = JSON.parse(line);
 
-          if (!("Output" in json)) {
+            if (!("Output" in json)) {
+              return "";
+            }
+
+            return json.Output.replace(/\n$/, "");
+          } catch (error) {
             return "";
           }
-
-          return json.Output.replace(/\n$/, "");
         }
 
         return line;
@@ -53,7 +48,7 @@
     const scrollPos = footer.scrollTop + footer.clientHeight;
     const shouldScroll = scrollPos >= footer.scrollHeight - scrollThreshold;
 
-    footerOutput.innerHTML = output.join("\n");
+    footerOutput.innerHTML = globalThis.testData.output.join("\n");
 
     if (shouldScroll) {
       footer.scrollTop = footer.scrollHeight;

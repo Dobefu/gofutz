@@ -1,16 +1,10 @@
 "use strict";
 
 (() => {
-  /**
-   * @param {CustomEvent} e
-   */
-  function handleGofutzInit(e) {
-    /** @type {InitMessage} */
-    const details = e.detail;
-
+  function handleGofutzInit() {
     if (window.location.hash) {
       const fileName = decodeURIComponent(window.location.hash.slice(1));
-      const file = details.params.files[fileName];
+      const file = globalThis.testData.files[fileName];
 
       if (file) {
         window.dispatchEvent(
@@ -35,6 +29,37 @@
     }
 
     return matchingLine.executionCount > 0 ? "covered" : "uncovered";
+  }
+
+  /**
+   * @param {File} file
+   * @param {HTMLDivElement} mainContentContainer
+   */
+  function renderFileContent(file, mainContentContainer) {
+    const code = file.highlightedCode
+      .split("\n")
+      .map((line, idx) => {
+        const processedLine = line.replace(/^<\/span>/g, "");
+        const lineNumber = idx + 1;
+        const coverageStatus = getLineCoverageStatus(
+          lineNumber,
+          file.coveredLines,
+        );
+
+        return `<div class="main-content__code--line ${coverageStatus}">
+        <span class="main-content__code--line-number">${lineNumber}</span>
+        <span class="main-content__code--line-content">${processedLine}</span></span>
+      </div>`;
+      })
+      .join("");
+
+    mainContentContainer.innerHTML = "";
+
+    const codeContainer = document.createElement("pre");
+    codeContainer.classList.add("main-content__code");
+    codeContainer.dataset.file = file.name;
+    codeContainer.innerHTML = code;
+    mainContentContainer.appendChild(codeContainer);
   }
 
   /**
@@ -66,38 +91,10 @@
       return;
     }
 
-    const code = file.highlightedCode
-      .split("\n")
-      .map((line, idx) => {
-        const processedLine = line.replace(/^<\/span>/g, "");
-        const lineNumber = idx + 1;
-        const coverageStatus = getLineCoverageStatus(
-          lineNumber,
-          file.coveredLines,
-        );
-
-        return `<div class="main-content__code--line ${coverageStatus}">
-        <span class="main-content__code--line-number">${lineNumber}</span>
-        <span class="main-content__code--line-content">${processedLine}</span></span>
-      </div>`;
-      })
-      .join("");
-
-    mainContentContainer.innerHTML = "";
-
-    const codeContainer = document.createElement("pre");
-    codeContainer.classList.add("main-content__code");
-    codeContainer.dataset.file = file.name;
-    codeContainer.innerHTML = code;
-    mainContentContainer.appendChild(codeContainer);
+    renderFileContent(file, mainContentContainer);
   }
 
-  /**
-   * @param {CustomEvent} e
-   */
-  function handleGofutzUpdate(e) {
-    /** @type {UpdateMessage} */
-    const details = e.detail;
+  function handleGofutzUpdate() {
     /** @type {HTMLPreElement | null} */
     const currentCodeContainer = document.querySelector(".main-content__code");
     /** @type {HTMLDivElement | null} */
@@ -109,18 +106,13 @@
 
     const currentFileName = currentCodeContainer.dataset.file;
 
-    if (!details.params.files) {
+    if (!globalThis.testData.files) {
       return;
     }
 
-    for (const file of Object.values(details.params.files)) {
+    for (const file of Object.values(globalThis.testData.files)) {
       if (file.name === currentFileName) {
-        if (file.coveredLines && file.coveredLines.length > 0) {
-          mainContentContainer.innerHTML = "";
-          handleGofutzToggleFile(
-            new CustomEvent("gofutz:toggle-file", { detail: file }),
-          );
-        }
+        renderFileContent(file, mainContentContainer);
 
         break;
       }

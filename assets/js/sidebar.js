@@ -1,12 +1,7 @@
 "use strict";
 
 (() => {
-  /**
-   * @param {CustomEvent} e
-   */
-  function handleGofutzInit(e) {
-    /** @type {UpdateMessage} */
-    const details = e.detail;
+  function handleGofutzInit() {
     const testFilesContainer = document.querySelector(".sidebar__tests");
 
     if (!testFilesContainer) {
@@ -15,12 +10,12 @@
       return;
     }
 
-    renderCoverage(details);
-    updateRunButtonState(details.params.isRunning);
+    renderCoverage();
+    updateRunButtonState();
 
     testFilesContainer.innerHTML = "";
 
-    const files = Object.values(details.params.files).sort((a, b) => {
+    const files = Object.values(globalThis.testData.files).sort((a, b) => {
       return a.name.localeCompare(b.name);
     });
 
@@ -29,12 +24,7 @@
     }
   }
 
-  /**
-   * @param {CustomEvent} e
-   */
-  function handleGofutzUpdate(e) {
-    /** @type {UpdateMessage} */
-    const details = e.detail;
+  function handleGofutzUpdate() {
     const testFilesContainer = document.querySelector(".sidebar__tests");
 
     if (!testFilesContainer) {
@@ -43,14 +33,14 @@
       return;
     }
 
-    renderCoverage(details);
-    updateRunButtonState(details.params.isRunning);
+    renderCoverage();
+    updateRunButtonState();
 
-    if (!details.params.files) {
+    if (!globalThis.testData.files) {
       return;
     }
 
-    const files = Object.values(details.params.files).sort((a, b) => {
+    const files = Object.values(globalThis.testData.files).sort((a, b) => {
       return a.name.localeCompare(b.name);
     });
 
@@ -70,11 +60,12 @@
     }
   }
 
-  /**
-   * @param {CustomEvent} e
-   */
-  function handleGofutzToggleFile(e) {
-    const fileName = e.detail.name;
+  function handleGofutzToggleFile() {
+    const fileName =
+      globalThis.testData.files[
+        decodeURIComponent(window.location.hash.slice(1))
+      ]?.name ?? "";
+
     /** @type {HTMLElement | null} */
     const testFilesContainer = document.querySelector(".sidebar__tests");
 
@@ -94,12 +85,7 @@
     }
 
     for (const file of files) {
-      const hashFileName = decodeURIComponent(window.location.hash.slice(1));
-
-      if (
-        file.dataset.name !== fileName &&
-        file.dataset.name !== hashFileName
-      ) {
+      if (file.dataset.name !== fileName) {
         file.classList.remove("open");
 
         continue;
@@ -107,6 +93,7 @@
 
       if (file.classList.contains("open")) {
         file.classList.remove("open");
+        window.location.hash = "";
 
         continue;
       }
@@ -115,10 +102,7 @@
     }
   }
 
-  /**
-   * @param {boolean} isRunning
-   */
-  function updateRunButtonState(isRunning) {
+  function updateRunButtonState() {
     /** @type {HTMLButtonElement | null} */
     const runBtn = document.querySelector(".btn__run-tests");
 
@@ -128,7 +112,7 @@
       return;
     }
 
-    if (isRunning) {
+    if (globalThis.testData.isRunning) {
       runBtn.classList.add("running");
       runBtn.title = "Stop tests";
     } else {
@@ -145,10 +129,7 @@
     runBtn.title += " (Ctrl+Enter)";
   }
 
-  /**
-   * @param {UpdateMessage} details
-   */
-  function renderCoverage(details) {
+  function renderCoverage() {
     /** @type {Element | null} */
     const coverageContainer = document.querySelector(".coverage");
 
@@ -158,13 +139,13 @@
       return;
     }
 
-    if (details.params.coverage < 0) {
+    if (globalThis.testData.coverage < 0) {
       coverageContainer.textContent = "…%";
 
       return;
     }
 
-    coverageContainer.textContent = `${details.params.coverage.toFixed(1)}%`;
+    coverageContainer.textContent = `${globalThis.testData.coverage.toFixed(1)}%`;
   }
 
   /**
@@ -205,10 +186,7 @@
 
     const fileItemStatus = document.createElement("div");
     fileItemStatus.classList.add("sidebar__tests--file-status");
-    fileItemStatus.classList.add(
-      "sidebar__tests--file-status",
-      `status-${file.status}`,
-    );
+    fileItemStatus.classList.add(`status-${file.status}`);
     fileItemContainer.appendChild(fileItemStatus);
 
     const fileItemTitle = document.createElement("div");
