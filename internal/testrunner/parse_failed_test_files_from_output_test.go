@@ -13,7 +13,17 @@ func TestParseFailedTestFilesFromOutput(t *testing.T) {
 		expected map[string]bool
 	}{
 		{
-			name:   "success",
+			name:     "success",
+			output:   `{"time":"2021-01-01T00:00:00Z","action":"pass","package":"/path/to/test","test":"TestSomething","output":"","elapsed":0}`,
+			expected: map[string]bool{},
+		},
+		{
+			name:     "fail output without tests",
+			output:   `{"time":"2021-01-01T00:00:00Z","action":"fail","package":"/path/to/test","output":"","elapsed":0}`,
+			expected: map[string]bool{},
+		},
+		{
+			name:   "fail output with test",
 			output: `{"time":"2021-01-01T00:00:00Z","action":"fail","package":"/path/to/test","test":"TestSomething","output":"","elapsed":0}`,
 			expected: map[string]bool{
 				"/path/to/test.go": true,
