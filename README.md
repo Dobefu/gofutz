@@ -6,6 +6,8 @@
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Dobefu_gofutz&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Dobefu_gofutz)
 [![Go Report Card](https://goreportcard.com/badge/github.com/Dobefu/gofutz)](https://goreportcard.com/report/github.com/Dobefu/gofutz)
 
+> **To Futz around** (verb): To engage in time-consuming, often tedious work on minor details or technical adjustments.
+
 ![GoFutz Dashboard](screenshot.png)
 
 A Go test UI that watches your files and runs tests automatically.
