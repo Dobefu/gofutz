@@ -22,6 +22,8 @@
     for (const file of files) {
       renderTestFile(file, testFilesContainer);
     }
+
+    handleGofutzToggleFile();
   }
 
   function handleGofutzUpdate() {
@@ -165,10 +167,18 @@
         return;
       }
 
-      window.location.hash = encodeURIComponent(file.name);
+      const currentFile = globalThis.testData.files[file.name];
+
+      if (!currentFile) {
+        console.error("Could not find file:", file.name);
+
+        return;
+      }
+
+      window.location.hash = encodeURIComponent(currentFile.name);
 
       window.dispatchEvent(
-        new CustomEvent("gofutz:toggle-file", { detail: file }),
+        new CustomEvent("gofutz:toggle-file", { detail: currentFile }),
       );
     });
 
