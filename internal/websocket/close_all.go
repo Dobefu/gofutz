@@ -20,6 +20,5 @@ func CloseAll() {
 
 	if sharedRunner != nil {
 		sharedRunner.Close()
-		sharedRunner = nil
 	}
 }

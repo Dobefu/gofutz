@@ -112,6 +112,10 @@ func (h *Handler) SendResponse(msg Message) error {
 }
 
 func (h *Handler) handleRunAllTests() error {
+	if h.runner == nil {
+		return fmt.Errorf("test runner is not initialized")
+	}
+
 	h.runner.SetHasRunTests(true)
 	h.runner.SetIsRunning(true)
 

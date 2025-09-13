@@ -1,6 +1,14 @@
 package websocket
 
+import (
+	"fmt"
+)
+
 func (h *Handler) handleStopTests() error {
+	if h.runner == nil {
+		return fmt.Errorf("test runner is not initialized")
+	}
+
 	h.runner.StopTests()
 	h.runner.SetIsRunning(false)
 

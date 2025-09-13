@@ -15,6 +15,10 @@ func (h *Handler) HandleMessage(
 	messageType int,
 	msg Message,
 ) error {
+	if h.runner == nil {
+		return fmt.Errorf("test runner is not initialized")
+	}
+
 	files := h.runner.GetFiles()
 
 	if messageType != websocket.TextMessage {
