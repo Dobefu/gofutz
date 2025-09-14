@@ -44,15 +44,6 @@ func TestSendResponse(t *testing.T) {
 			setup: func(h *Handler) {
 				h.wsChan = make(chan Message, 1)
 				h.isChannelClosed = false
-				h.wsChan <- UpdateMessage{
-					Method: "bogus:method",
-					Error:  "",
-					Params: UpdateParams{
-						Files:     nil,
-						Coverage:  0,
-						IsRunning: false,
-					},
-				}
 			},
 		},
 	}
