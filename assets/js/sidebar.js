@@ -46,18 +46,9 @@
       return a.name.localeCompare(b.name);
     });
 
+    testFilesContainer.innerHTML = "";
+
     for (const file of files) {
-      const fileItem = testFilesContainer.querySelector(
-        `[data-name="${file.name}"]`,
-      );
-
-      if (fileItem) {
-        fileItem.innerHTML = "";
-        buildFileContent(file, fileItem);
-
-        continue;
-      }
-
       renderTestFile(file, testFilesContainer);
     }
   }
