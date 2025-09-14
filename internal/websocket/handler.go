@@ -103,12 +103,9 @@ func (h *Handler) SendResponse(msg Message) error {
 		return nil
 	}
 
-	select {
-	case h.wsChan <- msg:
-		return nil
-	default:
-		return nil
-	}
+	h.wsChan <- msg
+
+	return nil
 }
 
 func (h *Handler) handleRunAllTests() error {

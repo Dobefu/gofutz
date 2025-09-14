@@ -26,7 +26,7 @@ func (h *Handler) HandleMessage(
 	}
 
 	if h.wsChan == nil {
-		h.wsChan = make(chan Message, 100)
+		h.wsChan = make(chan Message, 1000)
 		go h.handleMessages(ws)
 	}
 
