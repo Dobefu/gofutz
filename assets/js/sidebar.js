@@ -12,12 +12,13 @@
 
     renderCoverage();
     updateRunButtonState();
+    initializeSortOption();
 
     testFilesContainer.innerHTML = "";
 
-    const files = Object.values(globalThis.testData.files).sort((a, b) => {
-      return a.name.localeCompare(b.name);
-    });
+    const urlParams = new URLSearchParams(window.location.search);
+    const sortOption = urlParams.get("sort") || "name-asc";
+    const files = sortFiles(globalThis.testData.files, sortOption);
 
     for (const file of files) {
       renderTestFile(file, testFilesContainer);
@@ -42,9 +43,9 @@
       return;
     }
 
-    const files = Object.values(globalThis.testData.files).sort((a, b) => {
-      return a.name.localeCompare(b.name);
-    });
+    const urlParams = new URLSearchParams(window.location.search);
+    const sortOption = urlParams.get("sort") || "name-asc";
+    const files = sortFiles(globalThis.testData.files, sortOption);
 
     testFilesContainer.innerHTML = "";
 
@@ -139,6 +140,83 @@
     }
 
     coverageContainer.textContent = `${globalThis.testData.coverage.toFixed(1)}%`;
+  }
+
+  function initializeSortOption() {
+    /** @type {HTMLSelectElement | null} */
+    const sortSelect = document.querySelector(".btn__sort-tests");
+
+    if (!sortSelect) {
+      console.error("Could not find sort select element");
+
+      return;
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const sortParam = urlParams.get("sort");
+
+    if (sortParam) {
+      sortSelect.value = sortParam;
+    }
+
+    sortSelect.addEventListener("change", () => {
+      const url = new URL(window.location.href);
+
+      url.searchParams.set("sort", sortSelect.value);
+      window.history.replaceState({}, "", url);
+
+      const testFilesContainer = document.querySelector(".sidebar__tests");
+
+      if (!testFilesContainer) {
+        console.error("Could not find test files container");
+
+        return;
+      }
+
+      if (!globalThis.testData.files) {
+        return;
+      }
+
+      const files = sortFiles(globalThis.testData.files, sortSelect.value);
+      testFilesContainer.innerHTML = "";
+
+      for (const file of files) {
+        renderTestFile(file, testFilesContainer);
+      }
+    });
+  }
+
+  /**
+   * @param {Record<string, File>} files
+   * @param {string} sortOption
+   *
+   * @returns {File[]}
+   */
+  function sortFiles(files, sortOption) {
+    switch (sortOption) {
+      case "name-asc":
+        return Object.values(files).sort((a, b) => {
+          return a.name.localeCompare(b.name);
+        });
+
+      case "name-desc":
+        return Object.values(files).sort((a, b) => {
+          return b.name.localeCompare(a.name);
+        });
+
+      case "coverage-asc":
+        return Object.values(files).sort((a, b) => {
+          return a.coverage - b.coverage;
+        });
+
+      case "coverage-desc":
+        return Object.values(files).sort((a, b) => {
+          return b.coverage - a.coverage;
+        });
+
+      default:
+        return Object.values(files);
+    }
   }
 
   /**

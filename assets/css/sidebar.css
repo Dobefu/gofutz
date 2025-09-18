@@ -60,6 +60,37 @@
   color: var(--color-btn-hover);
 }
 
+.btn__sort-tests--wrapper {
+  position: relative;
+}
+
+.btn__sort-tests--wrapper::after {
+  content: "▼";
+  font-size: 0.75rem;
+  inset-inline-end: 0.75rem;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.btn__sort-tests {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: var(--color-sidebar-border);
+  border: 0;
+  border-radius: 1rem;
+  color: var(--color-sidebar-foreground);
+  font-size: 1rem;
+  overflow: hidden;
+  padding: 0.5rem 2rem 0.5rem 1rem;
+}
+
+.coverage {
+  text-wrap: nowrap;
+  text-align: end;
+  width: 4.75rem;
+}
+
 .sidebar__tests {
   overflow: auto;
   padding: 1rem;

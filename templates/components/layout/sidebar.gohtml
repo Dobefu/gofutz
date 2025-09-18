@@ -5,6 +5,19 @@
     <div class="sidebar__header">
       <button class="btn__run-tests" title="Run all tests"></button>
 
+      <div class="btn__sort-tests--wrapper">
+        <select class="btn__sort-tests">
+          {{- range .SortOptions -}}
+            <option
+              value="{{- .Value -}}"
+              {{- if eq $.SelectedSortOption .Value -}}selected{{- end -}}
+            >
+              {{- .Label -}}
+            </option>
+          {{- end -}}
+        </select>
+      </div>
+
       <div class="coverage"></div>
     </div>
 
