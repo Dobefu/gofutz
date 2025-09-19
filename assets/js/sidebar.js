@@ -52,6 +52,8 @@
     for (const file of files) {
       renderTestFile(file, testFilesContainer);
     }
+
+    handleGofutzToggleFile();
   }
 
   function handleGofutzToggleFile() {

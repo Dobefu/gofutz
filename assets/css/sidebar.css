@@ -82,7 +82,7 @@
   color: var(--color-sidebar-foreground);
   font-size: 1rem;
   overflow: hidden;
-  padding: 0.5rem 2rem 0.5rem 1rem;
+  padding: 0.25rem 2rem 0.25rem 1rem;
 }
 
 .coverage {
@@ -93,22 +93,19 @@
 
 .sidebar__tests {
   overflow: auto;
-  padding: 1rem;
-  padding-inline-start: calc(0.5rem + 1px);
+  padding: 0.5rem;
   scrollbar-gutter: stable;
 }
 
 .sidebar__tests--file {
-  border-left: 2px solid transparent;
-  border-radius: 0.25rem;
+  border-radius: 0.75rem;
   cursor: pointer;
-  margin-block-end: 0.5rem;
   margin-inline-start: -1px;
-  padding-inline-start: calc(0.5rem + 1px);
+  padding: calc(0.5rem + 1px);
 }
 
 .sidebar__tests--file.open {
-  border-left-color: var(--color-foreground-dark);
+  background-color: var(--color-sidebar-border);
 }
 
 .sidebar__tests--file-container {
