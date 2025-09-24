@@ -5,8 +5,12 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/Dobefu/gofutz/internal/server/routes"
+	"github.com/Dobefu/gofutz/internal/testrunner"
 	"github.com/Dobefu/gofutz/templates"
 )
 
@@ -21,6 +25,16 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal server error", 500)
 
 		return
+	}
+
+	title := "GoFutz"
+	cwd, err := os.Getwd()
+
+	if err == nil {
+		moduleName := testrunner.GetModuleName(filepath.Join(cwd, "go.mod"))
+		moduleParts := strings.Split(moduleName, "/")
+
+		title = fmt.Sprintf("%s | GoFutz", moduleParts[len(moduleParts)-1])
 	}
 
 	sortOptions := []routes.SortOption{
@@ -40,7 +54,7 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 		w,
 		fmt.Sprintf("pages/%s", tmplName),
 		routes.PageVars{
-			Title:              "Gofutz",
+			Title:              title,
 			SortOptions:        sortOptions,
 			SelectedSortOption: selectedSort,
 		},
