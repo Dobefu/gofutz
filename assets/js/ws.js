@@ -39,13 +39,21 @@
 
       wss.send(JSON.stringify({ method: "gofutz:init" }));
 
-      window.addEventListener("gofutz:run-all-tests", () => {
-        sendMessage("gofutz:run-all-tests");
-      }, { signal: abortController.signal });
+      window.addEventListener(
+        "gofutz:run-all-tests",
+        () => {
+          sendMessage("gofutz:run-all-tests");
+        },
+        { signal: abortController.signal },
+      );
 
-      window.addEventListener("gofutz:stop-tests", () => {
-        sendMessage("gofutz:stop-tests");
-      }, { signal: abortController.signal });
+      window.addEventListener(
+        "gofutz:stop-tests",
+        () => {
+          sendMessage("gofutz:stop-tests");
+        },
+        { signal: abortController.signal },
+      );
     };
 
     /**
@@ -78,8 +86,10 @@
           globalThis.testData.coverage = msg.params.coverage;
           globalThis.testData.isRunning = msg.params.isRunning;
 
-          for (const file of Object.values(msg.params.files)) {
-            globalThis.testData.files[file.name] = file;
+          if (msg.params.files) {
+            for (const file of Object.values(msg.params.files)) {
+              globalThis.testData.files[file.name] = file;
+            }
           }
 
           window.dispatchEvent(new CustomEvent("gofutz:update"));
