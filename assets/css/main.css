@@ -14,6 +14,10 @@
   --color-sidebar-foreground: #cad5e2;
   --color-footer-background: #18181b;
   --color-footer-border: #09090b;
+  --color-heatmap-high: #22c55e;
+  --color-heatmap-medium: #eab308;
+  --color-heatmap-low: #ef4444;
+  --color-heatmap-none: #6b7280;
 }
 
 *,
@@ -143,7 +147,8 @@ h6 {
 }
 
 .dashboard__widgets {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 2rem;
 }
 
@@ -154,6 +159,10 @@ h6 {
   box-shadow: 0 0 0.5rem 0 rgb(0, 0, 0, 0.25);
   padding: 1.5rem;
   width: 100%;
+}
+
+.dashboard__widget--heatmap {
+  grid-column: span 2;
 }
 
 .dashboard__widget h3 {
@@ -193,6 +202,102 @@ h6 {
   align-items: center;
   font-size: 1rem;
   font-weight: 600;
+}
+
+.heatmap-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.heatmap-grid {
+  display: grid;
+  gap: 0.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(1.25rem, 1fr));
+  max-width: 100%;
+}
+
+.heatmap-cell {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  cursor: pointer;
+  position: relative;
+}
+
+.heatmap-cell--high {
+  background-color: #22c55e;
+}
+
+.heatmap-cell--medium {
+  background-color: #eab308;
+}
+
+.heatmap-cell--low {
+  background-color: #ef4444;
+}
+
+.heatmap-cell--no-coverage {
+  background-color: #6b7280;
+}
+
+.heatmap-tooltip {
+  position: absolute;
+  inset-block-end: 100%;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  background-color: var(--color-footer-background);
+  border: 1px solid var(--color-footer-border);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  white-space: nowrap;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  margin-block-end: 0.5rem;
+}
+
+.heatmap-tooltip--visible {
+  opacity: 1;
+}
+
+.heatmap-legend {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.legend-color {
+  width: 1rem;
+  height: 1rem;
+  border-radius: .25rem;
+}
+
+.legend-color--high {
+  background-color: var(--color-heatmap-high);
+}
+
+.legend-color--medium {
+  background-color: var(--color-heatmap-medium);
+}
+
+.legend-color--low {
+  background-color: var(--color-heatmap-low);
+}
+
+.legend-color--none {
+  background-color: var(--color-heatmap-none);
+}
+
+.legend-label {
+  font-size: 0.8rem;
+  color: var(--color-sidebar-foreground);
 }
 
 .file-path {

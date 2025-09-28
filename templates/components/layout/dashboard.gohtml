@@ -27,6 +27,33 @@
         {{ end }}
       </div>
     </div>
+
+    <div class="dashboard__widget dashboard__widget--heatmap">
+      <h3>Coverage Heatmap</h3>
+      <div class="heatmap-container">
+        <div class="heatmap-grid" id="coverage-heatmap">
+          <!-- Populated by JavaScript -->
+        </div>
+        <div class="heatmap-legend">
+          <div class="legend-item">
+            <span class="legend-color legend-color--high"></span>
+            <span class="legend-label">High (75%+)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color legend-color--medium"></span>
+            <span class="legend-label">Medium (25-75%)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color legend-color--low"></span>
+            <span class="legend-label">Low (0-25%)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color legend-color--none"></span>
+            <span class="legend-label">No Coverage (0%)</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 {{- end -}}

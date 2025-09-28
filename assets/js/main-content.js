@@ -35,9 +35,15 @@
     const isRunning = globalThis.testData.isRunning;
 
     /** @type {HTMLElement | null} */
-    const totalTestsElement = dashboardContainer.querySelector(".stat__value--total");
+    const totalTestsElement = dashboardContainer.querySelector(
+      ".stat__value--total",
+    );
+
     /** @type {HTMLElement | null} */
-    const coverageElement = dashboardContainer.querySelector(".stat__value--coverage");
+    const coverageElement = dashboardContainer.querySelector(
+      ".stat__value--coverage",
+    );
+
     /** @type {HTMLElement | null} */
     const statusElement = dashboardContainer.querySelector(
       ".status__running, .status__idle",
@@ -61,6 +67,94 @@
       statusElement.textContent = "🔄 Running...";
     } else {
       statusElement.textContent = "⏸️ Idle";
+    }
+
+    updateHeatmap();
+  }
+
+  function updateHeatmap() {
+    /** @type {HTMLDivElement | null} */
+    const heatmapGrid = document.querySelector("#coverage-heatmap");
+
+    if (!heatmapGrid) {
+      return;
+    }
+
+    const files = globalThis.testData.files;
+    const fileEntries = Object.entries(files);
+
+    heatmapGrid.innerHTML = "";
+
+    fileEntries.forEach(([fileName, file]) => {
+      const cell = document.createElement("div");
+      cell.className = "heatmap-cell";
+      cell.dataset.fileName = fileName;
+      cell.dataset.coverage = file.coverage.toFixed(1);
+
+      const coverage = file.coverage;
+      let backgroundColor;
+
+      if (coverage <= 0) {
+        backgroundColor = "var(--color-heatmap-none)";
+      } else if (coverage < 25) {
+        const mixPercentage = 100 - coverage * 4;
+        backgroundColor = `color-mix(in srgb, var(--color-heatmap-low) 100%, var(--color-heatmap-none) ${mixPercentage}%)`;
+      } else if (coverage < 50) {
+        const mixPercentage = (coverage - 25) * 4;
+        backgroundColor = `color-mix(in srgb, var(--color-heatmap-low) 100%, var(--color-heatmap-medium) ${mixPercentage}%)`;
+      } else if (coverage < 75) {
+        const mixPercentage = (coverage - 50) * 4;
+        backgroundColor = `color-mix(in srgb, var(--color-heatmap-medium) 100%, var(--color-heatmap-high) ${mixPercentage}%)`;
+      } else {
+        const mixPercentage = 100 - (coverage - 75) * 4;
+        backgroundColor = `color-mix(in srgb, var(--color-heatmap-high) 100%, var(--color-heatmap-medium) ${mixPercentage}%)`;
+      }
+
+      cell.style.backgroundColor = backgroundColor;
+
+      cell.addEventListener("mouseenter", (e) => {
+        if (!(e.target instanceof HTMLElement)) {
+          return;
+        }
+
+        showTooltip(e.target, fileName, file.coverage);
+      });
+
+      cell.addEventListener("mouseleave", () => {
+        hideTooltip();
+      });
+
+      cell.addEventListener("click", () => {
+        globalThis.location.hash = encodeURIComponent(fileName);
+        handleGofutzInit();
+      });
+
+      heatmapGrid.appendChild(cell);
+    });
+  }
+
+  /**
+   * @param {HTMLElement} element
+   * @param {string} fileName
+   * @param {number} coverage
+   */
+  function showTooltip(element, fileName, coverage) {
+    hideTooltip();
+
+    const tooltip = document.createElement("div");
+    tooltip.className = "heatmap-tooltip";
+    tooltip.textContent = `${fileName}: ${coverage.toFixed(1)}%`;
+
+    element.appendChild(tooltip);
+    tooltip.classList.add("heatmap-tooltip--visible");
+  }
+
+  function hideTooltip() {
+    /** @type {HTMLElement | null} */
+    const existingTooltip = document.querySelector(".heatmap-tooltip");
+
+    if (existingTooltip) {
+      existingTooltip.remove();
     }
   }
 
