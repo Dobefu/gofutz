@@ -10,7 +10,7 @@
           {{- range .SortOptions -}}
             <option
               value="{{- .Value -}}"
-              {{- if eq $.SelectedSortOption .Value -}}selected{{- end -}}
+              {{- if eq $.SelectedSortOption .Value }} selected{{- end -}}
             >
               {{- .Label -}}
             </option>

@@ -11,4 +11,12 @@ type PageVars struct {
 	Title              string
 	SortOptions        []SortOption
 	SelectedSortOption string
+	DashboardData      DashboardData
+}
+
+// DashboardData contains basic dashboard information.
+type DashboardData struct {
+	TotalTests      int
+	OverallCoverage float64
+	IsRunning       bool
 }

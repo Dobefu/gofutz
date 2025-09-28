@@ -11,10 +11,75 @@
         const mainContentContainer = document.querySelector("#main-content");
 
         if (mainContentContainer) {
-          renderFileContent(file, mainContentContainer);
+          renderFileContent(file);
         }
       }
+    } else {
+      showDashboard();
     }
+  }
+
+  function updateDashboard() {
+    /** @type {HTMLDivElement | null} */
+    const dashboardContainer = document.querySelector("#dashboard-container");
+
+    if (!dashboardContainer) {
+      console.error("Could not find dashboard container");
+
+      return;
+    }
+
+    const coverage = globalThis.testData.coverage;
+    const numFiles = Object.keys(globalThis.testData.files).length;
+    const coveragePercentage = coverage > 0 ? coverage.toFixed(1) : "…";
+    const isRunning = globalThis.testData.isRunning;
+
+    /** @type {HTMLElement | null} */
+    const totalTestsElement = dashboardContainer.querySelector(".stat__value--total");
+    /** @type {HTMLElement | null} */
+    const coverageElement = dashboardContainer.querySelector(".stat__value--coverage");
+    /** @type {HTMLElement | null} */
+    const statusElement = dashboardContainer.querySelector(
+      ".status__running, .status__idle",
+    );
+
+    if (totalTestsElement) {
+      totalTestsElement.textContent = numFiles.toString();
+    }
+
+    if (coverageElement) {
+      coverageElement.textContent = `${coveragePercentage}%`;
+    }
+
+    if (!statusElement) {
+      console.error("Could not find status element");
+
+      return;
+    }
+
+    if (isRunning) {
+      statusElement.textContent = "🔄 Running...";
+    } else {
+      statusElement.textContent = "⏸️ Idle";
+    }
+  }
+
+  function showDashboard() {
+    /** @type {HTMLDivElement | null} */
+    const dashboardContainer = document.querySelector("#dashboard-container");
+
+    /** @type {HTMLDivElement | null} */
+    const fileContainer = document.querySelector("#file-container");
+
+    if (dashboardContainer) {
+      dashboardContainer.style.display = "";
+    }
+
+    if (fileContainer) {
+      fileContainer.innerHTML = "";
+    }
+
+    updateDashboard();
   }
 
   /**
@@ -36,9 +101,8 @@
 
   /**
    * @param {File} file
-   * @param {HTMLDivElement} mainContentContainer
    */
-  function renderFileContent(file, mainContentContainer) {
+  function renderFileContent(file) {
     const code = file.highlightedCode
       .split("\n")
       .map((line, idx) => {
@@ -56,18 +120,30 @@
       })
       .join("");
 
-    mainContentContainer.innerHTML = "";
+    /** @type {HTMLDivElement | null} */
+    const dashboardContainer = document.querySelector("#dashboard-container");
 
-    const filePathHeader = document.createElement("div");
-    filePathHeader.classList.add("file-path");
-    filePathHeader.textContent = file.name;
-    mainContentContainer.appendChild(filePathHeader);
+    /** @type {HTMLDivElement | null} */
+    const fileContainer = document.querySelector("#file-container");
 
-    const codeContainer = document.createElement("pre");
-    codeContainer.classList.add("main-content__code");
-    codeContainer.dataset.file = file.name;
-    codeContainer.innerHTML = code;
-    mainContentContainer.appendChild(codeContainer);
+    if (dashboardContainer) {
+      dashboardContainer.style.display = "none";
+    }
+
+    if (fileContainer) {
+      fileContainer.innerHTML = "";
+
+      const filePathHeader = document.createElement("div");
+      filePathHeader.classList.add("file-path");
+      filePathHeader.textContent = file.name;
+      fileContainer.appendChild(filePathHeader);
+
+      const codeContainer = document.createElement("pre");
+      codeContainer.classList.add("main-content__code");
+      codeContainer.dataset.file = file.name;
+      codeContainer.innerHTML = code;
+      fileContainer.appendChild(codeContainer);
+    }
   }
 
   /**
@@ -94,21 +170,29 @@
       currentCodeContainer &&
       currentCodeContainer.dataset.file === file.name
     ) {
-      const filePathHeader = mainContentContainer.querySelector(".file-path");
+      /** @type {HTMLDivElement | null} */
+      const dashboardContainer = document.querySelector("#dashboard-container");
 
-      if (filePathHeader) {
-        filePathHeader.remove();
+      /** @type {HTMLDivElement | null} */
+      const fileContainer = document.querySelector("#file-container");
+
+      if (dashboardContainer) {
+        dashboardContainer.style.display = "";
       }
 
-      currentCodeContainer.remove();
+      if (fileContainer) {
+        fileContainer.innerHTML = "";
+      }
 
       return;
     }
 
-    renderFileContent(file, mainContentContainer);
+    renderFileContent(file);
   }
 
   function handleGofutzUpdate() {
+    updateDashboard();
+
     /** @type {HTMLPreElement | null} */
     const currentCodeContainer = document.querySelector(".main-content__code");
     /** @type {HTMLDivElement | null} */
@@ -126,7 +210,7 @@
 
     for (const file of Object.values(globalThis.testData.files)) {
       if (file.name === currentFileName) {
-        renderFileContent(file, mainContentContainer);
+        renderFileContent(file);
 
         break;
       }

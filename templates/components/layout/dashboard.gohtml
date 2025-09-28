@@ -1,0 +1,32 @@
+{{- define "components/layout/dashboard" -}}
+<div class="dashboard">
+  <div class="dashboard__widgets">
+    <div class="dashboard__widget dashboard__widget--overview">
+      <h3>Test Overview</h3>
+      <div class="widget__stats">
+        <div class="stat">
+          <span class="stat__label">Coverage</span>
+          <span class="stat__value stat__value--coverage">…%</span>
+        </div>
+        <div class="stat">
+          <span class="stat__label">Total Tests</span>
+          <span class="stat__value stat__value--total">
+            {{- .DashboardData.TotalTests -}}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard__widget dashboard__widget--status">
+      <h3>Status</h3>
+      <div class="status">
+        {{ if .DashboardData.IsRunning }}
+          <span class="status__running">🔄 Running...</span>
+        {{ else }}
+          <span class="status__idle">⏸️ Idle</span>
+        {{ end }}
+      </div>
+    </div>
+  </div>
+</div>
+{{- end -}}

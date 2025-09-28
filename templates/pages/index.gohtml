@@ -4,5 +4,11 @@
   {{- template "layouts/default/sidebar" . -}}
   {{- template "layouts/default/content" . -}}
 
+  <div id="dashboard-container">
+    {{- template "components/layout/dashboard" . -}}
+  </div>
+
+  <div id="file-container"></div>
+
   {{- template "layouts/default/foot" . -}}
 {{- end -}}

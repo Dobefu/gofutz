@@ -50,6 +50,12 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 		selectedSort = "name-asc"
 	}
 
+	dashboardData := routes.DashboardData{
+		TotalTests:      0,
+		OverallCoverage: 0,
+		IsRunning:       false,
+	}
+
 	err = tmpl.ExecuteTemplate(
 		w,
 		fmt.Sprintf("pages/%s", tmplName),
@@ -57,6 +63,7 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 			Title:              title,
 			SortOptions:        sortOptions,
 			SelectedSortOption: selectedSort,
+			DashboardData:      dashboardData,
 		},
 	)
 
