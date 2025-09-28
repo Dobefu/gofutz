@@ -42,7 +42,7 @@
     const code = file.highlightedCode
       .split("\n")
       .map((line, idx) => {
-        const processedLine = line.replace(/^<\/span>/g, "");
+        const processedLine = line.replaceAll(/^<\/span>/g, "");
         const lineNumber = idx + 1;
         const coverageStatus = getLineCoverageStatus(
           lineNumber,

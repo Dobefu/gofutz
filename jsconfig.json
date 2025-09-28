@@ -4,6 +4,6 @@
     "checkJs": true,
     "module": "CommonJS",
     "strictNullChecks": true,
-    "target": "ES6"
+    "target": "ES2021"
   }
 }
