@@ -275,7 +275,11 @@
     const fileItem = document.createElement("div");
     fileItem.classList.add("sidebar__tests--file");
     fileItem.dataset.name = file.name;
-    fileItem.addEventListener("click", () => {
+    fileItem.tabIndex = 0;
+    fileItem.setAttribute("role", "button");
+    fileItem.setAttribute("aria-label", `Toggle ${file.name} test file`);
+
+    const toggleFile = () => {
       /** @type {HTMLDivElement | null} */
       const mainContentContainer = document.querySelector("#main-content");
 
@@ -297,6 +301,14 @@
       globalThis.dispatchEvent(
         new CustomEvent("gofutz:toggle-file", { detail: currentFile }),
       );
+    };
+
+    fileItem.addEventListener("click", toggleFile);
+    fileItem.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggleFile();
+      }
     });
 
     buildFileContent(file, fileItem);

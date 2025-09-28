@@ -6,7 +6,7 @@
       <button class="btn__run-tests" title="Run all tests"></button>
 
       <div class="btn__sort-tests--wrapper">
-        <select class="btn__sort-tests">
+        <select class="btn__sort-tests" aria-label="Sort tests">
           {{- range .SortOptions -}}
             <option
               value="{{- .Value -}}"
@@ -22,13 +22,13 @@
     </div>
 
     <div class="sidebar__search">
-      <input name="q" placeholder="Search..." type="search">
-      <button class="btn__search-clear" type="button" title="Clear search">
+      <input name="q" placeholder="Search..." type="search" autocomplete="off">
+      <button class="btn__search-clear" type="button" title="Clear search query">
         ×
       </button>
     </div>
 
-    <div class="sidebar__tests" tabindex="0"></div>
+    <div class="sidebar__tests"></div>
   </aside>
 
   <script src="/js/sidebar.js"></script>
