@@ -266,8 +266,7 @@
     fileItemContainer.classList.add("sidebar__tests--file-container");
 
     const fileItemStatus = document.createElement("div");
-    fileItemStatus.classList.add("sidebar__tests--file-status");
-    fileItemStatus.classList.add(`status-${file.status}`);
+    fileItemStatus.classList.add(`sidebar__tests--file-status status-${file.status}`);
     fileItemContainer.appendChild(fileItemStatus);
 
     const fileItemTitle = document.createElement("div");
