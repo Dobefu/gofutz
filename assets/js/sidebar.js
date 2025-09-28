@@ -13,17 +13,9 @@
     renderCoverage();
     updateRunButtonState();
     initializeSortOption();
+    initializeSearch();
 
-    testFilesContainer.innerHTML = "";
-
-    const urlParams = new URLSearchParams(globalThis.location.search);
-    const sortOption = urlParams.get("sort") || "name-asc";
-    const files = sortFiles(globalThis.testData.files, sortOption);
-
-    for (const file of files) {
-      renderTestFile(file, testFilesContainer);
-    }
-
+    renderFiles();
     handleGofutzToggleFile();
   }
 
@@ -43,16 +35,7 @@
       return;
     }
 
-    const urlParams = new URLSearchParams(globalThis.location.search);
-    const sortOption = urlParams.get("sort") || "name-asc";
-    const files = sortFiles(globalThis.testData.files, sortOption);
-
-    testFilesContainer.innerHTML = "";
-
-    for (const file of files) {
-      renderTestFile(file, testFilesContainer);
-    }
-
+    renderFiles();
     handleGofutzToggleFile();
   }
 
@@ -167,25 +150,88 @@
       url.searchParams.set("sort", sortSelect.value);
       globalThis.history.replaceState({}, "", url);
 
-      const testFilesContainer = document.querySelector(".sidebar__tests");
-
-      if (!testFilesContainer) {
-        console.error("Could not find test files container");
-
-        return;
-      }
-
-      if (!globalThis.testData.files) {
-        return;
-      }
-
-      const files = sortFiles(globalThis.testData.files, sortSelect.value);
-      testFilesContainer.innerHTML = "";
-
-      for (const file of files) {
-        renderTestFile(file, testFilesContainer);
-      }
+      renderFiles();
     });
+  }
+
+  function initializeSearch() {
+    /** @type {HTMLInputElement | null} */
+    const searchInput = document.querySelector(".sidebar__search input");
+
+    if (!searchInput) {
+      console.error("Could not find search input element");
+
+      return;
+    }
+
+    const urlParams = new URLSearchParams(globalThis.location.search);
+    const searchParam = urlParams.get("q");
+
+    if (searchParam) {
+      searchInput.value = searchParam;
+    }
+
+    searchInput.addEventListener("input", () => {
+      const url = new URL(globalThis.location.href);
+
+      if (searchInput.value) {
+        url.searchParams.set("q", searchInput.value);
+      } else {
+        url.searchParams.delete("q");
+      }
+
+      globalThis.history.replaceState({}, "", url);
+      renderFiles();
+    });
+
+    /** @type {HTMLButtonElement | null} */
+    const clearBtn = document.querySelector(".btn__search-clear");
+
+    if (clearBtn) {
+      clearBtn.addEventListener("click", () => {
+        searchInput.value = "";
+        const url = new URL(globalThis.location.href);
+        url.searchParams.delete("q");
+        globalThis.history.replaceState({}, "", url);
+        renderFiles();
+      });
+    }
+  }
+
+  function renderFiles() {
+    const testFilesContainer = document.querySelector(".sidebar__tests");
+
+    if (!testFilesContainer) {
+      console.error("Could not find test files container");
+
+      return;
+    }
+
+    if (!globalThis.testData.files) {
+      return;
+    }
+
+    const urlParams = new URLSearchParams(globalThis.location.search);
+    const sortOption = urlParams.get("sort") || "name-asc";
+    const searchQuery = urlParams.get("q")?.toLowerCase() || "";
+
+    let files = sortFiles(globalThis.testData.files, sortOption);
+
+    if (searchQuery) {
+      files = files.filter((file) => {
+        const fileNameMatch = file.name.toLowerCase().includes(searchQuery);
+        const functionMatch = file.functions.some((func) =>
+          func.name.toLowerCase().includes(searchQuery),
+        );
+        return fileNameMatch || functionMatch;
+      });
+    }
+
+    testFilesContainer.innerHTML = "";
+
+    for (const file of files) {
+      renderTestFile(file, testFilesContainer);
+    }
   }
 
   /**
@@ -266,7 +312,10 @@
     fileItemContainer.classList.add("sidebar__tests--file-container");
 
     const fileItemStatus = document.createElement("div");
-    fileItemStatus.classList.add(`sidebar__tests--file-status status-${file.status}`);
+    fileItemStatus.classList.add(
+      "sidebar__tests--file-status",
+      `status-${file.status}`,
+    );
     fileItemContainer.appendChild(fileItemStatus);
 
     const fileItemTitle = document.createElement("div");
