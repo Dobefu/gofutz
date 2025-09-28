@@ -58,6 +58,11 @@
 
     mainContentContainer.innerHTML = "";
 
+    const filePathHeader = document.createElement("div");
+    filePathHeader.classList.add("file-path");
+    filePathHeader.textContent = file.name;
+    mainContentContainer.appendChild(filePathHeader);
+
     const codeContainer = document.createElement("pre");
     codeContainer.classList.add("main-content__code");
     codeContainer.dataset.file = file.name;
@@ -89,6 +94,12 @@
       currentCodeContainer &&
       currentCodeContainer.dataset.file === file.name
     ) {
+      const filePathHeader = mainContentContainer.querySelector(".file-path");
+
+      if (filePathHeader) {
+        filePathHeader.remove();
+      }
+
       currentCodeContainer.remove();
 
       return;

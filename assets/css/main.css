@@ -123,8 +123,20 @@ h6 {
   padding: 1rem;
   position: absolute;
   text-align: center;
-  top: 50%;
+  inset-block-start: 50%;
   transform: translateY(-50%);
+}
+
+.file-path {
+  background-color: var(--color-background);
+  border-block-end: 1px solid var(--color-sidebar-border);
+  color: var(--color-sidebar-foreground);
+  font-family: monospace;
+  padding: 0.75rem 1rem;
+  position: sticky;
+  inset-block-start: 0;
+  transform: translateY(-1rem);
+  z-index: 1;
 }
 
 .main-content__code--line {
