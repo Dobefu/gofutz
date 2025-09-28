@@ -96,18 +96,17 @@
 
       if (coverage <= 0) {
         backgroundColor = "var(--color-heatmap-none)";
-      } else if (coverage < 25) {
-        const mixPercentage = 100 - coverage * 4;
-        backgroundColor = `color-mix(in srgb, var(--color-heatmap-low) 100%, var(--color-heatmap-none) ${mixPercentage}%)`;
+      } else if (coverage < 20) {
+        const mixPercentage = (coverage / 20) * 100;
+        backgroundColor = `color-mix(in srgb, var(--color-heatmap-none) 100%, var(--color-heatmap-low) ${mixPercentage}%)`;
       } else if (coverage < 50) {
-        const mixPercentage = (coverage - 25) * 4;
+        const mixPercentage = ((coverage - 20) / 30) * 100;
         backgroundColor = `color-mix(in srgb, var(--color-heatmap-low) 100%, var(--color-heatmap-medium) ${mixPercentage}%)`;
-      } else if (coverage < 75) {
-        const mixPercentage = (coverage - 50) * 4;
+      } else if (coverage < 80) {
+        const mixPercentage = ((coverage - 50) / 30) * 100;
         backgroundColor = `color-mix(in srgb, var(--color-heatmap-medium) 100%, var(--color-heatmap-high) ${mixPercentage}%)`;
       } else {
-        const mixPercentage = 100 - (coverage - 75) * 4;
-        backgroundColor = `color-mix(in srgb, var(--color-heatmap-high) 100%, var(--color-heatmap-medium) ${mixPercentage}%)`;
+        backgroundColor = "var(--color-heatmap-high)";
       }
 
       cell.style.backgroundColor = backgroundColor;
