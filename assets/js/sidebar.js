@@ -268,6 +268,45 @@
   }
 
   /**
+   * @param {number} coverage
+   * @returns {string}
+   */
+  function renderCoverageCircle(coverage) {
+    const strokeDasharray = Math.PI * 2 * 16;
+    let strokeDashoffset = strokeDasharray;
+    let coverageText = "…%";
+
+    if (coverage >= 0) {
+      coverageText = `${coverage.toFixed(1)}%`;
+
+      strokeDashoffset = strokeDasharray - (coverage / 100) * strokeDasharray;
+    }
+
+    return `
+      <span class="sidebar__coverage-text">${coverageText}</span>
+      <div class="sidebar__coverage-circle">
+        <svg viewBox="0 0 36 36">
+          <circle
+            class="sidebar__coverage-circle-bg"
+            cx="18"
+            cy="18"
+            r="16"
+          ></circle>
+          <circle
+            class="sidebar__coverage-circle-fill"
+            cx="18"
+            cy="18"
+            r="16"
+            stroke="var(--color-coverage-bar-covered)"
+            stroke-dasharray="${strokeDasharray}"
+            stroke-dashoffset="${strokeDashoffset}"
+          ></circle>
+        </svg>
+      </div>
+    `;
+  }
+
+  /**
    * @param {File} file
    * @param {Element} testFilesContainer
    */
@@ -338,11 +377,8 @@
 
     const fileItemCoverage = document.createElement("div");
     fileItemCoverage.classList.add("sidebar__tests--file-coverage");
-    if (file.coverage >= 0) {
-      fileItemCoverage.textContent = `${file.coverage.toFixed(1)}%`;
-    } else {
-      fileItemCoverage.textContent = "…%";
-    }
+    fileItemCoverage.innerHTML = renderCoverageCircle(file.coverage);
+
     fileItemContainer.appendChild(fileItemCoverage);
 
     fileItem.appendChild(fileItemContainer);
@@ -363,11 +399,8 @@
 
       const funcItemCoverage = document.createElement("div");
       funcItemCoverage.classList.add("sidebar__tests--test-coverage");
-      if (func.result.coverage >= 0) {
-        funcItemCoverage.textContent = `${func.result.coverage.toFixed(1)}%`;
-      } else {
-        funcItemCoverage.textContent = "…%";
-      }
+      funcItemCoverage.innerHTML = renderCoverageCircle(func.result.coverage);
+
       funcItemContainer.appendChild(funcItemCoverage);
     }
 

@@ -33,7 +33,7 @@
 
 .btn__run-tests:disabled {
   cursor: not-allowed;
-  opacity: 50%;
+  opacity: .5;
 }
 
 .btn__run-tests::after {
@@ -134,7 +134,7 @@
 
 .sidebar__tests {
   overflow: auto;
-  padding: 0.5rem;
+  padding: 0.5rem 0 0.5rem 0.5rem;
   scrollbar-gutter: stable;
 }
 
@@ -231,7 +231,43 @@
 
 .sidebar__tests--file-coverage,
 .sidebar__tests--test-coverage {
+  align-items: center;
   color: var(--color-sidebar-foreground);
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
   min-width: 3.5rem;
+}
+
+.sidebar__coverage-circle {
+  flex-shrink: 0;
+  height: 1rem;
+  position: relative;
+  width: 1rem;
+}
+
+.sidebar__coverage-circle svg {
+  height: 100%;
+  transform: rotate(-90deg);
+  width: 100%;
+}
+
+.sidebar__coverage-circle-bg {
+  fill: none;
+  stroke: var(--color-foreground-dark);
+  stroke-width: 6;
+  opacity: .5;
+}
+
+.sidebar__coverage-circle-fill {
+  fill: none;
+  stroke-width: 6;
+  transition: stroke-dasharray 0.3s ease;
+}
+
+.sidebar__coverage-text {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  min-width: 2.5rem;
   text-align: end;
 }
