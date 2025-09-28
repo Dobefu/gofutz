@@ -37,6 +37,7 @@
             return json.Output.replace(/\n$/, "");
           } catch (error) {
             console.warn("Could not parse line:", line);
+            console.warn("Error:", error);
 
             return "";
           }
