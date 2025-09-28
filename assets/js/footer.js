@@ -57,6 +57,6 @@
     }
   }
 
-  window.addEventListener("gofutz:init", handleGofutzUpdates);
-  window.addEventListener("gofutz:output", handleGofutzUpdates);
+  globalThis.addEventListener("gofutz:init", handleGofutzUpdates);
+  globalThis.addEventListener("gofutz:output", handleGofutzUpdates);
 })();

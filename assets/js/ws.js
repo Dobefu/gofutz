@@ -2,7 +2,7 @@
 
 (() => {
   /** @type {string} */
-  const WS_URL = `ws://${window.location.host}/ws`;
+  const WS_URL = `ws://${globalThis.location.host}/ws`;
 
   /** @type {WebSocket | null} */
   let wss;
@@ -39,7 +39,7 @@
 
       wss.send(JSON.stringify({ method: "gofutz:init" }));
 
-      window.addEventListener(
+      globalThis.addEventListener(
         "gofutz:run-all-tests",
         () => {
           sendMessage("gofutz:run-all-tests");
@@ -47,7 +47,7 @@
         { signal: abortController.signal },
       );
 
-      window.addEventListener(
+      globalThis.addEventListener(
         "gofutz:stop-tests",
         () => {
           sendMessage("gofutz:stop-tests");
@@ -74,7 +74,7 @@
           globalThis.testData.isRunning = msg.params.isRunning;
           globalThis.testData.output = msg.params.output;
 
-          window.dispatchEvent(new CustomEvent("gofutz:init"));
+          globalThis.dispatchEvent(new CustomEvent("gofutz:init"));
 
           break;
 
@@ -92,7 +92,7 @@
             }
           }
 
-          window.dispatchEvent(new CustomEvent("gofutz:update"));
+          globalThis.dispatchEvent(new CustomEvent("gofutz:update"));
 
           break;
 
@@ -103,7 +103,7 @@
 
           globalThis.testData.output = msg.params.output;
 
-          window.dispatchEvent(new CustomEvent("gofutz:output"));
+          globalThis.dispatchEvent(new CustomEvent("gofutz:output"));
 
           break;
 
@@ -184,6 +184,6 @@
     wss = null;
   }
 
-  window.addEventListener("beforeunload", closeWebSocket);
+  globalThis.addEventListener("beforeunload", closeWebSocket);
   initWebSocket(WS_URL);
 })();

@@ -20,6 +20,6 @@
     }
   }
 
-  window.addEventListener("gofutz:init", handleGofutzUpdates);
-  window.addEventListener("gofutz:update", handleGofutzUpdates);
+  globalThis.addEventListener("gofutz:init", handleGofutzUpdates);
+  globalThis.addEventListener("gofutz:update", handleGofutzUpdates);
 })();

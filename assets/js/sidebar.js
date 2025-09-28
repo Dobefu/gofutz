@@ -16,7 +16,7 @@
 
     testFilesContainer.innerHTML = "";
 
-    const urlParams = new URLSearchParams(window.location.search);
+    const urlParams = new URLSearchParams(globalThis.location.search);
     const sortOption = urlParams.get("sort") || "name-asc";
     const files = sortFiles(globalThis.testData.files, sortOption);
 
@@ -43,7 +43,7 @@
       return;
     }
 
-    const urlParams = new URLSearchParams(window.location.search);
+    const urlParams = new URLSearchParams(globalThis.location.search);
     const sortOption = urlParams.get("sort") || "name-asc";
     const files = sortFiles(globalThis.testData.files, sortOption);
 
@@ -59,7 +59,7 @@
   function handleGofutzToggleFile() {
     const fileName =
       globalThis.testData.files[
-        decodeURIComponent(window.location.hash.slice(1))
+        decodeURIComponent(globalThis.location.hash.slice(1))
       ]?.name ?? "";
 
     /** @type {HTMLElement | null} */
@@ -89,7 +89,7 @@
 
       if (file.classList.contains("open")) {
         file.classList.remove("open");
-        window.location.hash = "";
+        globalThis.location.hash = "";
 
         continue;
       }
@@ -154,7 +154,7 @@
       return;
     }
 
-    const urlParams = new URLSearchParams(window.location.search);
+    const urlParams = new URLSearchParams(globalThis.location.search);
     const sortParam = urlParams.get("sort");
 
     if (sortParam) {
@@ -162,10 +162,10 @@
     }
 
     sortSelect.addEventListener("change", () => {
-      const url = new URL(window.location.href);
+      const url = new URL(globalThis.location.href);
 
       url.searchParams.set("sort", sortSelect.value);
-      window.history.replaceState({}, "", url);
+      globalThis.history.replaceState({}, "", url);
 
       const testFilesContainer = document.querySelector(".sidebar__tests");
 
@@ -246,9 +246,9 @@
         return;
       }
 
-      window.location.hash = encodeURIComponent(currentFile.name);
+      globalThis.location.hash = encodeURIComponent(currentFile.name);
 
-      window.dispatchEvent(
+      globalThis.dispatchEvent(
         new CustomEvent("gofutz:toggle-file", { detail: currentFile }),
       );
     });
@@ -314,9 +314,9 @@
     fileItem.appendChild(testsContainer);
   }
 
-  window.addEventListener("gofutz:init", handleGofutzInit);
-  window.addEventListener("gofutz:update", handleGofutzUpdate);
-  window.addEventListener("gofutz:toggle-file", handleGofutzToggleFile);
+  globalThis.addEventListener("gofutz:init", handleGofutzInit);
+  globalThis.addEventListener("gofutz:update", handleGofutzUpdate);
+  globalThis.addEventListener("gofutz:toggle-file", handleGofutzToggleFile);
 
   /** @type {NodeListOf<HTMLButtonElement> | null} */
   const btnRunAllTests = document.querySelectorAll(".btn__run-tests");
@@ -330,12 +330,12 @@
   for (const btn of btnRunAllTests) {
     btn.addEventListener("click", () => {
       if (btn.classList.contains("running")) {
-        window.dispatchEvent(new CustomEvent("gofutz:stop-tests"));
+        globalThis.dispatchEvent(new CustomEvent("gofutz:stop-tests"));
 
         return;
       }
 
-      window.dispatchEvent(new CustomEvent("gofutz:run-all-tests"));
+      globalThis.dispatchEvent(new CustomEvent("gofutz:run-all-tests"));
     });
   }
 
@@ -352,12 +352,12 @@
       }
 
       if (runBtn.classList.contains("running")) {
-        window.dispatchEvent(new CustomEvent("gofutz:stop-tests"));
+        globalThis.dispatchEvent(new CustomEvent("gofutz:stop-tests"));
 
         return;
       }
 
-      window.dispatchEvent(new CustomEvent("gofutz:run-all-tests"));
+      globalThis.dispatchEvent(new CustomEvent("gofutz:run-all-tests"));
     }
   });
 })();

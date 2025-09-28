@@ -2,8 +2,8 @@
 
 (() => {
   function handleGofutzInit() {
-    if (window.location.hash) {
-      const fileName = decodeURIComponent(window.location.hash.slice(1));
+    if (globalThis.location.hash) {
+      const fileName = decodeURIComponent(globalThis.location.hash.slice(1));
       const file = globalThis.testData.files[fileName];
 
       if (file) {
@@ -122,7 +122,7 @@
     }
   }
 
-  window.addEventListener("gofutz:init", handleGofutzInit);
-  window.addEventListener("gofutz:toggle-file", handleGofutzToggleFile);
-  window.addEventListener("gofutz:update", handleGofutzUpdate);
+  globalThis.addEventListener("gofutz:init", handleGofutzInit);
+  globalThis.addEventListener("gofutz:toggle-file", handleGofutzToggleFile);
+  globalThis.addEventListener("gofutz:update", handleGofutzUpdate);
 })();
