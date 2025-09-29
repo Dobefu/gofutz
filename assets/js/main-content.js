@@ -87,7 +87,7 @@
 
     heatmapGrid.innerHTML = "";
 
-    fileEntries.forEach(([fileName, file]) => {
+    for (const [fileName, file] of fileEntries) {
       const cell = document.createElement("div");
       cell.className = "heatmap-cell";
       cell.dataset.fileName = fileName;
@@ -142,7 +142,7 @@
       });
 
       heatmapGrid.appendChild(cell);
-    });
+    }
   }
 
   /**
