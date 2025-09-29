@@ -87,3 +87,40 @@ func TestParseCoverageLines(t *testing.T) {
 		})
 	}
 }
+
+func TestGetFileCoverage(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		lines    []Line
+		expected float64
+	}{
+		{
+			name: "no statements",
+			lines: []Line{
+				{
+					NumberOfStatements: 0,
+					ExecutionCount:     0,
+					Number:             1,
+					StartLine:          1,
+					StartColumn:        1,
+					EndLine:            1,
+					EndColumn:          1,
+				},
+			},
+			expected: 0,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			result := getFileCoverage(test.lines)
+			if result != test.expected {
+				t.Fatalf("expected coverage to be %f, got: %f", test.expected, result)
+			}
+		})
+	}
+}
