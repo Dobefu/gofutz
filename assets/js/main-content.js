@@ -161,17 +161,22 @@
 
     const rect = element.getBoundingClientRect();
     const tooltipRect = tooltip.getBoundingClientRect();
-    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const rem = Number.parseFloat(
+      getComputedStyle(document.documentElement).fontSize,
+    );
 
     let left = rect.left + rect.width / 2 - tooltipRect.width / 2;
     let top = rect.top - tooltipRect.height - rem;
 
-    left = Math.max(rem, Math.min(left, window.innerWidth - tooltipRect.width - rem));
+    left = Math.max(
+      rem,
+      Math.min(left, window.innerWidth - tooltipRect.width - rem),
+    );
     top = top < rem ? rect.bottom + rem : top;
 
     tooltip.style.left = `${left / rem}rem`;
     tooltip.style.top = `${top / rem}rem`;
-    tooltip.style.transform = 'none';
+    tooltip.style.transform = "none";
 
     tooltip.classList.add("heatmap-tooltip--visible");
   }
