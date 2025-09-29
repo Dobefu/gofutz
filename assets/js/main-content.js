@@ -126,8 +126,19 @@
       });
 
       cell.addEventListener("click", () => {
-        globalThis.location.hash = encodeURIComponent(fileName);
-        handleGofutzInit();
+        const currentFile = globalThis.testData.files[file.name];
+
+        if (!currentFile) {
+          console.error("Could not find file:", file.name);
+
+          return;
+        }
+
+        globalThis.location.hash = encodeURIComponent(currentFile.name);
+
+        globalThis.dispatchEvent(
+          new CustomEvent("gofutz:toggle-file", { detail: currentFile }),
+        );
       });
 
       heatmapGrid.appendChild(cell);
