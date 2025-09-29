@@ -14,9 +14,11 @@
           renderFileContent(file);
         }
       }
-    } else {
-      showDashboard();
+
+      return;
     }
+
+    showDashboard();
   }
 
   function updateDashboard() {
@@ -275,6 +277,7 @@
 
       if (fileContainer) {
         fileContainer.innerHTML = "";
+        updateDashboard();
       }
 
       return;
