@@ -242,10 +242,7 @@ h6 {
 }
 
 .heatmap-tooltip {
-  position: absolute;
-  inset-block-end: 100%;
-  inset-inline-start: 50%;
-  transform: translateX(-50%);
+  position: fixed;
   background-color: var(--color-footer-background);
   border: 1px solid var(--color-footer-border);
   border-radius: 0.5rem;
