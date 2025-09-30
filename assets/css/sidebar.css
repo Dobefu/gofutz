@@ -17,6 +17,7 @@
   padding-block-end: 1rem;
   padding: 1rem;
   position: sticky;
+  z-index: 1;
 }
 
 .btn__run-tests {
@@ -33,7 +34,7 @@
 
 .btn__run-tests:disabled {
   cursor: not-allowed;
-  opacity: .5;
+  opacity: 0.5;
 }
 
 .btn__run-tests::after {
@@ -111,7 +112,6 @@
   visibility: visible;
 }
 
-
 .btn__search-clear {
   background-color: transparent;
   border: 0;
@@ -124,7 +124,9 @@
   position: absolute;
   inset-block-start: 50%;
   transform: translateY(-50%);
-  transition: color 0.2s, opacity 0.2s;
+  transition:
+    color 0.2s,
+    opacity 0.2s;
   visibility: hidden;
 }
 
@@ -256,7 +258,7 @@
   fill: none;
   stroke: var(--color-foreground-dark);
   stroke-width: 6;
-  opacity: .5;
+  opacity: 0.5;
 }
 
 .sidebar__coverage-circle-fill {
