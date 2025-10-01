@@ -38,11 +38,10 @@
 }
 
 .btn__run-tests::after {
-  color: var(--color-btn);
-  content: "▶";
-  font-size: 1.5rem;
+  background-color: var(--color-btn);
+  mask: url("/svg/play.svg") no-repeat center;
+  content: "";
   inset: 50% 0 0 50%;
-  line-height: 1;
   position: absolute;
   transform: translate(-50%, -50%);
 }
