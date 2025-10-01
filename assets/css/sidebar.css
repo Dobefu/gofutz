@@ -208,7 +208,10 @@
 
 /* Running */
 .sidebar__tests--file-status.status-1::after {
-  content: "🔄";
+  animation: spin 1s linear infinite;
+  background-color: var(--color-btn);
+  mask: url("/svg/loader.svg") no-repeat center;
+  content: "";
 }
 
 /* Passed */
@@ -313,4 +316,11 @@
   font-size: 0.8rem;
   min-width: 2.5rem;
   text-align: end;
+}
+
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
