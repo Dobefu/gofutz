@@ -194,7 +194,9 @@
 }
 
 .sidebar__tests--file-status::after {
+  background-color: var(--color-btn);
   display: inline-block;
+  height: 100%;
   text-align: center;
   width: 1.25rem;
 }
@@ -211,7 +213,9 @@
 
 /* Passed */
 .sidebar__tests--file-status.status-2::after {
-  content: "✅";
+  background-color: var(--color-coverage-bar-covered);
+  mask: url("/svg/check.svg") no-repeat center;
+  content: "";
 }
 
 /* Failed */
