@@ -47,7 +47,9 @@
 }
 
 .btn__run-tests.running::after {
-  content: "⏹";
+  background-color: var(--color-btn);
+  mask: url("/svg/stop.svg") no-repeat center;
+  content: "";
 }
 
 .btn__run-tests:hover,
