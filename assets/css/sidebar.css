@@ -203,7 +203,9 @@
 
 /* Pending */
 .sidebar__tests--file-status.status-0::after {
-  content: "?";
+  background-color: var(--color-btn);
+  mask: url("/svg/question.svg") no-repeat center;
+  content: "";
 }
 
 /* Running */
