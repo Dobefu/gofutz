@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-//go:embed css/*.css js/*.js
+//go:embed css/*.css js/*.js svg/*.svg
 var assetFS embed.FS
 
 // GetFS gets an asset file.

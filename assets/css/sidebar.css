@@ -118,13 +118,14 @@
 }
 
 .btn__home::after {
-  color: var(--color-btn);
-  content: "🏠";
+  background-color: var(--color-btn);
+  mask: url("/svg/home.svg") no-repeat center;
+  content: "";
   font-size: 1rem;
-  inset: 50% 0 0 50%;
+  inset: calc(50% - 0.5rem) 0 0 calc(50% - 0.5rem);
   line-height: 1;
   position: absolute;
-  transform: translate(-50%, -50%);
+  transform: translate(calc(-50% + 0.5rem), calc(-50% + 0.5rem));
 }
 
 .sidebar__search {
