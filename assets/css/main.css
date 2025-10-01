@@ -205,6 +205,32 @@ h6 {
   font-weight: 600;
 }
 
+.status__running,
+.status__idle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status__running::before,
+.status__idle::before {
+  content: "";
+  height: 1rem;
+  width: 1rem;
+}
+
+.status__running::before {
+  animation: spin 1s linear infinite;
+  background-color: var(--color-btn);
+  mask: url("/svg/loader.svg") no-repeat center;
+  mask-size: contain;
+}
+
+.status__idle::before {
+  background-color: var(--color-heatmap-none);
+  mask: url("/svg/pause.svg") no-repeat center;
+}
+
 .heatmap-container {
   display: flex;
   flex-direction: column;
@@ -336,4 +362,10 @@ h6 {
 
 .uncovered {
   background-color: var(--color-line-uncovered);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

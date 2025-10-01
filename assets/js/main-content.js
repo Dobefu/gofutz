@@ -66,9 +66,13 @@
     }
 
     if (isRunning) {
-      statusElement.textContent = "🔄 Running...";
+      statusElement.textContent = "Running...";
+      statusElement.classList.add("status__running");
+      statusElement.classList.remove("status__idle");
     } else {
-      statusElement.textContent = "⏸️ Idle";
+      statusElement.textContent = "Idle";
+      statusElement.classList.add("status__idle");
+      statusElement.classList.remove("status__running");
     }
 
     updateHeatmap();
