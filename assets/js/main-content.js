@@ -276,7 +276,7 @@
    * @param {CustomEvent} e
    */
   function handleGofutzToggleFile(e) {
-    /** @type {File} */
+    /** @type {File | undefined} */
     const file = e.detail;
     /** @type {HTMLDivElement | null} */
     const mainContentContainer = document.querySelector("#main-content");
@@ -292,16 +292,16 @@
       ".main-content__code",
     );
 
+    /** @type {HTMLDivElement | null} */
+    const fileContainer = document.querySelector("#file-container");
+
+    /** @type {HTMLDivElement | null} */
+    const dashboardContainer = document.querySelector("#dashboard-container");
+
     if (
-      currentCodeContainer &&
-      currentCodeContainer.dataset.file === file.name
+      !file ||
+      (currentCodeContainer && currentCodeContainer.dataset.file === file.name)
     ) {
-      /** @type {HTMLDivElement | null} */
-      const dashboardContainer = document.querySelector("#dashboard-container");
-
-      /** @type {HTMLDivElement | null} */
-      const fileContainer = document.querySelector("#file-container");
-
       if (dashboardContainer) {
         dashboardContainer.style.display = "";
       }

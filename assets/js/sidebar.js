@@ -12,6 +12,7 @@
 
     renderCoverage();
     updateRunButtonState();
+    initializeHomeButton();
     initializeSortOption();
     initializeSearch();
 
@@ -106,6 +107,23 @@
     }
 
     runBtn.title += " (Ctrl+Enter)";
+  }
+
+  function initializeHomeButton() {
+    /** @type {HTMLButtonElement | null} */
+    const homeBtn = document.querySelector(".btn__home");
+
+    if (!homeBtn) {
+      console.error("Could not find home button");
+
+      return;
+    }
+
+    homeBtn.addEventListener("click", () => {
+      globalThis.dispatchEvent(
+        new CustomEvent("gofutz:toggle-file", { detail: undefined }),
+      );
+    });
   }
 
   function renderCoverage() {
