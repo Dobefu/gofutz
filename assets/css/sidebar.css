@@ -67,12 +67,15 @@
 }
 
 .btn__sort-tests--wrapper::after {
-  content: "▼";
-  font-size: 0.75rem;
+  background-color: var(--color-sidebar-foreground);
+  mask: url("/svg/chevron-down.svg") no-repeat center;
+  content: "";
+  height: 0.75rem;
   inset-inline-end: 0.75rem;
   position: absolute;
   inset-block-start: 50%;
   transform: translateY(-50%);
+  width: 0.75rem;
 }
 
 .btn__sort-tests {
@@ -320,7 +323,6 @@
   min-width: 2.5rem;
   text-align: end;
 }
-
 
 @keyframes spin {
   to {
