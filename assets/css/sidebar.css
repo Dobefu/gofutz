@@ -236,7 +236,9 @@
 
 /* No Tests */
 .sidebar__tests--file-status.status-4::after {
-  content: "—";
+  background-color: var(--color-btn);
+  mask: url("/svg/minus.svg") no-repeat center;
+  content: "";
 }
 
 .sidebar__tests--file-title {
