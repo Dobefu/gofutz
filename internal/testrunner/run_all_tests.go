@@ -67,6 +67,7 @@ func (t *TestRunner) doRunAllTests(
 		filepath.Clean(goPath),
 		"test",
 		"-json",
+		"-buildvcs",
 		"-timeout",
 		"30s",
 		"-coverprofile",
