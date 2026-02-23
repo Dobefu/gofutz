@@ -93,7 +93,7 @@ h6 {
   grid-template-rows: 4rem 0.5rem 1fr min(16rem, calc(50vh - 4.5rem));
 }
 
-@media (width < 64rem) {
+@media (width < 60rem) {
   .layout--default {
     grid-template-areas:
       "header"
@@ -114,7 +114,7 @@ h6 {
   scrollbar-gutter: stable;
 }
 
-@media (width < 64rem) {
+@media (width < 60rem) {
   #main-content {
     display: none;
   }

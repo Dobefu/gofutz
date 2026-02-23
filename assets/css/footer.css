@@ -8,7 +8,7 @@ footer {
   scrollbar-gutter: stable;
 }
 
-@media (width < 64rem) {
+@media (width < 60rem) {
   footer {
     display: none;
   }
