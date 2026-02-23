@@ -51,7 +51,7 @@
     const scrollPos = footer.scrollTop + footer.clientHeight;
     const shouldScroll = scrollPos >= footer.scrollHeight - scrollThreshold;
 
-    footerOutput.innerHTML = globalThis.testData.output.join("\n");
+    footerOutput.innerText = globalThis.testData.output.join("\n");
 
     if (shouldScroll) {
       footer.scrollTop = footer.scrollHeight;

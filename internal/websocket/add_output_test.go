@@ -14,6 +14,7 @@ func TestAddOutput(t *testing.T) {
 	}
 
 	err := handler.AddOutput("output")
+	t.Log("output with potential <button>XSS</button>")
 
 	if err != nil {
 		t.Fatalf("expected no error, got: \"%s\"", err.Error())
