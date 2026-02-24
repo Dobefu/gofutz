@@ -30,7 +30,7 @@ func TestHandle(t *testing.T) {
 			server := httptest.NewServer(http.HandlerFunc(Handle))
 			defer server.Close()
 
-			ws, _, err := gorillawebsocket.DefaultDialer.Dial(
+			ws, resp, err := gorillawebsocket.DefaultDialer.Dial(
 				fmt.Sprintf("ws%s/ws", server.URL[4:]),
 				nil,
 			)
@@ -39,7 +39,10 @@ func TestHandle(t *testing.T) {
 				t.Fatalf("expected no error, got: %s", err.Error())
 			}
 
-			defer func() { _ = ws.Close() }()
+			defer func() {
+				_ = ws.Close()
+				_ = resp.Body.Close()
+			}()
 
 			time.Sleep(100 * time.Millisecond)
 
