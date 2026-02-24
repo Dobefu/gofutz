@@ -70,7 +70,7 @@ func runRootCmd(_ *cobra.Command, _ []string) {
 
 		if err != nil {
 			slog.Error(fmt.Sprintf("Server shutdown error: %s", err.Error()))
-			os.Exit(1)
+			defer os.Exit(1)
 		}
 	}
 }
