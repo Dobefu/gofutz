@@ -37,8 +37,8 @@ func GetFunctionsFromFiles(files []string) (map[string]File, error) {
 		allFunctions[file] = File{
 			Name:            file,
 			Functions:       functions,
-			Code:            string(code),
-			HighlightedCode: HighlightCode("go", string(code)),
+			Code:            code,
+			HighlightedCode: HighlightCode("go", code),
 			Status:          TestStatusPending,
 			Coverage:        -1,
 			CoveredLines:    []Line{},

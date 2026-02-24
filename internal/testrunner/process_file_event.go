@@ -52,7 +52,7 @@ func (t *TestRunner) processFileEvent(path, operation string) {
 			Name:            modulePath,
 			Functions:       functions,
 			Code:            code,
-			HighlightedCode: HighlightCode("go", string(code)),
+			HighlightedCode: HighlightCode("go", code),
 			Status:          TestStatusPending,
 			Coverage:        -1,
 			CoveredLines:    []Line{},
